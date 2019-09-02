@@ -1,0 +1,82 @@
+.GatesStatusWrap{
+    margin-top: -10px;
+    font-weight: 500;
+    line-height: 40px;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid #e8e8e8;
+    .status{
+        text-align: center;
+    }
+    .gateDesc{
+        width: 70%;
+        display: flex;
+        align-items: center;
+        >div{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+    .install{
+        position: absolute;
+        right: 0px;
+    }
+    >div{
+        float: left;
+    }
+
+    .online{
+        color:#3c763d;
+        b{
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            background: #3c763d;
+            border-radius: 50%;
+            position: relative;
+        }
+    }
+    .offline{
+        color:#f39c12;
+        b{
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #f39c12 ;
+            border-radius: 50%;
+            position: relative;
+        }
+    }
+    .notline{
+        color:#eee;
+        b{
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #eee ;
+            border-radius: 50%;
+            position: relative;
+        }
+    }
+    .positon{
+            width: 14px;
+            height: 14px;
+            border:2px solid #ccc;
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+            position: relative;
+        span{
+            position: absolute;
+            display: inline-block;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            width: 6px;
+            height: 6px;
+            background: #ccc;
+            border-radius: 50%;
+        }
+    }
+}

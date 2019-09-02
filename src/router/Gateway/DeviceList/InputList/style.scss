@@ -1,0 +1,12 @@
+table td{
+    word-wrap:break-word; 
+    text-overflow:ellipsis; 
+    white-space:nowrap; 
+    overflow:hidden; 
+}
+.ant-modal{
+    top: 40%!important;
+}
+.light-row{
+    background:#f9f9f9;
+}

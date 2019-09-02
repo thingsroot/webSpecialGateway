@@ -1,0 +1,66 @@
+.leftnav{
+    width: 200px;
+    .navlist{
+        margin-top: 15px;
+        border:1px solid #eee;
+        border-radius: 3px;
+        line-height: 40px;
+        min-width: 170px;
+        p{
+            text-indent: 20px;
+            font-size: 16px;
+            background-color: #f9f9f9;
+        }
+        .FeaturesGroup{
+            position: relative;
+        }
+        .Groupsetting{
+            position: absolute;
+            right: 15px;
+            top:0;
+            cursor: pointer;
+        }
+        .active{
+            border-left: 2px solid #3c8dbc;
+            font-weight: 600;
+        }
+        li{
+            border-top: 1px solid #eee;
+            text-indent: 12px;
+            position: relative;
+            .count{
+                position: absolute;
+                right:15px;
+                top:10px;
+                padding: 0 7px;
+                line-height: 20px;
+                border-radius: 5px;
+                color:white;
+                text-align: center;
+                text-indent: 0;
+                
+            }
+            .appcount{
+                background-color: #f39c12;
+            }
+            .gatecount{
+                background-color: #3c8dbc;
+            }
+            .logcount{
+                background-color: red;
+            }
+            &:hover{
+                background:#f9f9f9;
+            }
+        }
+    }
+}
+
+.ant-modal-body .list{
+    padding: 8px;
+    display: flex;
+    >span{
+        display: block;
+        width: 85%;
+    }
+}

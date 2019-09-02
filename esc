@@ -1,0 +1,402 @@
+[33mcommit ce05cd9acb9a5435268fe31df118943ede856a77[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Merge: 1cc7851 a5a1aa3
+Author: a980263316 <980263316@qq.com>
+Date:   Mon May 13 16:17:03 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/ReactProject
+
+[33mcommit 1cc7851d34d9fd8c7b032bd52c58fe251f3e9d8c[m
+Author: a980263316 <980263316@qq.com>
+Date:   Mon May 13 16:16:52 2019 +0800
+
+    'gateway_list'
+
+[33mcommit a5a1aa3bb334580d3e3841d274082cdedf7f2787[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Mon May 13 11:25:22 2019 +0800
+
+    bug
+
+[33mcommit 581ef2a100862a8a5143a38c3c0d939b1ef0cc11[m
+Merge: 299f977 976065f
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Fri May 10 18:26:02 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/ReactProject
+
+[33mcommit 299f9776b85f1a870e684a4fe241e3129bb369dc[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Fri May 10 18:25:38 2019 +0800
+
+    cuicui
+
+[33mcommit 976065f2e3af243489bd9b31bfdcdc4a9f5f7d5b[m
+Merge: 6bfde0d 3227f8e
+Author: a980263316 <980263316@qq.com>
+Date:   Fri May 10 15:24:23 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/ReactProject
+
+[33mcommit 6bfde0d1a9031e1e295af5357a57a0c0577e3783[m
+Author: a980263316 <980263316@qq.com>
+Date:   Fri May 10 15:23:52 2019 +0800
+
+    'li'
+
+[33mcommit 3227f8ea58e0eac625232f9b389a12f82bc936c3[m
+Merge: d120159 447d725
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Fri May 10 13:08:57 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/ReactProject
+
+[33mcommit d120159ce9e19305696e6bf78dc40a5025938773[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Fri May 10 13:08:39 2019 +0800
+
+    cuicui
+
+[33mcommit 447d72538e3f2a24a4e719f59daaf643c44e23af[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu May 9 17:02:09 2019 +0800
+
+    'li'
+
+[33mcommit 62d754e8bcd9105a437e4f759ef9710436d918af[m
+Merge: 6574ccd 0bdf57b
+Author: a980263316 <980263316@qq.com>
+Date:   Thu May 9 16:57:39 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/ReactProject
+
+[33mcommit 6574ccd99060de2def67327066d52925ef0b8802[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu May 9 16:55:57 2019 +0800
+
+    'li'
+
+[33mcommit 0bdf57b0ddf6164adc642a451e0b802ad7bb0a90[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu May 9 11:56:01 2019 +0800
+
+    修改密码
+
+[33mcommit 0724c5fc4c6c68cde1393fb0a8d2cebedaa7e080[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu May 9 10:48:57 2019 +0800
+
+    应用
+
+[33mcommit 5f8c91744c042f5a54174a5f2a2fbfe6304f513e[m
+Merge: 74a381d b8a8cf4
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu May 9 09:29:13 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/ReactProject
+
+[33mcommit 74a381d62888fedf3aa70023dc6ac68e0279b284[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu May 9 09:28:53 2019 +0800
+
+    cuicui
+
+[33mcommit b8a8cf420dda8487708f80ec2a0d4358d128c2c6[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu May 9 09:08:22 2019 +0800
+
+    'li'
+
+[33mcommit e372b41673202bc594b1d3884764c1f4e0289a81[m
+Author: a980263316 <980263316@qq.com>
+Date:   Tue May 7 16:17:20 2019 +0800
+
+    'li'
+
+[33mcommit 7840cd6df20ce373748e61c8a27bed91c4a40de3[m
+Author: a980263316 <980263316@qq.com>
+Date:   Sun May 5 18:19:21 2019 +0800
+
+    'li'
+
+[33mcommit f6b72cbfe1447b5214be082449f76c48568380b8[m
+Author: a980263316 <980263316@qq.com>
+Date:   Sun May 5 10:13:41 2019 +0800
+
+    'accesskey'
+
+[33mcommit e35d1d8dce986d46bbe449cf80b07ce4a69150a5[m
+Author: a980263316 <980263316@qq.com>
+Date:   Sun May 5 09:24:09 2019 +0800
+
+    'li'
+
+[33mcommit 903b05c08088675fd85e5de27cbc5bc690963c39[m
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 30 16:17:28 2019 +0800
+
+    'li'
+
+[33mcommit 89a7c1106333eff6579db82f8ef43df3f9b64b44[m
+Merge: 1f28d7d 8463289
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 30 13:24:08 2019 +0800
+
+    'li'
+
+[33mcommit 1f28d7dfe910edeadf2c35bc4e62884b8477c06b[m
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 30 13:21:56 2019 +0800
+
+    'li'
+
+[33mcommit 84632892635c296608eb542fdd10253ab2d8731d[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 30 13:20:07 2019 +0800
+
+    cuicui
+
+[33mcommit 1190920b568463428654d8c5bba9a8a76a6ecedd[m
+Merge: 90879ef 04585fe
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 30 12:54:04 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 90879ef03c57d9aef0d530414abede832e19ae79[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 30 12:53:47 2019 +0800
+
+    cuicui
+
+[33mcommit 04585fe6b4eb27d5ca60f3a0364a962e5979d9df[m
+Merge: 38469f1 a6940cd
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 30 12:53:05 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 38469f1ccd153d8e880e3a0f6b58497c02744806[m
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 30 12:52:54 2019 +0800
+
+    'li'
+
+[33mcommit a6940cd367aa28a89e71daef4def207f586b73ff[m
+Merge: 837f6a3 26d5d54
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 30 12:09:51 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 837f6a3fa143d1efa74e9ae48fccdac5af257d06[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 30 12:09:31 2019 +0800
+
+    cuicui
+
+[33mcommit 26d5d547b70f30cfa7b47f758a2418b9d468ae9a[m
+Merge: 2c46345 225247b
+Author: a980263316 <980263316@qq.com>
+Date:   Sun Apr 28 19:17:42 2019 +0800
+
+    'li'
+
+[33mcommit 2c46345a1fcd9f6396960776a9823d74b04c1a77[m
+Author: a980263316 <980263316@qq.com>
+Date:   Sun Apr 28 19:10:47 2019 +0800
+
+    'li'
+
+[33mcommit 225247b41bd38aaa31d6275b330754f4412b28ce[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Sun Apr 28 19:08:17 2019 +0800
+
+    cuicui
+
+[33mcommit 556c7be428831b5fd3eb55a6c13676b895bc9a16[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu Apr 25 18:40:18 2019 +0800
+
+    cuicui
+
+[33mcommit a1248aceb116df976be8c8fb76ea0d5894cc3aff[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Wed Apr 24 16:08:41 2019 +0800
+
+    cuicui
+
+[33mcommit 81cd34ab7c369334d0aeba3564a8b7cefcc36a26[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Wed Apr 24 15:35:51 2019 +0800
+
+    cuicui
+
+[33mcommit 8ce4602a3f254927cc702908298d6dd8359f1d8f[m
+Merge: 8aa16fc 935daff
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Wed Apr 24 14:21:59 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 8aa16fca385c619208ee51472e260d068e9cf52d[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Wed Apr 24 14:21:43 2019 +0800
+
+    cuicui
+
+[33mcommit 935daffdd3ca86acbc9d11a06b509899402c70c7[m
+Author: a980263316 <980263316@qq.com>
+Date:   Wed Apr 24 13:07:42 2019 +0800
+
+    'li'
+
+[33mcommit da28fb81c478342911f44e4d5b78fec757a2b022[m
+Merge: 9afdd5a 1c8e9e6
+Author: a980263316 <980263316@qq.com>
+Date:   Wed Apr 24 13:05:05 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 9afdd5a599a7622f15f1bf31eb691ee90724ca56[m
+Author: a980263316 <980263316@qq.com>
+Date:   Wed Apr 24 13:04:39 2019 +0800
+
+    'li'
+
+[33mcommit 1c8e9e6d5245b3b15808cd474498fa8008c0b81d[m
+Merge: a43f656 bddc81d
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Wed Apr 24 12:44:30 2019 +0800
+
+    cuicui
+
+[33mcommit a43f656ab01587a8c03507cfc080840f0c0f2c10[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Wed Apr 24 12:41:50 2019 +0800
+
+    cuicui
+
+[33mcommit bddc81dc731356e4f3c5822c48f057078c3da476[m
+Author: a980263316 <980263316@qq.com>
+Date:   Wed Apr 24 12:21:18 2019 +0800
+
+    'li'
+
+[33mcommit 948d2bde33e7dd45a1d57de1787e23e738ec5fc1[m
+Merge: 02b69ba 4a99987
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 23 11:16:44 2019 +0800
+
+    cuicui
+
+[33mcommit 02b69ba858e63da6a9ed8eaead0b7d3a02c82e7a[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 23 11:13:50 2019 +0800
+
+    cuicui
+
+[33mcommit 4a99987aefb531df0a7235ac5cfa906b69b1046c[m
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 23 11:11:18 2019 +0800
+
+    'li'
+
+[33mcommit 35d38231377dc63c9e852ea8cb873193c2434368[m
+Merge: daea5c8 b28617a
+Author: a980263316 <980263316@qq.com>
+Date:   Thu Apr 18 15:03:33 2019 +0800
+
+    'li'
+
+[33mcommit daea5c8e9207dc73fdb5e16f3a39d6a30e4f54e7[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu Apr 18 13:56:23 2019 +0800
+
+    'li'
+
+[33mcommit b28617a209f268c3a7781385c9100040e045a519[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu Apr 18 13:47:02 2019 +0800
+
+    cuicui
+
+[33mcommit 6f06e52784302a5b62692ebb118837338134a10f[m
+Merge: 21050c4 5b78bd0
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu Apr 11 14:27:22 2019 +0800
+
+    cuicui
+
+[33mcommit 21050c494afb155f0de702fc01452b1e2fbd79d1[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu Apr 11 14:23:34 2019 +0800
+
+    cuicui
+
+[33mcommit 5b78bd0020f9a0d965bf572dfb8546941fef4510[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu Apr 11 14:04:10 2019 +0800
+
+    'li'
+
+[33mcommit 95d71216fc730a61af0608b12954a7da4d5778d9[m
+Merge: 42fdb02 87b1fc8
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 9 11:04:02 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 42fdb02d57c2af87a93b91489d1b3f6e22dbb487[m
+Author: a980263316 <980263316@qq.com>
+Date:   Tue Apr 9 11:03:52 2019 +0800
+
+    'li'
+
+[33mcommit 87b1fc87e1912f75a167137e2593ab9def187ca6[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Tue Apr 9 10:43:39 2019 +0800
+
+    cuicui
+
+[33mcommit ffde5ebff40fe98b03b6d3cd4c7ce280cd7d56eb[m
+Merge: 8f87506 c9f2eee
+Author: a980263316 <980263316@qq.com>
+Date:   Thu Apr 4 12:26:08 2019 +0800
+
+    Merge branch 'master' of https://github.com/thingsroot/Test
+
+[33mcommit 8f87506c745ae550ea91caf9953cac1a7016a350[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu Apr 4 12:22:48 2019 +0800
+
+    'li'
+
+[33mcommit c9f2eeefee358cbe1506e7a7c24a0e0917dd19b5[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Thu Apr 4 12:22:06 2019 +0800
+
+    cuicui
+
+[33mcommit 5af5137cac0d0a7c4d9bce2191129a4a9adbbda0[m
+Author: ai-cuicui <ai_hasana@163.com>
+Date:   Fri Mar 29 19:12:13 2019 +0800
+
+    我的应用
+
+[33mcommit 7dbc8f568654505338f9ab3aba783eb3d80f154c[m
+Author: a980263316 <980263316@qq.com>
+Date:   Thu Mar 28 12:09:12 2019 +0800
+
+    'li'
+
+[33mcommit 073accb9f5053d741f5b38e93037c027dd73758d[m
+Author: a980263316 <980263316@qq.com>
+Date:   Wed Mar 27 14:38:19 2019 +0800
+
+    'li'
+
+[33mcommit c0fdd1b629c21a183a50f138fed1645b3b2a45de[m
+Author: a980263316 <980263316@qq.com>
+Date:   Wed Mar 27 13:23:43 2019 +0800
+
+    'first'

@@ -1,0 +1,11 @@
+.VserviceStateWrapper{
+    padding: 5px;
+    .prompt{
+        position: absolute;
+        right: 10px;
+        top: 20px;
+        a{
+            color: blue;
+        }
+    }
+}
