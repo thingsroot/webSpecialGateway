@@ -21,7 +21,7 @@ class Siders extends PureComponent {
         super(props)
         this.state = {
             collapsed: this.props.collapsed,
-            key: '1'
+            key: '2'
         }
     }
     UNSAFE_componentWillMount () {

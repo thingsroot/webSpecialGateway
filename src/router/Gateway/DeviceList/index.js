@@ -118,8 +118,16 @@ class DevicesList extends Component {
     getData (){
         http.get('/api/gateways_dev_list?gateway=' + this.state.gateway).then(res=>{
             if (res.ok) {
-                this.props.store.gatewayInfo.setDevices(res.data);
-                this.setData(res.data)
+                const dev_list = [];
+                if (res.data && res.data.length > 0) {
+                    res.data.map(item=>{
+                        if (item.meta.app_inst.toLowerCase().indexOf('modbus') !== -1) {
+                            dev_list.push(item)
+                        }
+                    })
+                }
+                this.props.store.gatewayInfo.setDevices(dev_list);
+                this.setData(dev_list)
             } else {
                 message.error(res.error)
             }

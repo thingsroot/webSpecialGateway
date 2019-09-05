@@ -169,6 +169,11 @@ class ContentMain extends Component {
                     component={Dashboard}
                     title={'Dashboard'}
                 /> */}
+                <PrivateRoute
+                    path="/"
+                    component={GatewayList}
+                    title={'我的网关'}
+                />
             </Switch>
         );
     }
