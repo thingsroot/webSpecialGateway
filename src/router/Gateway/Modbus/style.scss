@@ -1,0 +1,27 @@
+.ModbusModal{
+  p{
+    padding: 10px;
+  }
+  .ant-carousel .slick-slide {
+    text-align: center;
+    height: 160px;
+    width: 100%;
+    // line-height: 160px;
+    // background: #364d79;
+    overflow: hidden;
+  }
+
+  .ant-carousel .slick-slide h3 {
+    color: #fff;
+  }
+  .ant-select{
+    width: 200px!important;
+  }
+  .ant-form-item-control-wrapper {
+    display: inline-block;
+  }
+  .ant-form-item-label {
+    width: 15%;
+    text-align: left;
+  }
+}

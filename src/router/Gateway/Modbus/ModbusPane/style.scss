@@ -17,4 +17,11 @@
     .ant-select{
         width: 200px!important;
     }
+  .ant-form-item-control-wrapper {
+    display: inline-block;
+  }
+  .ant-form-item-label {
+    width: 10%;
+    text-align: left;
+  }
 }
