@@ -224,7 +224,6 @@ class ModbusPane extends Component {
                                             </div>
                                         </div>
                                     }
-                                    
                 </div>
                 <div style={{width: 500}}>
                     <p>设备模板选择</p>

@@ -208,8 +208,8 @@ class Mqtt extends Component {
     add = () => {
         const {panes} = this.state;
         const activeKey = `newTab${this.newTabIndex++}`;
-        const title = 'Mqtt配置' + (this.state.panes.length + 1);
-        panes.push({title, content: 'New Tab Pane' + activeKey, key: activeKey});
+        // const title = 'Mqtt配置' + (this.state.panes.length + 1);
+        // panes.push({title, content: 'New Tab Pane' + activeKey, key: activeKey});
         this.setState({panes, activeKey, visible: true});
     };
     handleOk = () => {
