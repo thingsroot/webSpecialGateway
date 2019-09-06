@@ -63,7 +63,7 @@ class Modbus extends Component {
                 break;
         }
         return name;
-    }
+    };
     showModbus () {
        if (this.state.modalKey === 0) {
            return (
