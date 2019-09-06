@@ -69,7 +69,7 @@ class Modbus extends Component {
            return (
               <Fragment>
                <div className="ModbusModal">
-                   <Form >
+                   <Form layout="inline">
                        <Divider  orientation="left">应用配置信息</Divider>
                        <Form.Item label="采集间隔:">
                            <InputNumber
@@ -107,7 +107,7 @@ class Modbus extends Component {
                    </Form>
                    {
                        this.state.channel_type === 'socket'
-                           ? <Form>
+                           ? <Form layout="inline">
                                <Divider  orientation="left">串口设定</Divider>
                                <Form.Item label="端口：">
                                    <Select
@@ -185,6 +185,7 @@ class Modbus extends Component {
                                </Form.Item>
                            </Form>
                            : <div>
+                           <Form layout="inline">
                                <Form.Item label="IP地址:">
                                    <Select
                                        defaultValue={this.state.serial_opt.flow_control}
@@ -212,6 +213,7 @@ class Modbus extends Component {
                                        defaultChecked
                                    />
                                </Form.Item>
+                           </Form>
                            </div>
                    }
                </div>
@@ -357,7 +359,7 @@ class Modbus extends Component {
                     onOk={this.handleOk}
                     onCancel={this.handleCancel}
                     destroyOnClose="true"
-                    width="600px"
+                    width="800px"
                     footer={[
                         <Button
                             key="0"

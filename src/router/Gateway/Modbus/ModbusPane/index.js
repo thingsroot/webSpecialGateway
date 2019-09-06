@@ -24,8 +24,9 @@ class ModbusPane extends Component {
             host: '127.0.0.1',
             port: 499,
             nodelay: true
-        }
-        // }
+        },
+        disabled: true
+
     }
     componentDidMount () {
         console.log(this.refs)
@@ -55,9 +56,13 @@ class ModbusPane extends Component {
             })
         }
 
-    }
+    };
+    toggleDisable = () => {
+        this.setState({disabled: !this.state.disabled})
+
+    };
     render (){
-        const  { loop_gap, apdu_type, channel_type, serial_opt} = this.state;
+        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled} = this.state;
         const Mt10 = {
             marginTop: '10px'
         }
@@ -69,10 +74,18 @@ class ModbusPane extends Component {
                     afterChange={onChange}
                     initialSlide={this.props.modalKey}
                 > */}
-                <Form >
+                <Form layout="inline">
+                    <Button
+                        style={{ marginLeft: '10px'}}
+                        type="primary"
+                        onClick={this.toggleDisable}
+                    >
+                        {!this.state.disabled ? '保存' : '编辑'}
+                    </Button>
                     <Divider  orientation="left">应用配置信息</Divider>
                     <Form.Item label="采集间隔:">
                         <InputNumber
+                            disabled={disabled}
                             min={1}
                             max={10000}
                             defaultValue={loop_gap}
@@ -84,6 +97,7 @@ class ModbusPane extends Component {
                     <Form.Item label="协议类型:">
                         <Select
                             defaultValue={apdu_type}
+                            disabled={disabled}
                             onChange={(val)=>{
                                 this.setSetting('apdu_type', val)
                             }}
@@ -95,6 +109,7 @@ class ModbusPane extends Component {
                     </Form.Item>
                     <Form.Item label="通讯类型:">
                         <Select
+                            disabled={disabled}
                             defaultValue={channel_type}
                             onChange={(val)=>{
                                 this.setSetting('channel_type', val)
@@ -107,10 +122,12 @@ class ModbusPane extends Component {
                 </Form>
                 {
                     channel_type === 'socket'
-                        ? <Form>
+                        ? <div>
+                        <Form layout="inline">
                             <Divider  orientation="left">串口设定</Divider>
                             <Form.Item label="端口：">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.port}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'port')
@@ -122,6 +139,7 @@ class ModbusPane extends Component {
                             </Form.Item>
                             <Form.Item label="波特率:">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.baudrate}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'baudrate')
@@ -140,6 +158,7 @@ class ModbusPane extends Component {
                             </Form.Item>
                             <Form.Item label="停止位：">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.stop_bits}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'stop_bits')
@@ -149,8 +168,11 @@ class ModbusPane extends Component {
                                     <Option value="2">2</Option>
                                 </Select>
                             </Form.Item>
+                        </Form>
+                            <Form layout="inline">
                             <Form.Item label="数据位：">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.data_bits}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'data_bits')
@@ -162,6 +184,7 @@ class ModbusPane extends Component {
                             </Form.Item>
                             <Form.Item label="流控:">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.flow_control}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'flow_control')
@@ -173,6 +196,7 @@ class ModbusPane extends Component {
                             </Form.Item>
                             <Form.Item label="校验:">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.parity}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'parity')
@@ -184,9 +208,12 @@ class ModbusPane extends Component {
                                 </Select>
                             </Form.Item>
                         </Form>
+                        </div>
                         : <div>
+                        <Form layout="inline">
                             <Form.Item label="IP地址:">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.flow_control}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'flow_control')
@@ -198,6 +225,7 @@ class ModbusPane extends Component {
                             </Form.Item>
                             <Form.Item label="端口:">
                                 <Select
+                                    disabled={disabled}
                                     defaultValue={serial_opt.flow_control}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'flow_control')
@@ -209,18 +237,26 @@ class ModbusPane extends Component {
                             </Form.Item>
                             <Form.Item label="Nodelay:">
                                 <Checkbox
+                                    disabled={disabled}
                                     defaultChecked
                                 />
                             </Form.Item>
+                        </Form>
                         </div>
                 }
 
                 <Divider orientation="left">设备模板选择</Divider>
                 <Table />
-                <Button style={Mt10}>选择模板</Button>
+                <Button
+                    style={Mt10}
+                    disabled={disabled}
+                >选择模板</Button>
                 <Divider orientation="left">设备列表</Divider>
                 <p>|设备列表</p>
-                <Button type="primary">添加</Button>
+                <Button
+                    type="primary"
+                    disabled={disabled}
+                >添加</Button>
                 <Table />
                 {/* </Carousel> */}
             </div>

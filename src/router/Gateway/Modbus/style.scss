@@ -21,7 +21,12 @@
     display: inline-block;
   }
   .ant-form-item-label {
-    width: 15%;
     text-align: left;
+  }
+  .ant-form-item{
+    width: 30%;
+  }
+  .ant-form-inline .ant-form-item > .ant-form-item-control-wrapper, .ant-form-inline .ant-form-item > .ant-form-item-label {
+    display: block;
   }
 }
