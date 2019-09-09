@@ -110,8 +110,16 @@ class GatewayInfo {
     }
 
     @action setDevices (value) {
-        this.devices = value
-        this.devices_count = value.length
+        const arr = [];
+        this.devices = arr;
+        if (value && value.length > 0) {
+            value.map(item=>{
+                if (item.meta.app_inst.toLowerCase().indexOf('modbus') !== -1) {
+                    arr.push(item)
+                }
+            })
+        }
+        this.devices_count = arr.length
     }
     @action setDevicesIsShow (value) {
         this.devices_is_show = value

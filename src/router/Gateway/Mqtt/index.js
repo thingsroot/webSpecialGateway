@@ -161,7 +161,6 @@ class Mqtt extends Component {
             modalKey: 0,
             userMessage: '',
             seniorIndeterminate: false, //高级选项
-            contentText: '',
             visible: false,
             dataSource: [
                 // {
@@ -170,10 +169,7 @@ class Mqtt extends Component {
                 // },
 
             ],
-            count: null,
-            groupList: [],
-            contentClient: '',
-            contentClientPw: '',
+            count: 0,
             fileList: [],
             fileList1: [],
             fileList2: [],
@@ -184,34 +180,6 @@ class Mqtt extends Component {
             }
         };
     }
-    // instance = (e) => {
-    //     this.setState({instanceVal: e.target.value})
-    // }
-    // getItemsValue = () => {
-    //     const values = this.props.form.getFieldsValue()
-    //     const {cycle, maxDate, maxQuantity, contentText, dataSource, groupList, contentClient, contentClientPw} = this.state
-    //     const result = {
-    //         cycle,
-    //         maxDate,
-    //         maxQuantity,
-    //         contentText,
-    //         dataSource,
-    //         groupList,
-    //         contentClient,
-    //         contentClientPw,
-    //         values
-    //     }
-    //
-    //     return result
-    // }
-    // handleSubmit = e => {
-    //     e.preventDefault();
-    //     this.props.form.validateFields((err, values) => {
-    //         if (!err) {
-    //             console.log(values)
-    //         }
-    //     })
-    // }
     setSetting = (type, val, name) => {
         this.setState({
             serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
@@ -328,15 +296,7 @@ class Mqtt extends Component {
         });
         this.setSetting('mqttForm', newDate, 'dataSource')
     }
-    // onCycle = (values) => {
-    //     this.setState({cycle: values})
-    // }
-    // onMaxDate = (values) => {
-    //     this.setState({maxDate: values})
-    // }
-    // onMaxQuantity = (values) => {
-    //     this.setState({maxQuantity: values})
-    // }
+
     remove = targetKey => {
         let {activeKey} = this.state;
         let lastIndex;
@@ -429,10 +389,7 @@ class Mqtt extends Component {
         panes.push({title, content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: activeKey});
         this.setState({panes, activeKey, visible: true});
     };
-    // handleSubmit = () => {
-    //     //this.setState({visible: false})
-    //     console.log(this.formRef.getItemsValue())
-    // };
+
     handleCancel = () => {
         this.setState({
             visible: false,

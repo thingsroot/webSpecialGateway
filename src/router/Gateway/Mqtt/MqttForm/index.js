@@ -155,7 +155,7 @@ class MqttForm extends React.Component {
                 // },
 
             ],
-            count: null,
+            count: 0,
 
             fileList: [],
             fileList1: [],
@@ -310,15 +310,6 @@ class MqttForm extends React.Component {
         });
         this.setSetting('mqttForm', newDate, 'dataSource')
     }
-    // onCycle = (values) => {
-    //     this.setState({cycle: values})
-    // }
-    // onMaxDate = (values) => {
-    //     this.setState({maxDate: values})
-    // }
-    // onMaxQuantity = (values) => {
-    //     this.setState({maxQuantity: values})
-    // }
     remove = targetKey => {
         let {activeKey} = this.state;
         let lastIndex;
@@ -660,5 +651,4 @@ class MqttForm extends React.Component {
     }
 }
 
-// export default Form.create({name: 'normal_login'})(MqttForm);
 export default MqttForm;
