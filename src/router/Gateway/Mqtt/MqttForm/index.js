@@ -436,7 +436,7 @@ class MqttForm extends React.Component {
                             onClick={this.toggleDisable}
                         >
                             {!this.state.disabled ? '保存' : '编辑'}
-                        </Button>
+                        </Button>>
                         <Form.Item label="实例名：">
                             {getFieldDecorator('instance', {
                                 rules: [{message: '请输入实例名!'}]

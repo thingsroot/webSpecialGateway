@@ -8,6 +8,8 @@ import './style.scss'
 
 const { TabPane } = Tabs;
 const { Option } = Select;
+// const operations = <Button onClick={this.onEdit}>2333</Button>
+
 
 @withRouter
 class Modbus extends Component {
@@ -265,15 +267,13 @@ class Modbus extends Component {
         this.setState({ activeKey });
     };
     onEdit = (targetKey, action) => {
-        console.log(targetKey, action)
         this[action](targetKey);
     };
     add = () => {
-        const { data } = this.state;
+        const { panes } = this.state;
         const activeKey = `newTab${this.newTabIndex++}`;
-        const inst_name = 'Modbus配置' + (this.state.data.length + 1);
-        data.push({ inst_name, content: 'New Tab Pane' + activeKey, key: activeKey });
-        this.setState({ data, activeKey });
+        panes.push({ title: 'New Tab', content: <ModbusPane/>, key: activeKey });
+        this.setState({ panes, activeKey });
     };
     remove = targetKey => {
         let { activeKey } = this.state;
@@ -294,12 +294,6 @@ class Modbus extends Component {
         this.setState({ panes, activeKey });
     };
     fetch = () => {
-        // const {gatewayInfo} = this.props.store
-        // let enable_beta = gatewayInfo.data.enable_beta
-        // if (enable_beta === undefined) {
-        //     enable_beta = 0
-        // }
-        console.log('22')
         http.get('/api/applications_read?app=APP00000025').then(res=>{
             console.log(res)
             if (res.ok) {
@@ -311,6 +305,7 @@ class Modbus extends Component {
                 const app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
+                        console.log(item, 'item')
                         if (item.inst_name.toLowerCase().indexOf('modbus') !== -1) {
                             app_list.push(item)
                         }
@@ -351,55 +346,56 @@ class Modbus extends Component {
         return (
             <div>
                 <div style={{ marginBottom: 16 }}>
-                    <Button onClick={this.showModal}>ADD</Button>
+                    <Button onClick={this.add}>ADD</Button>
+                    <Modal
+                        title="ADD"
+                        visible={this.state.visible}
+                        onOk={this.handleOk}
+                        onCancel={this.handleCancel}
+                        destroyOnClose="true"
+                        width="800px"
+                        footer={[
+                            <Button
+                                key="0"
+                                onClick={this.handleCancel}
+                            >
+                                取消
+                            </Button>,
+                            <Button
+                                key="1"
+                                disabled={this.state.modalKey === 0}
+                                onClick={()=>{
+                                    if (this.state.modalKey > 0) {
+                                        this.setState({modalKey: this.state.modalKey - 1})
+                                    }
+                                }}
+                            >
+                                上一步
+                            </Button>,
+                            <Button
+                                key="2"
+                                onClick={()=>{
+                                    if (this.state.modalKey < 2) {
+                                        this.setState({modalKey: this.state.modalKey + 1})
+                                    }
+                                }}
+                            >
+                                {
+                                    this.MatchTheButton(this.state.modalKey)
+                                }
+                            </Button>
+                        ]}
+                    >
+                        {this.showModbus()}
+                    </Modal>
                 </div>
-                <Modal
-                    title="ADD"
-                    visible={this.state.visible}
-                    onOk={this.handleOk}
-                    onCancel={this.handleCancel}
-                    destroyOnClose="true"
-                    width="800px"
-                    footer={[
-                        <Button
-                            key="0"
-                            onClick={this.handleCancel}
-                        >
-                            取消
-                        </Button>,
-                        <Button
-                            key="1"
-                            disabled={this.state.modalKey === 0}
-                            onClick={()=>{
-                                if (this.state.modalKey > 0) {
-                                    this.setState({modalKey: this.state.modalKey - 1})
-                                }
-                            }}
-                        >
-                            上一步
-                        </Button>,
-                        <Button
-                            key="2"
-                            onClick={()=>{
-                                if (this.state.modalKey < 2) {
-                                    this.setState({modalKey: this.state.modalKey + 1})
-                                }
-                            }}
-                        >
-                            {
-                                this.MatchTheButton(this.state.modalKey)
-                            }
-                        </Button>
-                    ]}
-                >
-                    {this.showModbus()}
-                </Modal>
                 <Tabs
                     hideAdd
                     onChange={this.onChange}
                     activeKey={this.state.activeKey}
                     type="editable-card"
                     onEdit={this.onEdit}
+                    // tabBarExtraContent={operations}
                 >
                     {this.state.panes.map(pane => (
                         <TabPane
@@ -407,6 +403,7 @@ class Modbus extends Component {
                             key={pane.key}
                         >
                             <ModbusPane/>
+                            {/*{pane.content}*/}
                         </TabPane>
                     ))}
                 </Tabs>
@@ -415,4 +412,5 @@ class Modbus extends Component {
     }
 }
 
-export default Modbus;
+// export default Modbus;
+export default Form.create({name: 'normal_login'})(Modbus);

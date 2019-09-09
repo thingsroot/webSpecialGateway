@@ -410,7 +410,7 @@ class Mqtt extends Component {
         this.setState({activeKey});
     };
     onEdit = (targetKey, action) => {
-        console.log(targetKey, action)
+        console.log(targetKey, action, this[action](targetKey), this)
         this[action](targetKey);
     };
     add = () => {
