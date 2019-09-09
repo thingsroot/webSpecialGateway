@@ -182,6 +182,7 @@ class Modbus extends Component {
                 break;
         }
         return name;
+<<<<<<< HEAD
     }
      //添加模板
      onAddTemplate = (config)=>{
@@ -271,6 +272,8 @@ class Modbus extends Component {
         this.setState({
             showTemplateSelection: false
         })
+=======
+>>>>>>> 19c87e94c2fdbbac0fb92d0312a1017f2b557c09
     };
     showModbus () {
        if (this.state.modalKey === 0) {

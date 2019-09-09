@@ -164,7 +164,8 @@ class MqttForm extends React.Component {
             contentClientPw: '',
             fileList: [],
             fileList1: [],
-            fileList2: []
+            fileList2: [],
+            disabled: true
         };
     }
 
@@ -392,10 +393,13 @@ class MqttForm extends React.Component {
             )
         }
     }
+    toggleDisable = () => {
+        this.setState({disabled: !this.state.disabled})
+    }
 
     render () {
         const {getFieldDecorator} = this.props.form;
-        const {dataSource, fileList, fileList1, fileList2} = this.state;
+        const {dataSource, fileList, fileList1, fileList2, disabled} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -424,7 +428,15 @@ class MqttForm extends React.Component {
                 className="login-form login-form-mqtt"
             >
                 <Row gutter={24}>
+
                     <Col span={24}>
+                        <Button
+                            style={{marginLeft: '10pxs'}}
+                            type="primary"
+                            onClick={this.toggleDisable}
+                        >
+                            {!this.state.disabled ? '保存' : '编辑'}
+                        </Button>
                         <Form.Item label="实例名：">
                             {getFieldDecorator('instance', {
                                 rules: [{message: '请输入实例名!'}]
@@ -432,6 +444,7 @@ class MqttForm extends React.Component {
                                 <Input
                                     allowClear
                                     autoComplete="off"
+                                    disabled={disabled}
                                 />
                             )}
                         </Form.Item>
@@ -445,6 +458,7 @@ class MqttForm extends React.Component {
                                 <Input
                                     allowClear
                                     autoComplete="off"
+                                    disabled={disabled}
                                 />,
                             )}
                         </Form.Item>
@@ -458,6 +472,7 @@ class MqttForm extends React.Component {
                                 <Input
                                     allowClear
                                     autoComplete="off"
+                                    disabled={disabled}
                                 />,
                             )}
                         </Form.Item>
@@ -471,6 +486,7 @@ class MqttForm extends React.Component {
                                 <Input
                                     allowClear
                                     autoComplete="off"
+                                    disabled={disabled}
                                 />,
                             )}
                         </Form.Item>
@@ -484,6 +500,7 @@ class MqttForm extends React.Component {
                                 <Input
                                     allowClear
                                     autoComplete="off"
+                                    disabled={disabled}
                                 />,
                             )}
                         </Form.Item>
@@ -497,6 +514,7 @@ class MqttForm extends React.Component {
                                 <Input
                                     allowClear
                                     autoComplete="off"
+                                    disabled={disabled}
                                 />,
                             )}
                         </Form.Item>
@@ -506,7 +524,7 @@ class MqttForm extends React.Component {
                             {getFieldDecorator('rememberUse', {
                                 valuePropName: 'checked',
                                 initialValue: false
-                            })(<Checkbox/>)}
+                            })(<Checkbox disabled={disabled}/>)}
                         </Form.Item>
                     </Col>
                     <Col span={24}>
@@ -518,7 +536,7 @@ class MqttForm extends React.Component {
                                 fileList={fileList}
                                 onChange={this.handleListChange}
                             >
-                                <Button>
+                                <Button disabled={disabled}>
                                     <Icon type="upload"/> 点击上传
                                 </Button>
                             </Upload>
@@ -533,7 +551,7 @@ class MqttForm extends React.Component {
                                 fileList={fileList1}
                                 onChange={this.handleListChange1}
                             >
-                                <Button>
+                                <Button disabled={disabled}>
                                     <Icon type="upload"/> 点击上传
                                 </Button>
                             </Upload>
@@ -548,7 +566,7 @@ class MqttForm extends React.Component {
                                 fileList={fileList2}
                                 onChange={this.handleListChange2}
                             >
-                                <Button>
+                                <Button disabled={disabled}>
                                     <Icon type="upload"/> 点击上传
                                 </Button>
                             </Upload>
@@ -560,6 +578,7 @@ class MqttForm extends React.Component {
                             <InputNumber
                                 defaultValue={60}
                                 onChange={this.onCycle}
+                                disabled={disabled}
                             />
                         </Form.Item>
                     </Col>
@@ -568,6 +587,7 @@ class MqttForm extends React.Component {
                             <InputNumber
                                 defaultValue={300}
                                 onChange={this.onMaxDate}
+                                disabled={disabled}
                             />
                         </Form.Item>
                     </Col>
@@ -576,6 +596,7 @@ class MqttForm extends React.Component {
                             <InputNumber
                                 defaultValue={1024}
                                 onChange={this.onMaxQuantity}
+                                disabled={disabled}
                             />
                         </Form.Item>
                     </Col>
@@ -584,7 +605,7 @@ class MqttForm extends React.Component {
                             {getFieldDecorator('shortCache', {
                                 valuePropName: 'checked',
                                 initialValue: false
-                            })(<Checkbox/>)}
+                            })(<Checkbox disabled={disabled}/>)}
                         </Form.Item>
                     </Col>
                     <Divider>需要上传的设备列表</Divider>
@@ -595,6 +616,7 @@ class MqttForm extends React.Component {
                                     onClick={this.handleAdd}
                                     type="primary"
                                     style={{marginBottom: 16}}
+                                    disabled={disabled}
                                 >
                                     Add
                                 </Button>
@@ -615,7 +637,10 @@ class MqttForm extends React.Component {
                             {getFieldDecorator('checkedSenior', {
                                 valuePropName: 'checkedSenior',
                                 initialValue: this.state.seniorIndeterminate
-                            })(<Checkbox onChange={this.seniorChange}/>)}
+                            })(<Checkbox
+                                onChange={this.seniorChange}
+                                disabled={disabled}
+                               />)}
                         </Form.Item>
                     </Col>
                     <Col span={8}>
