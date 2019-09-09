@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import {Tabs, Button, message, Modal, Form, Divider, InputNumber, Select, Checkbox, Table} from 'antd';
+import {Tabs, Button, message, Modal, Form, Divider, InputNumber, Select, Checkbox, Table, Input} from 'antd';
 import {withRouter} from 'react-router-dom'
 import http from '../../../utils/Server';
 import ModbusPane from './ModbusPane';
@@ -8,8 +8,6 @@ import './style.scss'
 
 const { TabPane } = Tabs;
 const { Option } = Select;
-// const operations = <Button onClick={this.onEdit}>2333</Button>
-
 
 @withRouter
 class Modbus extends Component {
@@ -20,6 +18,120 @@ class Modbus extends Component {
             // { title: 'Modbus配置1', content: 'Content of Tab Pane 1', key: '1' },
             // { title: 'Modbus配置2', content: 'Content of Tab Pane 2', key: '2' }
         ];
+        const addTempLists = [
+            {
+                title: '名称',
+                width: '20%',
+                dataIndex: 'conf_name',
+                key: 'conf_name',
+                render: text => <span>{text}</span>
+            }, {
+                title: '描述',
+                width: '30%',
+                dataIndex: 'description',
+                key: 'description'
+            }, {
+                title: '模板ID',
+                width: '15%',
+                dataIndex: 'name',
+                key: 'name'
+            }, {
+                title: '版本',
+                width: '10%',
+                key: 'latest_version',
+                dataIndex: 'latest_version'
+            }, {
+                title: '操作',
+                width: '25%',
+                render: (record) => (
+                    record.latest_version !== undefined && record.latest_version !== 0 ? (
+                    <span>
+                        {/* <Button>
+                            <Link to={`/template/${record.app}/${record.name}/${record.latest_version}`}> 查看 </Link>
+                        </Button> */}
+                        {/* <span style={{padding: '0 2px'}}> </span>
+                        <Button>
+                            <Link to={`/template/${record.app}/${record.name}/${record.latest_version}/clone`}> 克隆 </Link>
+                        </Button> */}
+                        <Button
+                            onClick={()=>{
+                                this.onViewTemplate(record.name, record.latest_version)
+                            }}
+                        > 查看 </Button>
+                        <span style={{padding: '0 1px'}}> </span>
+                        {
+                            record.owner !== '' ? (
+                            <Button
+                                onClick={()=>{
+                                    this.onCloneTemplate(record.name, record.latest_version)
+                                }}
+                            > 克隆 </Button> ) : null
+                        }
+                        <span style={{padding: '0 1px'}}> </span>
+                        <Button
+                            type="primary"
+                            onClick={()=>{
+                                console.log(record)
+                                const conf = {
+                                    description: record.description,
+                                    id: record.name,
+                                    key: 1,
+                                    name: record.conf_name,
+                                    ver: record.latest_version
+                                }
+                                this.onAddTemplate(conf)
+                            }}
+                        > 添加 </Button>
+                    </span>) : (
+                    <span>
+                        <Button
+                            onClick={()=>{
+                                this.onViewTemplate(record.name)
+                            }}
+                        > 查看 </Button>
+                    </span>)
+                )
+            }
+        ]
+        const temoplateColumns = [
+            {
+                title: '名称',
+                dataIndex: 'name',
+                key: 'name'
+            }, {
+                title: '描述',
+                dataIndex: 'desc',
+                key: 'desc'
+            }, {
+                title: '模板ID',
+                dataIndex: 'id',
+                key: 'id'
+            }, {
+                title: '版本',
+                dataIndex: 'ver',
+                key: 'ver'
+            }, {
+                title: '操作',
+                dataIndex: 'action',
+                key: 'action',
+                render: (conf, record)=>{
+                    console.log(conf, record)
+                    return (
+                        <div>
+                            <Button>编辑</Button>
+                            <Button
+                                onClick={()=>{
+                                    const list = this.state.templateList.filter(item=> record.key !== item.key);
+                                    this.setState({
+                                        templateList: list
+                                    })
+                                }}
+                            >删除</Button>
+                        </div>
+                    )
+                }
+            }
+        ]
         this.state = {
             activeKey: '0',
             panes,
@@ -31,6 +143,8 @@ class Modbus extends Component {
             loop_gap: 1000,
             apdu_type: 'TCP',
             channel_type: 'socket',
+            temoplateColumns,
+            templateList: [],
             serial_opt: {
                 port: '/dev/ttyS1',
                 baudrate: 9600,
@@ -43,11 +157,14 @@ class Modbus extends Component {
                 host: '127.0.0.1',
                 port: 499,
                 nodelay: true
-            }
+            },
+            addTempLists,
+            templateStore: []
         };
     }
     componentDidMount () {
         this.fetch()
+        this.refreshTemplateList()
     }
      MatchTheButton = (key)=> {
         let name = '';
@@ -65,6 +182,95 @@ class Modbus extends Component {
                 break;
         }
         return name;
+    }
+     //添加模板
+     onAddTemplate = (config)=>{
+         console.log(this.state.templateList)
+         const list = this.state.templateList;
+         const obj = {
+             id: config.id,
+             desc: config.description,
+             name: config.name,
+             ver: config.ver,
+             key: list.length + 1
+         }
+         list.push(obj)
+         this.setState({
+             templateList: list
+         }, ()=>{
+             console.log(this.state.templateList)
+         })
+        // this.state.configStore.addTemplate(name, conf_name, desc, version)
+        // let val = config.Value
+        // let max_key = 0
+        // val.map(item => max_key < item.key ? max_key = item.key : max_key)
+        // val.push({
+        //     key: max_key + 1,
+        //     id: name,
+        //     name: conf_name,
+        //     description: desc,
+        //     ver: version
+        // })
+        // config.setValue(val)
+        // this.props.onChange()
+    };
+    // 删除模板
+    onDeleteTemplate =  (name)=>{
+        let dataSource = this.state.showTempList;
+        dataSource.splice(name, 1);//index为获取的索引，后面的 1 是删除几行
+        this.setState({
+            showTempList: dataSource
+        });
+        let a = [];
+        dataSource && dataSource.length > 0 && dataSource.map((item)=>{
+            a.push(item.conf_name)
+        });
+        let addTempList = this.state.addTempList;
+        this.setState({
+            addTempList: addTempList
+        })
+    };
+    refreshTemplateList = () => {
+        this.setState({appTemplateList: []})
+        http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025')
+        .then(res=>{
+            let list = this.state.appTemplateList;
+            res.data && res.data.length > 0 && res.data.map((tp)=>{
+                if (undefined === list.find(item => item.name === tp.name) &&
+                    tp.latest_version !== undefined && tp.latest_version !== 0 ) {
+                    list.push(tp)
+                }
+            });
+            this.setState({
+                appTemplateList: list
+            }, ()=>{
+                console.log(this.state.appTemplateList)
+            });
+        });
+        http.get('/api/user_configurations_list?conf_type=Template&app=APP00000025')
+            .then(res=>{
+                if (res.ok) {
+                    let list = this.state.appTemplateList;
+                    res.data && res.data.length > 0 && res.data.map((tp)=>{
+                        if (undefined === list.find(item => item.name === tp.name) ) {
+                            list.push(tp)
+                        }
+                    });
+                    this.setState({
+                        appTemplateList: list
+                    });
+                }
+            });
+    }
+    templateShow = ()=>{
+        this.setState({
+            showTemplateSelection: true
+        })
+    }
+    handleCancelAddTempList = ()=>{
+        this.setState({
+            showTemplateSelection: false
+        })
     };
     showModbus () {
        if (this.state.modalKey === 0) {
@@ -189,15 +395,13 @@ class Modbus extends Component {
                            : <div>
                            <Form layout="inline">
                                <Form.Item label="IP地址:">
-                                   <Select
-                                       defaultValue={this.state.serial_opt.flow_control}
+                                   <Input
+                                       defaultValue={this.state.serial_opt.host}
                                        onChange={(value)=>{
                                            this.setSetting('serial_opt', value, 'flow_control')
                                        }}
-                                   >
-                                       <Option value="OFF">OFF</Option>
-                                       <Option value="ON">ON</Option>
-                                   </Select>
+                                   />
+
                                </Form.Item>
                                <Form.Item label="端口:">
                                    <Select
@@ -227,8 +431,66 @@ class Modbus extends Component {
            return (
                <Fragment>
                    <Divider orientation="left">设备模板选择</Divider>
-                   <Table />
-                   <Button style={{ marginTop: '10'}}>选择模板</Button>
+                    <Table
+                        columns={this.state.temoplateColumns}
+                        dataSource={this.state.templateList}
+                        pagination={false}
+                    />
+                    <Button
+                        onClick={this.templateShow}
+                        style={{margin: '10px 0'}}
+                    >
+                        选择模板
+                    </Button>
+                    <Modal
+                        className="templateList"
+                        title="选择模板"
+                        visible={this.state.showTemplateSelection}
+                        onOk={this.handleCancelAddTempList}
+                        onCancel={this.handleCancelAddTempList}
+                        wrapClassName={'templatesModal'}
+                        okText="确定"
+                        cancelText="取消"
+                    >
+                        <div
+                            style={{
+                                display: 'flex',
+                                position: 'absolute',
+                                right: 300,
+                                top: 10,
+                                zIndex: 999,
+                                lineHeight: '30px'
+                            }}
+                        >
+                            <Button
+                                onClick={()=>{
+                                    this.props.refreshTemplateList()
+                                }}
+                            >
+                                刷新
+                            </Button>
+                            <span style={{padding: '0 20px'}}> </span>
+                            <Input.Search
+                                placeholder="网关名称、描述、序列号"
+                                onChange={this.search}
+                                style={{ width: 200 }}
+                            />
+                            <span style={{padding: '0 2px'}}> </span>
+                            <Button
+                                type="primary"
+                                onClick={this.onCreateNewTemplate}
+                            >
+                                创建新模板
+                            </Button>
+                        </div>
+                        <Table
+                            rowKey="key"
+                            dataSource={this.state.appTemplateList}
+                            columns={this.state.addTempLists}
+                            pagination={false}
+                            scroll={{ y: 240 }}
+                        />
+                    </Modal>
                </Fragment>
            )
        }
@@ -267,13 +529,15 @@ class Modbus extends Component {
         this.setState({ activeKey });
     };
     onEdit = (targetKey, action) => {
+        console.log(targetKey, action)
         this[action](targetKey);
     };
     add = () => {
-        const { panes } = this.state;
+        const { data } = this.state;
         const activeKey = `newTab${this.newTabIndex++}`;
-        panes.push({ title: 'New Tab', content: <ModbusPane/>, key: activeKey });
-        this.setState({ panes, activeKey });
+        const inst_name = 'Modbus配置' + (this.state.data.length + 1);
+        data.push({ inst_name, content: 'New Tab Pane' + activeKey, key: activeKey });
+        this.setState({ data, activeKey });
     };
     remove = targetKey => {
         let { activeKey } = this.state;
@@ -294,6 +558,12 @@ class Modbus extends Component {
         this.setState({ panes, activeKey });
     };
     fetch = () => {
+        // const {gatewayInfo} = this.props.store
+        // let enable_beta = gatewayInfo.data.enable_beta
+        // if (enable_beta === undefined) {
+        //     enable_beta = 0
+        // }
+        console.log('22')
         http.get('/api/applications_read?app=APP00000025').then(res=>{
             console.log(res)
             if (res.ok) {
@@ -305,7 +575,6 @@ class Modbus extends Component {
                 const app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
-                        console.log(item, 'item')
                         if (item.inst_name.toLowerCase().indexOf('modbus') !== -1) {
                             app_list.push(item)
                         }
@@ -340,55 +609,55 @@ class Modbus extends Component {
             })
         }
 
-    }
+    };
     render () {
         console.log(this.state.data)
         return (
             <div>
                 <div style={{ marginBottom: 16 }}>
-                    <Button onClick={this.add}>ADD</Button>
-                    <Modal
-                        title="ADD"
-                        visible={this.state.visible}
-                        onOk={this.handleOk}
-                        onCancel={this.handleCancel}
-                        destroyOnClose="true"
-                        width="800px"
-                        footer={[
-                            <Button
-                                key="0"
-                                onClick={this.handleCancel}
-                            >
-                                取消
-                            </Button>,
-                            <Button
-                                key="1"
-                                disabled={this.state.modalKey === 0}
-                                onClick={()=>{
-                                    if (this.state.modalKey > 0) {
-                                        this.setState({modalKey: this.state.modalKey - 1})
-                                    }
-                                }}
-                            >
-                                上一步
-                            </Button>,
-                            <Button
-                                key="2"
-                                onClick={()=>{
-                                    if (this.state.modalKey < 2) {
-                                        this.setState({modalKey: this.state.modalKey + 1})
-                                    }
-                                }}
-                            >
-                                {
-                                    this.MatchTheButton(this.state.modalKey)
-                                }
-                            </Button>
-                        ]}
-                    >
-                        {this.showModbus()}
-                    </Modal>
+                    <Button onClick={this.showModal}>ADD</Button>
                 </div>
+                <Modal
+                    title="ADD"
+                    visible={this.state.visible}
+                    onOk={this.handleOk}
+                    onCancel={this.handleCancel}
+                    destroyOnClose="true"
+                    width="800px"
+                    footer={[
+                        <Button
+                            key="0"
+                            onClick={this.handleCancel}
+                        >
+                            取消
+                        </Button>,
+                        <Button
+                            key="1"
+                            disabled={this.state.modalKey === 0}
+                            onClick={()=>{
+                                if (this.state.modalKey > 0) {
+                                    this.setState({modalKey: this.state.modalKey - 1})
+                                }
+                            }}
+                        >
+                            上一步
+                        </Button>,
+                        <Button
+                            key="2"
+                            onClick={()=>{
+                                if (this.state.modalKey < 2) {
+                                    this.setState({modalKey: this.state.modalKey + 1})
+                                }
+                            }}
+                        >
+                            {
+                                this.MatchTheButton(this.state.modalKey)
+                            }
+                        </Button>
+                    ]}
+                >
+                    {this.showModbus()}
+                </Modal>
                 <Tabs
                     hideAdd
                     onChange={this.onChange}
@@ -397,13 +666,15 @@ class Modbus extends Component {
                     onEdit={this.onEdit}
                     // tabBarExtraContent={operations}
                 >
-                    {this.state.panes.map(pane => (
+                    {this.state.panes.map((pane, key) => (
                         <TabPane
                             tab={pane.inst_name}
-                            key={pane.key}
+                            key={key}
                         >
-                            <ModbusPane/>
-                            {/*{pane.content}*/}
+                            <ModbusPane
+                                key={key}
+                                pane={pane}
+                            />
                         </TabPane>
                     ))}
                 </Tabs>
@@ -412,5 +683,4 @@ class Modbus extends Component {
     }
 }
 
-// export default Modbus;
-export default Form.create({name: 'normal_login'})(Modbus);
+export default Modbus;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {withRouter} from 'react-router-dom'
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider  } from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input  } from 'antd';
 // import Slide from 'react-slick'
 
 import './style.scss';
@@ -12,9 +12,11 @@ class ModbusPane extends Component {
     }
     state = {
         // conf: {
+        tpls: [],
+        devs: [],
         loop_gap: 1000,
         apdu_type: 'TCP',
-        channel_type: 'socket',
+        channel_type: 'serial',
         serial_opt: {
             port: '/dev/ttyS1',
             baudrate: 9600,
@@ -28,11 +30,74 @@ class ModbusPane extends Component {
             port: 499,
             nodelay: true
         },
+        devsCloumns: [
+            {
+                title: '地址',
+                dataIndex: 'name',
+                key: 'name'
+              },
+              {
+                title: '年龄',
+                dataIndex: 'age',
+                key: 'age'
+              },
+              {
+                title: '住址',
+                dataIndex: 'address',
+                key: 'address'
+              }
+        ],
+        tplsCloumns: [
+            {
+                title: '名称',
+                dataIndex: 'name',
+                key: 'name'
+              },
+              {
+                title: '描述',
+                dataIndex: 'description',
+                key: 'description'
+              },
+              {
+                title: '模板ID',
+                dataIndex: 'id',
+                key: 'id'
+              },
+              {
+                title: '版本',
+                dataIndex: 'ver',
+                key: 'ver'
+              },
+              {
+                title: '操作',
+                dataIndex: 'action',
+                key: 'action'
+              }
+        ],
         disabled: true
 
     }
     componentDidMount () {
-        console.log(this.refs)
+        console.log(this.props.pane)
+        const { conf } = this.props.pane;
+        this.setState({
+            apdu_type: conf.apdu_type,
+            channel_type: conf.channel_type,
+            dev_sn_prefix: conf.dev_sn_prefix,
+            loop_gap: conf.loop_gap,
+            tpls: conf.tpls,
+            devs: conf.devs
+        })
+        if (conf.serial_opt) {
+            this.setState({
+                serial_opt: conf.serial_opt
+            })
+        }
+        if (conf.socket_opt) {
+            this.setState({
+                socket_opt: conf.socket_opt
+            })
+        }
     }
     // UNSAFE_componentWillReceiveProps (nextProps) {
     //     console.log(this.refs.Carousel)
@@ -65,7 +130,7 @@ class ModbusPane extends Component {
 
     };
     render (){
-        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled} = this.state;
+        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs} = this.state;
         const Mt10 = {
             marginTop: '10px'
         }
@@ -122,13 +187,13 @@ class ModbusPane extends Component {
                                 this.setSetting('channel_type', val)
                             }}
                         >
-                            <Option value="socket">串口</Option>
+                            <Option value="serial">串口</Option>
                             <Option value="TCP">TCP协议</Option>
                         </Select>
                     </Form.Item>
                 </Form>
                 {
-                    channel_type === 'socket'
+                    channel_type === 'serial'
                         ? <div>
                         <Form layout="inline">
                             <Divider  orientation="left">串口设定</Divider>
@@ -219,28 +284,23 @@ class ModbusPane extends Component {
                         : <div>
                         <Form layout="inline">
                             <Form.Item label="IP地址:">
-                                <Select
+                                <Input
                                     disabled={disabled}
-                                    defaultValue={serial_opt.flow_control}
+                                    defaultValue={socket_opt.host}
                                     onChange={(value)=>{
-                                        this.setSetting('serial_opt', value, 'flow_control')
+                                        this.setSetting('socket_opt', value, 'host')
                                     }}
-                                >
-                                    <Option value="OFF">OFF</Option>
-                                    <Option value="ON">ON</Option>
-                                </Select>
+                                />
+                                    
                             </Form.Item>
                             <Form.Item label="端口:">
-                                <Select
+                                <Input
                                     disabled={disabled}
-                                    defaultValue={serial_opt.flow_control}
+                                    defaultValue={socket_opt.port}
                                     onChange={(value)=>{
-                                        this.setSetting('serial_opt', value, 'flow_control')
+                                        this.setSetting('socket_opt', value, 'port')
                                     }}
-                                >
-                                    <Option value="OFF">OFF</Option>
-                                    <Option value="ON">ON</Option>
-                                </Select>
+                                />
                             </Form.Item>
                             <Form.Item label="Nodelay:">
                                 <Checkbox
@@ -253,7 +313,10 @@ class ModbusPane extends Component {
                 }
 
                 <Divider orientation="left">设备模板选择</Divider>
-                <Table />
+                <Table
+                    dataSource={tpls}
+                    columns={this.state.tplsCloumns}
+                />
                 <Button
                     style={Mt10}
                     disabled={disabled}
@@ -264,7 +327,9 @@ class ModbusPane extends Component {
                     type="primary"
                     disabled={disabled}
                 >添加</Button>
-                <Table />
+                <Table
+                    dataSource={devs}
+                />
                 {/* </Carousel> */}
             </div>
         );
