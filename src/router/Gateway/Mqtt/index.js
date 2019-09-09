@@ -161,7 +161,6 @@ class Mqtt extends Component {
             modalKey: 0,
             userMessage: '',
             seniorIndeterminate: false, //高级选项
-            contentText: '',
             visible: false,
             dataSource: [
                 // {
@@ -170,55 +169,32 @@ class Mqtt extends Component {
                 // },
 
             ],
-            count: null,
-            cycle: NUMBER_CYCLE,
-            maxDate: NUMBER_MAXDATE,
-            maxQuantity: NUMBER_MAXQUANTITY,
-            groupList: [],
-            contentClient: '',
-            contentClientPw: '',
+            count: 0,
             fileList: [],
             fileList1: [],
-            fileList2: []
+            fileList2: [],
+            serial_opt: {
+                cycle: NUMBER_CYCLE,
+                maxDate: NUMBER_MAXDATE,
+                maxQuantity: NUMBER_MAXQUANTITY
+            }
         };
     }
-    instance = (e) => {
-        this.setState({instanceVal: e.target.value})
-    }
-    getItemsValue = () => {
-        const values = this.props.form.getFieldsValue()
-        const {cycle, maxDate, maxQuantity, contentText, dataSource, groupList, contentClient, contentClientPw} = this.state
-        const result = {
-            cycle,
-            maxDate,
-            maxQuantity,
-            contentText,
-            dataSource,
-            groupList,
-            contentClient,
-            contentClientPw,
-            values
-        }
-
-        return result
-    }
-    handleSubmit = e => {
-        e.preventDefault();
-        this.props.form.validateFields((err, values) => {
-            if (!err) {
-                console.log(values)
-            }
+    setSetting = (type, val, name) => {
+        this.setState({
+            serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
+        }, ()=> {
+            console.log(this.state.serial_opt)
         })
     }
     getTextInfo = (file) => {
         const reader = new FileReader();
         reader.readAsText(file);
         reader.onload = (result) => {
-            console.log(result)
             let targetNum = result.target.result;
             // targetNum = targetNum.replace(/[\n\r]/g, '');
             // targetNum = targetNum.replace(/[ ]/g, '');
-            this.setState({contentText: targetNum})
+            this.setSetting('mqttForm', targetNum, 'contentText')
         }
         return false;
     };
@@ -227,7 +203,7 @@ class Mqtt extends Component {
         reader.readAsText(file);
         reader.onload = (result) => {
             let targetNum = result.target.result;
-            this.setState({contentClient: targetNum})
+            this.setSetting('mqttForm', targetNum, 'contentClient')
         }
         return false;
     };
@@ -238,7 +214,7 @@ class Mqtt extends Component {
             let targetNum = result.target.result;
             targetNum = targetNum.replace(/[\n\r]/g, '');
             targetNum = targetNum.replace(/[ ]/g, '');
-            this.setState({contentClientPw: targetNum})
+            this.setSetting('mqttForm', targetNum, 'contentClientPw')
         }
         return false;
     };
@@ -318,17 +294,9 @@ class Mqtt extends Component {
             ...item,
             ...row
         });
-        this.setState({dataSource: newDate})
+        this.setSetting('mqttForm', newDate, 'dataSource')
     }
-    onCycle = (values) => {
-        this.setState({cycle: values})
-    }
-    onMaxDate = (values) => {
-        this.setState({maxDate: values})
-    }
-    onMaxQuantity = (values) => {
-        this.setState({maxQuantity: values})
-    }
+
     remove = targetKey => {
         let {activeKey} = this.state;
         let lastIndex;
@@ -351,7 +319,7 @@ class Mqtt extends Component {
         this.setState({seniorIndeterminate: !this.state.seniorIndeterminate})
     };
     changeGroup = (checkedValues) => {
-        this.setState({groupList: [...checkedValues]})
+        this.setSetting('mqttForm', [...checkedValues], 'groupList' )
     };
 
     moreChange () {
@@ -410,7 +378,7 @@ class Mqtt extends Component {
         this.setState({activeKey});
     };
     onEdit = (targetKey, action) => {
-        console.log(targetKey, action)
+        console.log(targetKey, action, this[action](targetKey), this)
         this[action](targetKey);
     };
     add = () => {
@@ -421,10 +389,7 @@ class Mqtt extends Component {
         // panes.push({title, content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: activeKey});
         this.setState({panes, activeKey, visible: true});
     };
-    handleSubmit = () => {
-        //this.setState({visible: false})
-        console.log(this.formRef.getItemsValue())
-    };
+
     handleCancel = () => {
         this.setState({
             visible: false,
@@ -450,7 +415,6 @@ class Mqtt extends Component {
     };
 
     render () {
-        const {getFieldDecorator} = this.props.form;
         const {dataSource, fileList, fileList1, fileList2} = this.state;
         const components = {
             body: {
@@ -533,87 +497,84 @@ class Mqtt extends Component {
                                     ? <Fragment>
                                         <Col span={24}>
                                             <Form.Item label="实例名：">
-                                                {getFieldDecorator('instance', {
-                                                    rules: [{message: '请输入实例名!'}]
-                                                })(
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
+                                                        defaultValue={this.state.serial_opt.instance}
+                                                        onChange={(e) => {
+                                                            this.setSetting('mqttForm', e.target.value, 'instance')
+                                                        }}
                                                     />
-                                                )}
                                             </Form.Item>
                                             <Divider>服务器信息</Divider>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="MQTT地址：">
-                                                {getFieldDecorator('mqttAddress', {
-                                                    rules: [{message: '请输入MQTT地址!'}]
-                                                })(
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
+                                                        defaultValue={this.state.serial_opt.address}
+                                                        onChange={(e) => {
+                                                            this.setSetting('mqttForm', e.target.value, 'address')
+                                                        }}
                                                     />,
-                                                )}
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="MQTT端口：">
-                                                {getFieldDecorator('mqttPort', {
-                                                    rules: [{message: '请输入MQTT端口'}]
-
-                                                })(
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
-                                                    />,
-                                                )}
+                                                        defaultValue={this.state.serial_opt.port}
+                                                        onChange={(e) => {
+                                                            this.setSetting('mqttForm', e.target.value, 'port')
+                                                        }}
+                                                    />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="MQTT用户(留空使用标准规则)：">
-                                                {getFieldDecorator('mqttUser', {
-                                                    rules: [{message: '请输入MQTT用户'}]
-
-                                                })(
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
-                                                    />,
-                                                )}
+                                                        defaultValue={this.state.serial_opt.user}
+                                                        onChange={(e) => {
+                                                            this.setSetting('mqttForm', e.target.value, 'user')
+                                                        }}
+                                                    />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="MQTT密码(留空使用标准规则)：">
-                                                {getFieldDecorator('mqttPassword', {
-                                                    rules: [{message: '请输入MQTT密码'}]
-
-                                                })(
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
-                                                    />,
-                                                )}
+                                                        defaultValue={this.state.serial_opt.password}
+                                                        onChange={(e) => {
+                                                            this.setSetting('mqttForm', e.target.value, 'password')
+                                                        }}
+                                                    />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="客户端ID(留空使用标准规则)：">
-                                                {getFieldDecorator('username', {
-                                                    rules: [{message: '请输入客户端ID'}]
-
-                                                })(
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
-                                                    />,
-                                                )}
+                                                        defaultValue={this.state.serial_opt.userId}
+                                                        onChange={(e) => {
+                                                            this.setSetting('mqttForm', e.target.value, 'userId')
+                                                        }}
+                                                    />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="使用TLS：">
-                                                {getFieldDecorator('rememberUse', {
-                                                    valuePropName: 'checked',
-                                                    initialValue: false
-                                                })(<Checkbox/>)}
+                                               <Checkbox
+                                                   onChange={(e) => {
+                                                       this.setSetting('mqttForm', e.target.checked, 'tls')
+                                                   }}
+                                               />
                                             </Form.Item>
                                         </Col>
                                         <Col span={24}>
@@ -671,7 +632,9 @@ class Mqtt extends Component {
                                             <Form.Item label="上送周期(秒)：">
                                                 <InputNumber
                                                     defaultValue={60}
-                                                    onChange={this.onCycle}
+                                                    onChange={(e) => {
+                                                        this.setSetting('mqttForm', e, 'onCycle')
+                                                    }}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -679,7 +642,9 @@ class Mqtt extends Component {
                                             <Form.Item label="最大数据间隔(秒)：">
                                                 <InputNumber
                                                     defaultValue={300}
-                                                    onChange={this.onMaxDate}
+                                                    onChange={(value) => {
+                                                        this.setSetting('mqttForm', value, 'onMaxDate')
+                                                    }}
                                                 />
                                             </Form.Item>
                                         </Col>
@@ -687,16 +652,19 @@ class Mqtt extends Component {
                                             <Form.Item label="最大打包数量：">
                                                 <InputNumber
                                                     defaultValue={1024}
-                                                    onChange={this.onMaxQuantity}
+                                                    onChange={(value) => {
+                                                        this.setSetting('mqttForm', value, 'onMaxQuantity')
+                                                    }}
                                                 />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>
                                             <Form.Item label="开启短线缓存：">
-                                                {getFieldDecorator('shortCache', {
-                                                    valuePropName: 'checked',
-                                                    initialValue: false
-                                                })(<Checkbox/>)}
+                                                <Checkbox
+                                                    onChange={(e) => {
+                                                        this.setSetting('mqttForm', e.target.checked, 'openLazy')
+                                                    }}
+                                                />
                                             </Form.Item>
                                         </Col>
                                     </Fragment>
@@ -729,10 +697,7 @@ class Mqtt extends Component {
                                         <Col span={4}>
                                             <Form.Item>
                                                 <span>高级选项：</span>
-                                                {getFieldDecorator('checkedSenior', {
-                                                    valuePropName: 'checkedSenior',
-                                                    initialValue: this.state.seniorIndeterminate
-                                                })(<Checkbox onChange={this.seniorChange}/>)}
+                                               <Checkbox onChange={this.seniorChange}/>
                                             </Form.Item>
                                         </Col>
                                         <Col span={8}>
@@ -768,5 +733,4 @@ class Mqtt extends Component {
     }
 }
 
-// export default Mqtt;
-export default Form.create({name: 'normal_login'})(Mqtt);
+export default Mqtt;

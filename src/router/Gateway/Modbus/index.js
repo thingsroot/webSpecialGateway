@@ -401,7 +401,7 @@ class Modbus extends Component {
                                            this.setSetting('serial_opt', value, 'flow_control')
                                        }}
                                    />
-                                      
+
                                </Form.Item>
                                <Form.Item label="端口:">
                                    <Select
@@ -616,7 +616,7 @@ class Modbus extends Component {
             })
         }
 
-    }
+    };
     render () {
         console.log(this.state.data)
         return (
@@ -671,6 +671,7 @@ class Modbus extends Component {
                     activeKey={this.state.activeKey}
                     type="editable-card"
                     onEdit={this.onEdit}
+                    // tabBarExtraContent={operations}
                 >
                     {this.state.panes.map((pane, key) => (
                         <TabPane

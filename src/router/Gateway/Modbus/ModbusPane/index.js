@@ -7,6 +7,9 @@ import './style.scss';
 const { Option } = Select;
 @withRouter
 class ModbusPane extends Component {
+    constructor (props) {
+        super(props)
+    }
     state = {
         // conf: {
         tpls: [],
@@ -157,6 +160,10 @@ class ModbusPane extends Component {
                     >
                         {!this.state.disabled ? '保存' : '编辑'}
                     </Button>
+                    <Button
+                        type="danger"
+                        onClick={this.onEdit}
+                    >删除</Button>
                     <Divider  orientation="left">应用配置信息</Divider>
                     <Form.Item label="采集间隔:">
                         <InputNumber
