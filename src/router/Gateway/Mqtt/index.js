@@ -18,7 +18,7 @@ import {
     Table
 } from 'antd';
 import './index.css'
-import MqttForm from './MqttForm'
+// import MqttForm from './MqttForm'
 
 const EditableContext = React.createContext();
 
@@ -416,9 +416,9 @@ class Mqtt extends Component {
     add = () => {
         const {panes} = this.state;
         const activeKey = `newTab${this.newTabIndex++}`;
-        const title = 'Mqtt配置' + (this.state.panes.length + 1);
+        // const title = 'Mqtt配置' + (this.state.panes.length + 1);
         // panes.push({title, content: 'New Tab Pane' + activeKey, key: activeKey});
-        panes.push({title, content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: activeKey});
+        // panes.push({title, content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: activeKey});
         this.setState({panes, activeKey, visible: true});
     };
     handleSubmit = () => {

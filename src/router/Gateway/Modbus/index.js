@@ -496,12 +496,19 @@ class Modbus extends Component {
        }
        if (this.state.modalKey === 2) {
            return (
-               <Fragment>
-                   <Divider orientation="left">设备列表</Divider>
-                   <p>|设备列表</p>
-                   <Button type="primary">添加</Button>
-                   <Table />
-               </Fragment>
+                <Fragment>
+                    <Divider orientation="left">设备列表</Divider>
+                    <p>|设备列表</p>
+                    <Button
+                        type="primary"
+                        onClick={()=>{
+                            console.log('222222')
+                        }}
+                    >添加</Button>
+                    <Table
+                        pagination={false}
+                    />
+                </Fragment>
            )
        }
     }
