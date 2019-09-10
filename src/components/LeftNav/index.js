@@ -43,42 +43,14 @@ class LeftNav extends Component {
             this.setState({
                 index: 0
             })
-        } else if (pathname.indexOf('/apps') !== -1){
+        } else if (pathname.indexOf('/modbus') !== -1){
             this.setState({
                 index: 1
             });
-        } else if (pathname.indexOf('/settings') !== -1){
+        } else if (pathname.indexOf('/mqtt') !== -1){
             this.setState({
                 index: 2
             });
-        } else if (pathname.indexOf('/vserial') !== -1){
-            this.setState({
-                index: 3
-            });
-        } else if (pathname.indexOf('/vnet') !== -1){
-            this.setState({
-                index: 4
-            });
-        } else if (pathname.indexOf('/onlinerecords') !== -1){
-            this.setState({
-                index: 5
-            })
-        } else if (pathname.indexOf('/logs') !== -1){
-            this.setState({
-                index: 6
-            })
-        } else if (pathname.indexOf('/comms') !== -1){
-            this.setState({
-                index: 7
-            })
-        } else if (pathname.indexOf('/platformevents') !== -1){
-            this.setState({
-                index: 8
-            })
-        } else if (pathname.indexOf('/events') !== -1){
-            this.setState({
-                index: 9
-            })
         }
     }
     componentWillUnmount (){

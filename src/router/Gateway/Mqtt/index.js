@@ -1,4 +1,6 @@
 import React, {Component, Fragment} from 'react';
+import http from '../../../utils/Server';
+import MqttPane from './MqttForm';
 import {
     Tabs,
     Button,
@@ -19,7 +21,7 @@ import {
 } from 'antd';
 import './index.css'
 // import MqttForm from './MqttForm'
-
+import { inject, observer} from 'mobx-react';
 const EditableContext = React.createContext();
 
 const EditableRow = ({form, index, ...props}) => (
@@ -40,7 +42,8 @@ const coustomPanelStyle = {
     border: 0,
     overflow: 'hidden'
 }
-
+@inject('store')
+@observer
 class EditableCell extends React.Component {
     state = {
         editing: true
@@ -122,7 +125,8 @@ class EditableCell extends React.Component {
     }
 }
 const {TabPane} = Tabs;
-
+@inject('store')
+@observer
 class Mqtt extends Component {
     constructor (props) {
         super(props);
@@ -159,9 +163,11 @@ class Mqtt extends Component {
             activeKey: '0',
             panes,
             modalKey: 0,
+            app_list: [],
             userMessage: '',
             seniorIndeterminate: false, //高级选项
             visible: false,
+            applist: [],
             dataSource: [
                 // {
                 //     key: '0',
@@ -177,15 +183,70 @@ class Mqtt extends Component {
                 cycle: NUMBER_CYCLE,
                 maxDate: NUMBER_MAXDATE,
                 maxQuantity: NUMBER_MAXQUANTITY
+            },
+            options_ex: {
+                diable_command: false,
+                diable_data: false,
+                disable_compress: false,
+                disable_data_em: false,
+                disable_devices: false,
+                disable_output: false,
+                upload_event: 0
             }
         };
     }
-    setSetting = (type, val, name) => {
-        this.setState({
-            serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-        }, ()=> {
-            console.log(this.state.serial_opt)
+    componentDidMount () {
+        this.fetch()
+        this.t1 = setInterval(() => {
+            this.fetch()
+        }, 10000);
+    }
+    UNSAFE_componentWillReceiveProps (nextProps) {
+        if (nextProps.match.params.sn !== this.props.match.params.sn) {
+            this.fetch(nextProps.match.params.sn)
+        }
+    }
+    componentWillUnmount (){
+        clearInterval(this.t1)
+    }
+    fetch = (sn) => {
+        const vsn = sn ? sn : this.props.match.params.sn;
+        http.get('/api/applications_read?app=APP00000259').then(res=>{
+            if (res.ok) {
+                this.setState({app_info: res.data})
+            }
         })
+        http.get('/api/gateways_app_list?gateway=' + vsn + '&beta=0').then(res=>{
+            if (res.ok){
+                const app_list = [];
+                if (res.data && res.data.length > 0) {
+                    res.data.map(item=>{
+                        if (item.inst_name.toLowerCase().indexOf('mqtt') !== -1) {
+                            app_list.push(item)
+                        }
+                    })
+                    // this.props.store.gatewayInfo.setApps(app_list)
+                }
+                this.setState({app_list})
+            } else {
+                message.error(res.error)
+            }
+        })
+    }
+    setSetting = (type, val, name) => {
+        if (type !== 'mqttForm') {
+            this.setState({
+                [type]: Object.assign({}, this.state[type], {[name]: val})
+            }, ()=>{
+                console.log(this.state[type])
+            })
+        } else {
+            this.setState({
+                serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
+            }, ()=> {
+                console.log(this.state.serial_opt)
+            })
+        }
     }
     getTextInfo = (file) => {
         const reader = new FileReader();
@@ -233,7 +294,9 @@ class Mqtt extends Component {
             return file;
         });
 
-        this.setState({fileList});
+        this.setState({fileList}, ()=>{
+            console.log(fileList)
+        });
     }
     handleListChange1 = info => {
         if (info.file.size / 1024 > 8) {
@@ -339,34 +402,82 @@ class Mqtt extends Component {
                         style={coustomPanelStyle}
                     >
                         <Form.Item>
-                            <Checkbox.Group
+                            {/* <Checkbox.Group
                                 style={{width: '100%'}}
                                 onChange={this.changeGroup}
-                            >
+                            > */}
                                 <Row className="highSenior">
+                                    {console.log(this.state.options_ex)}
                                     <Col span={24}>
-                                        <Checkbox value="禁止数据上送">禁止数据上送：</Checkbox>
+                                        <Checkbox
+                                            value="禁止数据上送"
+                                            checked={this.state.options_ex.diable_data}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'diable_data')
+                                            }}
+                                        >禁止数据上送：</Checkbox>
+                                    </Col>
+                                    <Col
+                                        span={24}
+                                        style={{display: 'flex'}}
+                                    >
+                                        <span style={{lineHeight: '30px'}}>事件上送（最小等级）：</span>
+                                        <Input
+                                            style={{width: 150}}
+                                            value={this.state.options_ex.upload_event}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.value, 'upload_event')
+                                            }}
+                                        />
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="事件上送(最小等级)">事件上送（最小等级）：</Checkbox>
+                                        <Checkbox
+                                            // value="禁止设备输出"
+                                            checked={this.state.options_ex.disable_output}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_output')
+                                            }}
+                                        >
+                                        禁止设备输出：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止设备输出">禁止设备输出：</Checkbox>
+                                        <Checkbox
+                                            value="禁止设备指令"
+                                            checked={this.state.options_ex.diable_command}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'diable_command')
+                                            }}
+                                        >禁止设备指令：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止设备指令">禁止设备指令：</Checkbox>
+                                        <Checkbox
+                                            value="禁止设备信息上送"
+                                            checked={this.state.options_ex.disable_devices}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_devices')
+                                            }}
+                                        >禁止设备信息上送：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止设备信息上送">禁止设备信息上送：</Checkbox>
+                                        <Checkbox
+                                            value="禁止上送紧急数据"
+                                            checked={this.state.options_ex.disable_data_em}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_data_em')
+                                            }}
+                                        >禁止上送紧急数据：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止上送紧急数据">禁止上送紧急数据：</Checkbox>
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox value="禁止压缩（调试使用">禁止压缩（调试使用）：</Checkbox>
+                                        <Checkbox
+                                            value="禁止压缩（调试使用"
+                                            checked={this.state.options_ex.disable_compress}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_compress')
+                                            }}
+                                        >禁止压缩（调试使用）：</Checkbox>
                                     </Col>
                                 </Row>
-                            </Checkbox.Group>
+                            {/* </Checkbox.Group> */}
                         </Form.Item>
                     </Panel>
 
@@ -383,11 +494,11 @@ class Mqtt extends Component {
     };
     add = () => {
         const {panes} = this.state;
-        const activeKey = `newTab${this.newTabIndex++}`;
+        // const activeKey = `newTab${this.newTabIndex++}`;
         // const title = 'Mqtt配置' + (this.state.panes.length + 1);
         // panes.push({title, content: 'New Tab Pane' + activeKey, key: activeKey});
         // panes.push({title, content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: activeKey});
-        this.setState({panes, activeKey, visible: true});
+        this.setState({panes, visible: true});
     };
 
     handleCancel = () => {
@@ -413,7 +524,71 @@ class Mqtt extends Component {
         }
         return name
     };
-
+    installMqtt = () => {
+        console.log(this.state)
+        const { serial_opt } = this.state;
+        const { app_list} = this.state;
+        let flag = false;
+        if (app_list && app_list.length > 0) {
+            app_list.map(item=>{
+                if (item.inst_name === 'mqtt_1'){
+                    flag = true
+                }
+            })
+        }
+        const devs = serial_opt.dataSource;
+        const arr = [];
+        devs && devs.length > 0 && devs.map((item) =>{
+            arr.push({
+                key: item.key,
+                sn: item.name
+            })
+        })
+        const inst_name = flag ? 'mqtt_2' : 'mqtt_1';
+        const data = {
+                gateway: this.props.match.params.sn,
+                inst: inst_name,
+                app: 'APP00000259',
+                version: this.state.app_info.versionLatest,
+                conf: {
+                    mqtt: {
+                        server: serial_opt.address,
+                        port: serial_opt.port,
+                        username: serial_opt.user,
+                        password: serial_opt.password,
+                        client_id: serial_opt.userId,
+                        enable_tls: serial_opt.tls,
+                        tls_cert: serial_opt.contentText,
+                        client_cert: serial_opt.contentClient,
+                        client_key: serial_opt.contentClientPw
+                    },
+                    options: {
+                        period: serial_opt.cycle,
+                        ttl: serial_opt.maxDate,
+                        data_upload_dpp: serial_opt.maxQuantity,
+                        enable_data_cache: serial_opt.openLazy
+                    },
+                    devs: arr,
+                    has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
+                    options_ex: this.state.options_ex
+                },
+                id: 'app_install/' + this.props.match.params.sn + '/' + inst_name + '/APP00000259/' + new Date() * 1
+            }
+            this.setState({
+                visible: false
+            })
+            http.post('/api/gateways_applications_install', data).then(res=>{
+                if (res.ok) {
+                    let title = '安装应用' + data.inst + '请求成功!'
+                    message.info(title + '等待网关响应!')
+                    this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                        this.fetch()
+                    })
+                } else {
+                    message.error(res.error)
+                }
+            })
+    }
     render () {
         const {dataSource, fileList, fileList1, fileList2} = this.state;
         const components = {
@@ -440,9 +615,12 @@ class Mqtt extends Component {
         return (
             <div className="parents-mqtt">
                 <div style={{marginBottom: '16px'}}>
-                    <Button onClick={this.add}>ADD</Button>
+                    <Button
+                        onClick={this.add}
+                        disabled={this.state.app_list.length >= 2}
+                    >安装MQTT</Button>
                     <Modal
-                        title="ADD"
+                        title="安装应用"
                         width="800px"
                         visible={this.state.visible}
                         onOk={this.handleSubmit}
@@ -476,6 +654,10 @@ class Mqtt extends Component {
                                             modalKey: this.state.modalKey + 1
                                         })
                                     }
+                                    if (this.state.modalKey === 2) {
+                                        console.log(this.state)
+                                        this.installMqtt()
+                                    }
                                 }}
                             >
                                 {
@@ -496,7 +678,7 @@ class Mqtt extends Component {
                                 {this.state.modalKey === 0 && this.state.modalKey !== 1 && this.state.modalKey !== 2
                                     ? <Fragment>
                                         <Col span={24}>
-                                            <Form.Item label="实例名：">
+                                            {/* <Form.Item label="实例名：">
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
@@ -505,7 +687,7 @@ class Mqtt extends Component {
                                                             this.setSetting('mqttForm', e.target.value, 'instance')
                                                         }}
                                                     />
-                                            </Form.Item>
+                                            </Form.Item> */}
                                             <Divider>服务器信息</Divider>
                                         </Col>
                                         <Col span={12}>
@@ -697,7 +879,10 @@ class Mqtt extends Component {
                                         <Col span={4}>
                                             <Form.Item>
                                                 <span>高级选项：</span>
-                                               <Checkbox onChange={this.seniorChange}/>
+                                                <Checkbox
+                                                    checked={this.state.seniorIndeterminate}
+                                                    onChange={this.seniorChange}
+                                                />
                                             </Form.Item>
                                         </Col>
                                         <Col span={8}>
@@ -716,15 +901,18 @@ class Mqtt extends Component {
                     hideAdd
                     onChange={this.onChange}
                     activeKey={this.state.activeKey}
-                    type="editable-card"
+                    type="card"
                     onEdit={this.onEdit}
                 >
-                    {this.state.panes.map(pane => (
+                    {this.state.app_list.map((pane, key) => (
                         <TabPane
-                            tab={pane.title}
-                            key={pane.key}
+                            tab={pane.inst_name && pane.inst_name.replace('__', '通道')}
+                            key={key}
                         >
-                            {pane.content}
+                            <MqttPane
+                                pane={pane}
+                                fetch={this.fetch}
+                            />
                         </TabPane>
                     ))}
                 </Tabs>

@@ -301,7 +301,6 @@ class ModbusPane extends Component {
                                         this.setSetting('socket_opt', value, 'host')
                                     }}
                                 />
-                                    
                             </Form.Item>
                             <Form.Item label="端口:">
                                 <Input

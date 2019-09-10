@@ -13,7 +13,9 @@ import {
     Table,
     Upload
 } from 'antd';
-
+import { inject, observer} from 'mobx-react';
+import { withRouter } from 'react-router-dom';
+import http from '../../../../utils/Server';
 const EditableContext = React.createContext();
 
 const EditableRow = ({form, index, ...props}) => (
@@ -25,7 +27,9 @@ const EditableRow = ({form, index, ...props}) => (
     </EditableContext.Provider>
 );
 const EditableFormRow = Form.create()(EditableRow);
-
+function cancel () {
+    message.error('取消卸载应用');
+  }
 const {Panel} = Collapse;
 const coustomPanelStyle = {
     background: '#f7f7f7',
@@ -34,7 +38,7 @@ const coustomPanelStyle = {
     border: 0,
     overflow: 'hidden'
 }
-
+@withRouter
 class EditableCell extends React.Component {
     state = {
         editing: true
@@ -55,6 +59,7 @@ class EditableCell extends React.Component {
             if (error && error[e.currentTarget.id]) {
                 return;
             }
+            console.log(values, record)
             this.toggleEdit();
             handleSave({...record, ...values});
         });
@@ -116,13 +121,12 @@ class EditableCell extends React.Component {
         );
     }
 }
-
+@withRouter
+@inject('store')
+@observer
 class MqttForm extends React.Component {
     constructor (props) {
         super(props)
-        const NUMBER_CYCLE = 60;
-        const NUMBER_MAXDATE = 300
-        const NUMBER_MAXQUANTITY = 1024
         this.columns = [
             {
                 title: '设备序号',
@@ -161,19 +165,65 @@ class MqttForm extends React.Component {
             fileList1: [],
             fileList2: [],
             disabled: true,
-            serial_opt: {
-                cycle: NUMBER_CYCLE,
-                maxDate: NUMBER_MAXDATE,
-                maxQuantity: NUMBER_MAXQUANTITY
+            serial_opt: {},
+            options: {
+                enable_data_cache: true,
+                data_upload_dpp: 1024,
+                period: 60,
+                ttl: 300
+            },
+            mqtt: {
+                enable_tls: true,
+                password: '',
+                port: '',
+                server: '',
+                tls_cert: '',
+                client_cert: '',
+                client_key: '',
+                username: ''
+            },
+            has_options_ex: false,
+            options_ex: {
+                diable_command: false,
+                diable_data: false,
+                disable_compress: false,
+                disable_data_em: false,
+                disable_devices: false,
+                disable_output: false,
+                upload_event: 0
             }
         };
     }
-    setSetting = (type, val, name) => {
+    componentDidMount () {
+        console.log(this.props)
+        if (this.props.pane.conf) {
+            const { conf } = this.props.pane;
             this.setState({
-                serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-            }, ()=> {
-                console.log(this.state.serial_opt)
+                options: conf.options,
+                mqtt: conf.mqtt,
+                has_options_ex: conf.has_options_ex === 'yes'
             })
+            if (conf.has_options_ex === 'yes') {
+                this.setState({
+                    seniorIndeterminate: true
+                })
+            }
+        }
+    }
+    setSetting = (type, val, name) => {
+            if (type !== 'mqttForm') {
+                this.setState({
+                    [type]: Object.assign({}, this.state[type], {[name]: val})
+                }, ()=>{
+                    console.log(this.state[type])
+                })
+            } else {
+                this.setState({
+                    serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
+                }, ()=> {
+                    console.log(this.state.serial_opt)
+                })
+            }
     }
     // getItemsValue = () => {
     //     const values = this.props.form.getFieldsValue()
@@ -207,7 +257,7 @@ class MqttForm extends React.Component {
             let targetNum = result.target.result;
             // targetNum = targetNum.replace(/[\n\r]/g, '');
             // targetNum = targetNum.replace(/[ ]/g, '');
-           this.setSetting('mqttForm', targetNum, 'contentText')
+           this.setSetting('mqtt', targetNum, 'tls_cert')
         }
         return false;
     };
@@ -216,7 +266,7 @@ class MqttForm extends React.Component {
         reader.readAsText(file);
         reader.onload = (result) => {
             let targetNum = result.target.result;
-            this.setSetting('mqttForm', targetNum, 'contentClient')
+            this.setSetting('mqtt', targetNum, 'client_cert')
         }
         return false;
     };
@@ -227,7 +277,7 @@ class MqttForm extends React.Component {
             let targetNum = result.target.result;
             targetNum = targetNum.replace(/[\n\r]/g, '');
             targetNum = targetNum.replace(/[ ]/g, '');
-            this.setSetting('mqttForm', targetNum, 'contentClientPw')
+            this.setSetting('mqtt', targetNum, 'client_key')
 
         }
         return false;
@@ -246,7 +296,7 @@ class MqttForm extends React.Component {
             }
             return file;
         });
-
+        console.log(fileList)
         this.setState({fileList});
     }
     handleListChange1 = info => {
@@ -308,7 +358,7 @@ class MqttForm extends React.Component {
             ...item,
             ...row
         });
-        this.setSetting('mqttForm', newDate, 'dataSource')
+        this.setState({dataSource: newDate})
     }
     remove = targetKey => {
         let {activeKey} = this.state;
@@ -352,34 +402,89 @@ class MqttForm extends React.Component {
                         style={coustomPanelStyle}
                     >
                         <Form.Item>
-                            <Checkbox.Group
+                            {/* <Checkbox.Group
                                 style={{width: '100%'}}
                                 onChange={this.changeGroup}
-                            >
+                            > */}
                                 <Row className="highSenior">
+                                    {console.log(this.state.options_ex)}
                                     <Col span={24}>
-                                        <Checkbox value="禁止数据上送">禁止数据上送：</Checkbox>
+                                        <Checkbox
+                                            disabled={this.state.disabled}
+                                            value="禁止数据上送"
+                                            checked={this.state.options_ex.diable_data}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'diable_data')
+                                            }}
+                                        >禁止数据上送：</Checkbox>
+                                    </Col>
+                                    <Col
+                                        span={24}
+                                        style={{display: 'flex'}}
+                                    >
+                                        <span style={{lineHeight: '30px'}}>事件上送（最小等级）：</span>
+                                        <Input
+                                            style={{width: 150}}
+                                            value={this.state.options_ex.upload_event}
+                                            disabled={this.state.disabled}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.value, 'upload_event')
+                                            }}
+                                        />
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="事件上送(最小等级)">事件上送（最小等级）：</Checkbox>
+                                        <Checkbox
+                                            // value="禁止设备输出"
+                                            checked={this.state.options_ex.disable_output}
+                                            disabled={this.state.disabled}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_output')
+                                            }}
+                                        >
+                                        禁止设备输出：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止设备输出">禁止设备输出：</Checkbox>
+                                        <Checkbox
+                                            value="禁止设备指令"
+                                            checked={this.state.options_ex.diable_command}
+                                            disabled={this.state.disabled}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'diable_command')
+                                            }}
+                                        >禁止设备指令：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止设备指令">禁止设备指令：</Checkbox>
+                                        <Checkbox
+                                            value="禁止设备信息上送"
+                                            checked={this.state.options_ex.disable_devices}
+                                            disabled={this.state.disabled}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_devices')
+                                            }}
+                                        >禁止设备信息上送：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止设备信息上送">禁止设备信息上送：</Checkbox>
+                                        <Checkbox
+                                            value="禁止上送紧急数据"
+                                            checked={this.state.options_ex.disable_data_em}
+                                            disabled={this.state.disabled}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_data_em')
+                                            }}
+                                        >禁止上送紧急数据：</Checkbox>
                                     </Col>
                                     <Col span={24}>
-                                        <Checkbox value="禁止上送紧急数据">禁止上送紧急数据：</Checkbox>
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox value="禁止压缩（调试使用">禁止压缩（调试使用）：</Checkbox>
+                                        <Checkbox
+                                            value="禁止压缩（调试使用"
+                                            checked={this.state.options_ex.disable_compress}
+                                            disabled={this.state.disabled}
+                                            onChange={(e)=>{
+                                                this.setSetting('options_ex', e.target.checked, 'disable_compress')
+                                            }}
+                                        >禁止压缩（调试使用）：</Checkbox>
                                     </Col>
                                 </Row>
-                            </Checkbox.Group>
+                            {/* </Checkbox.Group> */}
                         </Form.Item>
                     </Panel>
 
@@ -388,12 +493,52 @@ class MqttForm extends React.Component {
         }
     }
     toggleDisable = () => {
+        if (!this.state.disabled) {
+            console.log('保存')
+            // if(this.)
+            const data = {
+                gateway: this.props.match.params.sn,
+                inst: this.props.pane.inst_name,
+                conf: {
+                    devs: this.state.devs,
+                    has_options_ex: this.state.has_options_ex ? 'yes' : 'no',
+                    mqtt: this.state.mqtt,
+                    options: this.state.options,
+                    options_ex: this.state.options_ex
+                },
+                id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`
+            }
+            http.post('/api/gateways_applications_conf', data).then(res=>{
+                if (res.ok) {
+                    let title = '配置应用' + data.inst + '请求成功!'
+                    message.info(title + '等待网关响应!')
+                    this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                        this.props.fetch()
+                    })
+                }
+            })
+        }
         this.setState({disabled: !this.state.disabled})
     };
-
+    removeApp = () =>{
+        const data = {
+            gateway: this.props.match.params.sn,
+            inst: this.props.pane.inst_name,
+            id: `app_remove/${this.props.match.params.sn}/${this.props.pane.inst_name}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_applications_remove', data).then(res=>{
+            if (res.ok) {
+                let title = '卸载应用' + data.inst + '请求成功!'
+                message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                    this.props.fetch()
+                })
+            }
+        })
+    }
     render () {
         // const {getFieldDecorator} = this.props.form;
-        const {dataSource, fileList, fileList1, fileList2, disabled} = this.state;
+        const {dataSource, fileList, fileList1, fileList2, disabled, mqtt, options} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -430,18 +575,35 @@ class MqttForm extends React.Component {
                         >
                             {!this.state.disabled ? '保存' : '编辑'}
                         </Button>
-                        <Form.Item label="实例名：">
+
+
+                        <Popconfirm
+                            title="确定要删除应用吗?"
+                            onConfirm={this.removeApp}
+                            onCancel={cancel}
+                            okText="删除"
+                            cancelText="取消"
+                        >
+                            <Button
+                                style={{marginLeft: '10pxs'}}
+                                type="danger"
+                                // onClick={this.removeApp}
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                        {/* <Form.Item label="实例名：">
                                 <Input
                                     allowClear
                                     autoComplete="off"
                                     disabled={disabled}
-                                    defaultValue={this.state.serial_opt.instance}
+                                    // defaultValue={this.state.options.clientId}
                                     onChange={(e) => {
                                         this.setSetting('mqttForm', e.target.value, 'instance')
                                     }}
                                 />
 
-                        </Form.Item>
+                        </Form.Item> */}
                         <Divider>服务器信息</Divider>
                     </Col>
                     <Col span={12}>
@@ -450,9 +612,9 @@ class MqttForm extends React.Component {
                                     allowClear
                                     autoComplete="off"
                                     disabled={disabled}
-                                    defaultValue={this.state.serial_opt.address}
+                                    value={mqtt.server}
                                     onChange={(e) => {
-                                    this.setSetting('mqttForm', e.target.value, 'address')
+                                    this.setSetting('mqtt', e.target.value, 'server')
                                 }}
                                 />,
                         </Form.Item>
@@ -463,9 +625,9 @@ class MqttForm extends React.Component {
                                     allowClear
                                     autoComplete="off"
                                     disabled={disabled}
-                                    defaultValue={this.state.serial_opt.port}
+                                    value={mqtt.port}
                                     onChange={(e) => {
-                                        this.setSetting('mqttForm', e.target.value, 'port')
+                                        this.setSetting('mqtt', e.target.value, 'port')
                                     }}
                                 />,
                         </Form.Item>
@@ -476,9 +638,9 @@ class MqttForm extends React.Component {
                                     allowClear
                                     autoComplete="off"
                                     disabled={disabled}
-                                    defaultValue={this.state.serial_opt.user}
+                                    value={mqtt.username}
                                     onChange={(e) => {
-                                        this.setSetting('mqttForm', e.target.value, 'user')
+                                        this.setSetting('mqtt', e.target.value, 'username')
                                     }}
                                 />,
                         </Form.Item>
@@ -489,9 +651,9 @@ class MqttForm extends React.Component {
                                     allowClear
                                     autoComplete="off"
                                     disabled={disabled}
-                                    defaultValue={this.state.serial_opt.password}
+                                    value={mqtt.password}
                                     onChange={(e) => {
-                                        this.setSetting('mqttForm', e.target.value, 'password')
+                                        this.setSetting('mqtt', e.target.value, 'password')
                                     }}
                                 />,
                         </Form.Item>
@@ -502,9 +664,9 @@ class MqttForm extends React.Component {
                                     allowClear
                                     autoComplete="off"
                                     disabled={disabled}
-                                    defaultValue={this.state.serial_opt.userId}
+                                    value={mqtt.client_id}
                                     onChange={(e) => {
-                                        this.setSetting('mqttForm', e.target.value, 'userId')
+                                        this.setSetting('mqtt', e.target.value, 'client_id')
                                     }}
                                 />,
                         </Form.Item>
@@ -513,8 +675,9 @@ class MqttForm extends React.Component {
                         <Form.Item label="使用TLS：">
                             <Checkbox
                                 disabled={disabled}
+                                checked={this.state.tls_cert}
                                 onChange={(e) => {
-                                    this.setSetting('mqttForm', e.target.checked, 'tls')
+                                    this.setSetting('mqtt', e.target.checked, 'tls_cert')
                                 }}
                             />
                         </Form.Item>
@@ -568,10 +731,10 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="上送周期(秒)：">
                             <InputNumber
-                                defaultValue={60}
+                                value={options.period}
                                 disabled={disabled}
                                 onChange={(e) => {
-                                    this.setSetting('mqttForm', e, 'onCycle')
+                                    this.setSetting('options', e, 'period')
                                 }}
                             />
                         </Form.Item>
@@ -579,10 +742,10 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="最大数据间隔(秒)：">
                             <InputNumber
-                                defaultValue={300}
+                                value={options.ttl}
                                 disabled={disabled}
                                 onChange={(value) => {
-                                    this.setSetting('mqttForm', value, 'onMaxDate')
+                                    this.setSetting('options', value, 'ttl')
                                 }}
                             />
                         </Form.Item>
@@ -590,10 +753,10 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="最大打包数量：">
                             <InputNumber
-                                defaultValue={1024}
+                                value={options.data_upload_dpp}
                                 disabled={disabled}
                                 onChange={(value) => {
-                                    this.setSetting('mqttForm', value, 'onMaxQuantity')
+                                    this.setSetting('options', value, 'data_upload_dpp')
                                 }}
                             />
                         </Form.Item>
@@ -602,8 +765,9 @@ class MqttForm extends React.Component {
                         <Form.Item label="开启短线缓存：">
                            <Checkbox
                                disabled={disabled}
+                               defaultChecked={this.state.options.enable_data_cache}
                                onChange={(e) => {
-                                   this.setSetting('mqttForm', e.target.checked, 'openLazy')
+                                   this.setSetting('options', e.target.checked, 'enable_data_cache')
                                }}
                            />
                         </Form.Item>
@@ -634,10 +798,14 @@ class MqttForm extends React.Component {
                     <Col span={4}>
                         <Form.Item>
                             <span>高级选项：</span>
-                           <Checkbox
-                               onChange={this.seniorChange}
-                               disabled={disabled}
-                           />
+                            {
+                                console.log(this.props)
+                            }
+                            <Checkbox
+                                checked={this.state.seniorIndeterminate}
+                                onChange={this.seniorChange}
+                                disabled={disabled}
+                            />
                         </Form.Item>
                     </Col>
                     <Col span={8}>

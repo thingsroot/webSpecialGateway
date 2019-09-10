@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Icon, Tooltip, Button } from 'antd';
+import { Icon, Tooltip } from 'antd';
 import http from '../../utils/Server';
-import { Link, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import './style.scss';
 
 import {IconIOT, IconCloud} from '../../utils/iconfont';
@@ -133,13 +133,6 @@ class Status extends Component {
                                     localStorage.setItem('url', this.props.location.pathname)
                                 }}
                               >
-                                <Link to={`/appsinstall/${this.state.gateway}`}>
-                                    <Button type="primary">
-                                        <Icon type="appstore"
-                                            theme="filled"
-                                        />安装新应用
-                                    </Button>
-                                </Link>
                             </div>
                             : ''
                         }
