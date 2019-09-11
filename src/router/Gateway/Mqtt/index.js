@@ -549,7 +549,7 @@ class Mqtt extends Component {
                 gateway: this.props.match.params.sn,
                 inst: inst_name,
                 app: 'APP00000259',
-                version: this.state.app_info.versionLatest,
+                version: 275,
                 conf: {
                     mqtt: {
                         server: serial_opt.address,
@@ -699,7 +699,7 @@ class Mqtt extends Component {
                                                         onChange={(e) => {
                                                             this.setSetting('mqttForm', e.target.value, 'address')
                                                         }}
-                                                    />,
+                                                    />
                                             </Form.Item>
                                         </Col>
                                         <Col span={12}>

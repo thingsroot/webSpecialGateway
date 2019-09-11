@@ -18,8 +18,9 @@ const Mqtt = LoadableComponent(()=>import('./Mqtt'));
 // const Vnet  = LoadableComponent(()=>import('./Vnet'));
 // const Vserial = LoadableComponent(()=>import('./Vserial'));
 // const OnlineRecords = LoadableComponent(()=>import('./OnlineRecords'));
-// const Logviewer = LoadableComponent(()=>import('./Logviewer'));
-// const Comm = LoadableComponent(()=>import('./CommViewer'));
+const Logviewer = LoadableComponent(()=>import('./Logviewer'));
+const Comm = LoadableComponent(()=>import('./CommViewer'));
+const NetworkConfig = LoadableComponent(()=>import('./NetworkConfig'));
 // const Appconfig = LoadableComponent(()=>import('../AppsInstall/AppConfig'));
 // const PlatformEvents = LoadableComponent(()=>import('./PlatformEvents'));
 // const DeviceEvents = LoadableComponent(()=>import('./DeviceEvents'));
@@ -153,11 +154,11 @@ class MyGatesDevices extends Component {
                             title="我的网关·MQTT"
                             gateway={this.state.gateway}
                         />
-                        {/* <GatewayRoute path={`${path}/apps`}
-                            component={AppsList}
-                            title="我的网关·应用列表"
+                        <GatewayRoute path={`${path}/networkconfig`}
+                            component={NetworkConfig}
+                            title="我的网关·网络配置"
                             gateway={this.state.gateway}
-                        /> */}
+                        />
                         {/* <GatewayRoute path={`${path}/settings`}
                             component={Settings}
                             title="我的网关·网关设置"
@@ -182,7 +183,7 @@ class MyGatesDevices extends Component {
                             title="我的网关·在线记录"
                             gateway={this.state.gateway}
                         /> */}
-                        {/* <GatewayRoute path={`${path}/logs`}
+                        <GatewayRoute path={`${path}/logs`}
                             component={Logviewer}
                             title="我的网关·日志"
                             mqtt={this.state.mqtt}
@@ -193,7 +194,7 @@ class MyGatesDevices extends Component {
                             title="我的网关·报文"
                             mqtt={this.state.mqtt}
                             gateway={this.state.gateway}
-                        /> */}
+                        />
                         {/* <GatewayRoute path={`${path}/platformevents`}
                             component={PlatformEvents}
                             title="我的网关·平台事件"

@@ -609,66 +609,66 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="MQTT地址：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
                                     value={mqtt.server}
                                     onChange={(e) => {
                                     this.setSetting('mqtt', e.target.value, 'server')
                                 }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT端口：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
                                     value={mqtt.port}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'port')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT用户(留空使用标准规则)：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
                                     value={mqtt.username}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'username')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT密码(留空使用标准规则)：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
                                     value={mqtt.password}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'password')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="客户端ID(留空使用标准规则)：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
                                     value={mqtt.client_id}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'client_id')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>

@@ -51,6 +51,18 @@ class LeftNav extends Component {
             this.setState({
                 index: 2
             });
+        } else if (pathname.indexOf('/logs') !== -1){
+            this.setState({
+                index: 6
+            });
+        } else if (pathname.indexOf('/comms') !== -1){
+            this.setState({
+                index: 7
+            });
+        } else if (pathname.indexOf('/networkconfig') !== -1){
+            this.setState({
+                index: 8
+            });
         }
     }
     componentWillUnmount (){
@@ -201,6 +213,41 @@ class LeftNav extends Component {
                             })
                         }
                     </ul>
+                </div>
+                <div className="navlist">
+                        <p className="FeaturesGroup">高级功能</p>
+                        <ul>
+                            <Link
+                                to={`${url}/logs`}
+                                onClick={()=>{
+                                    this.setState({index: 6})
+                                }}
+                            >
+                                <li
+                                    className={index === 6 ? 'active' : ''}
+                                >{this.state.lognum !== 0 ? <div className="logcount count">{this.state.lognum}</div> : ''}<Icon type="ordered-list"/>&nbsp;&nbsp;网关日志</li>
+                            </Link>
+                            <Link
+                                to={`${url}/comms`}
+                                onClick={()=>{
+                                    this.setState({index: 7})
+                                }}
+                            >
+                                <li
+                                    className={index === 7 ? 'active' : ''}
+                                >{this.state.commnum !== 0 ? <div className="logcount count">{this.state.commnum}</div> : ''}<Icon type="bars"/>&nbsp;&nbsp;网关报文</li>
+                            </Link>
+                            <Link
+                                to={`${url}/networkconfig`}
+                                onClick={()=>{
+                                    this.setState({index: 8})
+                                }}
+                            >
+                                <li
+                                    className={index === 8 ? 'active' : ''}
+                                ><Icon type="bell"/>&nbsp;&nbsp;网络配置</li>
+                            </Link>
+                        </ul>
                 </div>
                 {/* <Modal
                     title="扩展功能设置"

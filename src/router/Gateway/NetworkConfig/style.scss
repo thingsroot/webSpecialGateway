@@ -1,0 +1,46 @@
+.networkpagelist{
+    border: 1px solid #ccc;
+    margin: 20px;
+    padding: 20px;
+    position: relative;
+    .networkpagelist_title{
+        position: absolute;
+        left: 15px;
+        top: -10px;
+        background: #fff;
+        z-index: 999;
+        padding: 0 5px 0 5px;
+    }
+    .networkpagelist_content{
+        display: flex;
+        .networkpagelist_left{
+            width: 100px;
+            height:100px;
+            border: 1px solid #ccc;
+            .networkinfo_top{
+                line-height: 40px;
+                background:rgb(37, 188, 199);
+                text-align: center;
+            }
+            .networkinfo_bottom{
+                line-height: 60px;
+                text-align: center;
+            }
+        }
+        .networkpagelist_right{
+            margin-left: 80px;
+            line-height: 30px;
+        }
+        .networksetinfo{
+            border: 1px solid #ccc;
+            width:80px;
+            height: 80px;
+            line-height: 80px;
+            text-align: center;
+            position: absolute;
+            right:30px;
+            top:30px;
+            cursor: pointer;
+        }
+    }
+}

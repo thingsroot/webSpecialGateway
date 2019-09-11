@@ -5,9 +5,16 @@ import {
 } from 'antd';
 import http  from '../../../utils/Server';
 import { authenticateSuccess } from '../../../utils/Session';
+import Cookies from 'js-cookie'
 
 @withRouter
 class Sign extends PureComponent {
+    componentDidMount () {
+        const keys = document.cookie.match(/[^ =;]+(?==)/g)
+        keys && keys.length > 0 && keys.map((item, key)=>{
+            Cookies.remove(keys[key])
+        })
+    }
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
