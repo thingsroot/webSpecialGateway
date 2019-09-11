@@ -522,7 +522,7 @@ class Modbus extends Component {
                        type="primary"
                        onClick={this.handleAdd}
                    >添加</Button>
-                   <Table />
+                   <Table  pagination={false}/>
                </Fragment>
            )
        }

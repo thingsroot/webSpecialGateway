@@ -33,18 +33,28 @@ class ModbusPane extends Component {
         devsCloumns: [
             {
                 title: '地址',
+                dataIndex: 'unit',
+                key: 'unit'
+              },
+              {
+                title: '设备名称',
                 dataIndex: 'name',
                 key: 'name'
               },
               {
-                title: '年龄',
-                dataIndex: 'age',
-                key: 'age'
+                title: '设备序列号',
+                dataIndex: 'sn',
+                key: 'sn'
               },
               {
-                title: '住址',
-                dataIndex: 'address',
-                key: 'address'
+                title: '模板',
+                dataIndex: 'tpl',
+                key: 'tpl'
+              },
+              {
+                title: '操作',
+                dataIndex: 'action',
+                key: 'action'
               }
         ],
         tplsCloumns: [
@@ -315,6 +325,7 @@ class ModbusPane extends Component {
                 <Table
                     dataSource={tpls}
                     columns={this.state.tplsCloumns}
+                    pagination={false}
                 />
                 <Button
                     style={Mt10}
@@ -327,8 +338,17 @@ class ModbusPane extends Component {
                     disabled={disabled}
                 >添加</Button>
                 <Table
+                    columns={this.state.devsCloumns}
                     dataSource={devs}
+                    pagination={false}
                 />
+                <div>
+                    使用网关sn作为设备sn的前缀:
+                    <Checkbox onChange={()=>{
+                        this.setSetting('checkbox', 'checkbox')
+                        }}
+                    />
+                </div>
                 {/* </Carousel> */}
             </div>
         );
