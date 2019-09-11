@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { observer, inject } from 'mobx-react';
-import {notification } from 'antd';  //
+import {notification } from 'antd';
 import { Switch, withRouter} from 'react-router-dom';
 import LoadableComponent from '../../utils/LoadableComponent';
 import PrivateRoute from '../PrivateRoute';
 import { doUpdate } from '../../utils/Action';
 import { isDeveloper } from '../../utils/Session'
-// const AppDetails = LoadableComponent(()=>import('../../router/AppDetails'));
+const AppDetails = LoadableComponent(()=>import('../../router/AppDetails'));
 // const AppEdit = LoadableComponent(()=>import('../../router/AppEdit'));
 // const Dashboard = LoadableComponent(()=>import('../../router/Dashboard'));
 const GatewayList = LoadableComponent(()=>import('../../router/GatewayList'));
@@ -20,9 +20,9 @@ const Gateway = LoadableComponent(()=>import('../../router/Gateway'));
 // const PlatformEvents = LoadableComponent(()=>import('../../router/PlatformEvents'));
 // const DeviceEvents = LoadableComponent(()=>import('../../router/GatewayEvents'));
 // const BrowsingHistory = LoadableComponent(()=>import('../../router/BrowsingHistory'));
-// const AppsInstall = LoadableComponent(()=>import('../../router/AppsInstall'));
+const AppsInstall = LoadableComponent(()=>import('../../router/AppsInstall'));
 // const AppEditorCode = LoadableComponent(()=>import('../../router/AppEditorCode'));
-// const TemplateDetails = LoadableComponent(()=>import('../../router/TemplateDetails'));
+const TemplateDetails = LoadableComponent(()=>import('../../router/TemplateDetails'));
 
 let timer;
 const openNotification = (title, message) => {
@@ -93,11 +93,12 @@ class ContentMain extends Component {
                     component={Gateway}
                     title={'网关详情'}
                 />
-                {/* <PrivateRoute
-                    path="/appdetails/:name/:action?"
-                    component={AppDetails}
-                    title={'应用详情'}
-                />
+                 <PrivateRoute
+                     path="/appdetails/:name/:action?"
+                     component={AppDetails}
+                     title={'应用详情'}
+                 />
+                {/*
                 <PrivateRoute
                     path="/appedit/:name/:action?"
                     component={AppEdit}
@@ -108,21 +109,25 @@ class ContentMain extends Component {
                     component={AppEdit}
                     title={'创建新应用'}
                 />
+                */}
                 <PrivateRoute
                     path="/appsinstall/:sn/:app?/:step?"
                     component={AppsInstall}
                     title={'安装应用'}
                 />
+                {/*
                 <PrivateRoute
                     path="/appeditorcode/:app/:name/:gateway?/:inst?"
                     component={AppEditorCode}
                     title={'代码编辑'}
                 />
+                */}
                 <PrivateRoute
                     path="/template/:app/:name/:version?/:action?"
                     component={TemplateDetails}
                     title={'模板详情'}
                 />
+                {/*
                 <PrivateRoute
                     path="/account"
                     component={UserSettings}

@@ -488,8 +488,6 @@ class Mqtt extends Component {
                         {/*    wrappedComponentRef={(form) => this.formRef = form}*/}
                         {/*/>*/}
                         <Form
-                            ref="form"
-                            onSubmit={this.handleSubmit}
                             className="login-form login-form-mqtt"
                         >
                             <Row gutter={24}>
