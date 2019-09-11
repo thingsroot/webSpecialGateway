@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import {Tabs, Button, message, Modal, Form, Divider, InputNumber, Select, Checkbox, Table, Input} from 'antd';
+import {Tabs, Button, message, Modal, Form, Divider, InputNumber, Select, Checkbox, Table, Input, Popconfirm} from 'antd';
 import {withRouter} from 'react-router-dom'
 import http from '../../../utils/Server';
 import ModbusPane from './ModbusPane';
@@ -118,15 +118,21 @@ class Modbus extends Component {
                     console.log(conf, record)
                     return (
                         <div>
-                            <Button>编辑</Button>
-                            <Button
-                                onClick={()=>{
-                                    const list = this.state.templateList.filter(item=> record.key !== item.key);
-                                    this.setState({
-                                        templateList: list
-                                    })
-                                }}
-                            >删除</Button>
+                            {
+                                this.state.templateList.length >= 1 ? (
+                                    <Popconfirm
+                                        title="Sure to delete ?"
+                                        onConfirm={() => {
+                                            const list = this.state.templateList.filter(item => record.key !== item.key);
+                                            this.setState({
+                                                templateList: list
+                                            })
+                                        }}
+                                    >
+                                        <Button type="danger">delete</Button>
+                                    </Popconfirm>
+                                ) : null
+                            }
                         </div>
                     )
                 }
@@ -230,6 +236,18 @@ class Modbus extends Component {
             addTempList: addTempList
         })
     };
+    //查看模板
+    onViewTemplate = (conf, version) => {
+        if (version !== undefined && version !== 0) {
+            window.open(`/template/${this.state.app_info.data.name}/${conf}/${version}`, '_blank')
+        } else {
+            window.open(`/template/${this.state.app_info.data.name}/${conf}`)
+        }
+    }
+    //克隆模板
+    onCloneTemplate = (conf, version)=> {
+        window.open(`/template/${this.state.app_info.data.name}/${conf}/${version}/clone`, '_blank')
+    }
     refreshTemplateList = () => {
         this.setState({appTemplateList: []})
         http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025')
@@ -464,7 +482,8 @@ class Modbus extends Component {
                         >
                             <Button
                                 onClick={()=>{
-                                    this.props.refreshTemplateList()
+                                    // this.props.refreshTemplateList()
+                                    this.refreshTemplateList()
                                 }}
                             >
                                 刷新
@@ -496,19 +515,15 @@ class Modbus extends Component {
        }
        if (this.state.modalKey === 2) {
            return (
-                <Fragment>
-                    <Divider orientation="left">设备列表</Divider>
-                    <p>|设备列表</p>
-                    <Button
-                        type="primary"
-                        onClick={()=>{
-                            console.log('222222')
-                        }}
-                    >添加</Button>
-                    <Table
-                        pagination={false}
-                    />
-                </Fragment>
+               <Fragment>
+                   <Divider orientation="left">设备列表</Divider>
+                   <p>|设备列表</p>
+                   <Button
+                       type="primary"
+                       onClick={this.handleAdd}
+                   >添加</Button>
+                   <Table  pagination={false}/>
+               </Fragment>
            )
        }
     }
