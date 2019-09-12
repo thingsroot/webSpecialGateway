@@ -534,13 +534,26 @@ class MqttForm extends React.Component {
                 <Row gutter={24}>
                     <Col span={24}>
                         <Button
-                            style={{marginLeft: '10pxs'}}
+                            style={{marginLeft: '10pxs', marginRight: '20px'}}
                             type="primary"
                             onClick={this.toggleDisable}
                         >
                             {!this.state.disabled ? '保存' : '编辑'}
                         </Button>
-
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginRight: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                            取消编辑
+                              </Button>
+                            : ''
+                        }
 
                         <Popconfirm
                             title="确定要删除应用吗?"
