@@ -6,6 +6,7 @@ import http from '../../../utils/Server';
 import ModbusPane from './ModbusPane';
 import {ConfigStore} from '../../../utils/ConfigUI'
 import './style.scss'
+import EditableTable from './EditableTable';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
@@ -514,11 +515,8 @@ class Modbus extends Component {
                <Fragment>
                    <Divider orientation="left">设备列表</Divider>
                    <p>|设备列表</p>
-                   <Button
-                       type="primary"
-                       onClick={this.handleAdd}
-                   >添加</Button>
-                   <Table  pagination={false}/>
+                   {/*<Table  pagination={false}/>*/}
+                   <EditableTable />
                </Fragment>
            )
        }
