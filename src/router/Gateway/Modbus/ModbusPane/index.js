@@ -1,11 +1,17 @@
 import React, { Component } from 'react';
-import {withRouter} from 'react-router-dom'
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input  } from 'antd';
+import {withRouter} from 'react-router-dom';
+import { inject, observer} from 'mobx-react';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm } from 'antd';
 // import Slide from 'react-slick'
-
+import http from '../../../../utils/Server';
 import './style.scss';
 const { Option } = Select;
+function cancel () {
+    message.info('取消删除应用');
+  }
 @withRouter
+@inject('store')
+@observer
 class ModbusPane extends Component {
     constructor (props) {
         super(props)
@@ -135,12 +141,61 @@ class ModbusPane extends Component {
         }
 
     };
+    AppConf = () => {
+        const data = {
+            conf: {
+                apdu_type: this.state.apdu_type,
+                channel_type: this.state.channel_type,
+                dev_sn_prefix: this.state.dev_sn_prefix,
+                devs: this.state.devs,
+                loop_gap: this.state.loop_gap,
+                serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
+                socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
+                tpls: this.state.tpls
+            },
+            gateway: this.props.match.params.sn,
+            id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
+            inst: this.props.pane.inst_name
+        }
+        http.post('/api/gateways_applications_conf', data).then(res=>{
+            if (res.ok) {
+                let title = '配置应用' + data.inst + '请求'
+                message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                    this.props.fetch()
+                })
+            } else {
+                message.error(res.error)
+            }
+        })
+    }
     toggleDisable = () => {
-        this.setState({disabled: !this.state.disabled})
-
+        this.setState({disabled: !this.state.disabled}, ()=>{
+            if (this.state.disabled) {
+                this.AppConf()
+            }
+        })
     };
+    removeModbus = () =>{
+        const data = {
+            gateway: this.props.match.params.sn,
+            inst: this.props.pane.inst_name,
+            id: `app_remove/${this.props.match.params.sn}/${this.props.pane.inst_name}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_applications_remove', data).then(res=>{
+            if (res.ok) {
+                let title = '卸载应用' + data.inst + '请求成功!'
+                message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                    this.props.fetch()
+                    this.props.setActiveKey('0')
+                })
+            }
+        })
+    }
     render (){
-        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs} = this.state;
+        console.log(this.props)
+        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
         const Mt10 = {
             marginTop: '10px'
         }
@@ -160,10 +215,32 @@ class ModbusPane extends Component {
                     >
                         {!this.state.disabled ? '保存' : '编辑'}
                     </Button>
-                    <Button
-                        type="danger"
-                        onClick={this.onEdit}
-                    >删除</Button>
+                    &nbsp;&nbsp;
+                    {
+                        !disabled
+                        ? <Button
+                            onClick={()=>{
+                                this.setState({
+                                    disabled: true
+                                })
+                            }}
+                          >
+                            取消编辑
+                        </Button>
+                        : ''
+                    }
+                    &nbsp;&nbsp;
+                    <Popconfirm
+                        title="确定要删除应用Modbus吗?"
+                        onConfirm={this.removeModbus}
+                        onCancel={cancel}
+                        okText="确定"
+                        cancelText="取消"
+                    >
+                        <Button
+                            type="danger"
+                        >删除</Button>
+                    </Popconfirm>
                     <Divider  orientation="left">应用配置信息</Divider>
                     <Form.Item label="采集间隔:">
                         <InputNumber
@@ -323,7 +400,7 @@ class ModbusPane extends Component {
 
                 <Divider orientation="left">设备模板选择</Divider>
                 <Table
-                    dataSource={tpls}
+                    dataSource={tpls && tpls.length > 0 ? tpls : []}
                     columns={this.state.tplsCloumns}
                     pagination={false}
                 />
@@ -339,13 +416,16 @@ class ModbusPane extends Component {
                 >添加</Button>
                 <Table
                     columns={this.state.devsCloumns}
-                    dataSource={devs}
+                    dataSource={devs && devs.length > 0 ? devs : []}
                     pagination={false}
                 />
                 <div>
                     使用网关sn作为设备sn的前缀:
-                    <Checkbox onChange={()=>{
-                        this.setSetting('checkbox', 'checkbox')
+                    <Checkbox
+                        disabled={disabled}
+                        checked={dev_sn_prefix}
+                        onChange={(e)=>{
+                            this.setSetting('dev_sn_prefix', e.target.checked)
                         }}
                     />
                 </div>

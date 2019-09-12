@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Icon, Tooltip } from 'antd';
+import { Icon, Tooltip} from 'antd';
 import http from '../../utils/Server';
 import { withRouter } from 'react-router-dom';
 import './style.scss';
-
+import UpgradeBtn from './upgradeBtn';
 import {IconIOT, IconCloud} from '../../utils/iconfont';
-
 @withRouter
 @inject('store')
 @observer
@@ -33,6 +32,9 @@ class Status extends Component {
     }
     componentWillUnmount (){
         clearInterval(this.timer);
+    }
+    getVersionLatest = ()=>{
+        http.get('/')
     }
     startTimer (){
         this.timer = setInterval(() => {
@@ -123,23 +125,9 @@ class Status extends Component {
                         </div>
                     </Tooltip>
                 </div>
-                {
-                    device_status === 'ONLINE'
-                    ? <div className="install">
-                        {
-                            this.props.location.pathname.indexOf('/gateway/') !== -1
-                            ? <div
-                                onClick={()=>{
-                                    localStorage.setItem('url', this.props.location.pathname)
-                                }}
-                              >
-                            </div>
-                            : ''
-                        }
+                    <div className="upgrade">
+                        <UpgradeBtn />
                     </div>
-                    : ''
-                }
-
             </div>
         );
     }

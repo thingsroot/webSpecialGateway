@@ -1,3 +1,10 @@
+.upgradeBtn{
+    display: flex;
+    >span{
+        display: block;
+        width: 100px;
+    }
+}
 .GatesStatusWrap{
     margin-top: -10px;
     font-weight: 500;
@@ -8,6 +15,7 @@
     .status{
         text-align: center;
     }
+    
     .gateDesc{
         width: 70%;
         display: flex;

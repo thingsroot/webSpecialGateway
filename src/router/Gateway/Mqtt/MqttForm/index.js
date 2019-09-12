@@ -152,15 +152,8 @@ class MqttForm extends React.Component {
             userMessage: '',
             seniorIndeterminate: false, //高级选项
             visible: false,
-            dataSource: [
-                // {
-                //     key: '0',
-                //     name: '',
-                // },
-
-            ],
+            dataSource: [],
             count: 0,
-
             fileList: [],
             fileList1: [],
             fileList2: [],
@@ -225,31 +218,6 @@ class MqttForm extends React.Component {
                 })
             }
     }
-    // getItemsValue = () => {
-    //     const values = this.props.form.getFieldsValue()
-    //     const {cycle, maxDate, maxQuantity, contentText, dataSource, groupList, contentClient, contentClientPw} = this.state
-    //     const result = {
-    //         cycle,
-    //         maxDate,
-    //         maxQuantity,
-    //         contentText,ser
-    //         dataSource,
-    //         groupList,
-    //         contentClient,
-    //         contentClientPw,
-    //         values
-    //     }
-    //
-    //     return result
-    // }
-    // handleSubmit = e => {
-    //     e.preventDefault();
-    //     this.props.form.validateFields((err, values) => {
-    //         if (!err) {
-    //             console.log(values)
-    //         }
-    //     })
-    // }
     getTextInfo = (file) => {
         const reader = new FileReader();
         reader.readAsText(file);
@@ -494,8 +462,6 @@ class MqttForm extends React.Component {
     }
     toggleDisable = () => {
         if (!this.state.disabled) {
-            console.log('保存')
-            // if(this.)
             const data = {
                 gateway: this.props.match.params.sn,
                 inst: this.props.pane.inst_name,
@@ -510,7 +476,7 @@ class MqttForm extends React.Component {
             }
             http.post('/api/gateways_applications_conf', data).then(res=>{
                 if (res.ok) {
-                    let title = '配置应用' + data.inst + '请求成功!'
+                    let title = '配置应用' + data.inst + '请求'
                     message.info(title + '等待网关响应!')
                     this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
                         this.props.fetch()
@@ -528,10 +494,11 @@ class MqttForm extends React.Component {
         }
         http.post('/api/gateways_applications_remove', data).then(res=>{
             if (res.ok) {
-                let title = '卸载应用' + data.inst + '请求成功!'
+                let title = '卸载应用' + data.inst + '请求'
                 message.info(title + '等待网关响应!')
                 this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
                     this.props.fetch()
+                    this.props.setActiveKey('0')
                 })
             }
         })
@@ -562,20 +529,31 @@ class MqttForm extends React.Component {
         })
         return (
             <Form
-                // ref="form"
-                // onSubmit={this.handleSubmit}
                 className="login-form login-form-mqtt"
             >
                 <Row gutter={24}>
                     <Col span={24}>
                         <Button
-                            style={{marginLeft: '10pxs'}}
+                            style={{marginLeft: '10pxs', marginRight: '20px'}}
                             type="primary"
                             onClick={this.toggleDisable}
                         >
                             {!this.state.disabled ? '保存' : '编辑'}
                         </Button>
-
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginRight: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                            取消编辑
+                              </Button>
+                            : ''
+                        }
 
                         <Popconfirm
                             title="确定要删除应用吗?"
@@ -587,88 +565,75 @@ class MqttForm extends React.Component {
                             <Button
                                 style={{marginLeft: '10pxs'}}
                                 type="danger"
-                                // onClick={this.removeApp}
                             >
                                 删除
                             </Button>
                         </Popconfirm>
-                        {/* <Form.Item label="实例名：">
-                                <Input
-                                    allowClear
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    // defaultValue={this.state.options.clientId}
-                                    onChange={(e) => {
-                                        this.setSetting('mqttForm', e.target.value, 'instance')
-                                    }}
-                                />
-
-                        </Form.Item> */}
                         <Divider>服务器信息</Divider>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT地址：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
-                                    value={mqtt.server}
+                                    value={mqtt && mqtt.server ? mqtt.server : ''}
                                     onChange={(e) => {
                                     this.setSetting('mqtt', e.target.value, 'server')
                                 }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT端口：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
-                                    value={mqtt.port}
+                                    value={mqtt && mqtt.port ? mqtt.port : ''}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'port')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT用户(留空使用标准规则)：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
-                                    value={mqtt.username}
+                                    value={mqtt && mqtt.username ? mqtt.username : ''}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'username')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="MQTT密码(留空使用标准规则)：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
-                                    value={mqtt.password}
+                                    value={mqtt && mqtt.password ? mqtt.password : ''}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'password')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
                         <Form.Item label="客户端ID(留空使用标准规则)：">
                                 <Input
-                                    allowClear
+                                    allowClear={!disabled}
                                     autoComplete="off"
                                     disabled={disabled}
-                                    value={mqtt.client_id}
+                                    value={mqtt && mqtt.client_id ? mqtt.client_id : ''}
                                     onChange={(e) => {
                                         this.setSetting('mqtt', e.target.value, 'client_id')
                                     }}
-                                />,
+                                />
                         </Form.Item>
                     </Col>
                     <Col span={12}>
@@ -731,7 +696,7 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="上送周期(秒)：">
                             <InputNumber
-                                value={options.period}
+                                value={options && options.period ? options.period : ''}
                                 disabled={disabled}
                                 onChange={(e) => {
                                     this.setSetting('options', e, 'period')
@@ -742,7 +707,7 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="最大数据间隔(秒)：">
                             <InputNumber
-                                value={options.ttl}
+                                value={options && options.ttl ? options.ttl : ''}
                                 disabled={disabled}
                                 onChange={(value) => {
                                     this.setSetting('options', value, 'ttl')
@@ -753,7 +718,7 @@ class MqttForm extends React.Component {
                     <Col span={12}>
                         <Form.Item label="最大打包数量：">
                             <InputNumber
-                                value={options.data_upload_dpp}
+                                value={options && options.data_upload_dpp ? options.data_upload_dpp : ''}
                                 disabled={disabled}
                                 onChange={(value) => {
                                     this.setSetting('options', value, 'data_upload_dpp')
@@ -765,7 +730,7 @@ class MqttForm extends React.Component {
                         <Form.Item label="开启短线缓存：">
                            <Checkbox
                                disabled={disabled}
-                               defaultChecked={this.state.options.enable_data_cache}
+                               defaultChecked={options && options.enable_data_cache ? options.enable_data_cache : false}
                                onChange={(e) => {
                                    this.setSetting('options', e.target.checked, 'enable_data_cache')
                                }}

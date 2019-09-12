@@ -5,9 +5,16 @@ import {
 } from 'antd';
 import http  from '../../../utils/Server';
 import { authenticateSuccess } from '../../../utils/Session';
+import Cookies from 'js-cookie'
 
 @withRouter
 class Sign extends PureComponent {
+    componentDidMount () {
+        const keys = document.cookie.match(/[^ =;]+(?==)/g)
+        keys && keys.length > 0 && keys.map((item, key)=>{
+            Cookies.remove(keys[key])
+        })
+    }
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
@@ -24,11 +31,16 @@ class Sign extends PureComponent {
                             location.href = '/';
                         })
                     } else {
-                        message.info('账号密码错误，请重新输入')
+                        if (res.message === 'Incorrect password') {
+                            message.info('账号密码错误，请重新输入')
+                        }
+                        if (res.message === 'User disabled or missing') {
+                            message.info('用户未注册或已被禁用，请重新输入')
+                        }
                     }
                 }).catch(function (error){
                     if (error){
-                        message.info('账号密码错误，请重新输入')
+                        message.info('系统错误，请稍后重试')
                     }
                 })
             }

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import {Tabs, Button, message, Modal, Form, Divider, InputNumber, Select, Checkbox, Table, Input, Popconfirm} from 'antd';
-import {withRouter} from 'react-router-dom'
+import {Tabs, Button, message, Modal, Form, Divider, InputNumber, Select, Checkbox, Table, Input, Popconfirm, Empty} from 'antd';
+import { inject, observer} from 'mobx-react';
+import {withRouter} from 'react-router-dom';
 import http from '../../../utils/Server';
 import ModbusPane from './ModbusPane';
 import {ConfigStore} from '../../../utils/ConfigUI'
@@ -11,14 +12,13 @@ const { TabPane } = Tabs;
 const { Option } = Select;
 
 @withRouter
+@inject('store')
+@observer
 class Modbus extends Component {
     constructor (props) {
         super(props);
         this.newTabIndex = 0;
-        const panes = [
-            // { title: 'Modbus配置1', content: 'Content of Tab Pane 1', key: '1' },
-            // { title: 'Modbus配置2', content: 'Content of Tab Pane 2', key: '2' }
-        ];
+        const panes = [];
         const addTempLists = [
             {
                 title: '名称',
@@ -72,7 +72,6 @@ class Modbus extends Component {
                         <Button
                             type="primary"
                             onClick={()=>{
-                                console.log(record)
                                 const conf = {
                                     description: record.description,
                                     id: record.name,
@@ -116,7 +115,6 @@ class Modbus extends Component {
                 dataIndex: 'action',
                 key: 'action',
                 render: (conf, record)=>{
-                    console.log(conf, record)
                     return (
                         <div>
                             {
@@ -149,9 +147,11 @@ class Modbus extends Component {
             configStore: new ConfigStore(),
             loop_gap: 1000,
             apdu_type: 'TCP',
-            channel_type: 'socket',
+            channel_type: 'serial',
             temoplateColumns,
             templateList: [],
+            sn: null,
+            loading: true,
             serial_opt: {
                 port: '/dev/ttyS1',
                 baudrate: 9600,
@@ -170,8 +170,22 @@ class Modbus extends Component {
         };
     }
     componentDidMount () {
-        this.fetch()
-        this.refreshTemplateList()
+        this.setState({
+            sn: this.props.match.params.sn
+        }, ()=>{
+            this.fetch()
+            this.refreshTemplateList()
+        })
+    }
+    UNSAFE_componentWillReceiveProps (nextProps){
+        if (nextProps.match.params.sn !== this.props.match.params.sn) {
+            this.setState({
+                sn: nextProps.match.params.sn,
+                loading: true
+            }, ()=>{
+                this.fetch()
+            })
+        }
     }
      MatchTheButton = (key)=> {
         let name = '';
@@ -192,7 +206,6 @@ class Modbus extends Component {
     }
      //添加模板
      onAddTemplate = (config)=>{
-         console.log(this.state.templateList)
          const list = this.state.templateList;
          const obj = {
              id: config.id,
@@ -204,22 +217,7 @@ class Modbus extends Component {
          list.push(obj)
          this.setState({
              templateList: list
-         }, ()=>{
-             console.log(this.state.templateList)
          })
-        // this.state.configStore.addTemplate(name, conf_name, desc, version)
-        // let val = config.Value
-        // let max_key = 0
-        // val.map(item => max_key < item.key ? max_key = item.key : max_key)
-        // val.push({
-        //     key: max_key + 1,
-        //     id: name,
-        //     name: conf_name,
-        //     description: desc,
-        //     ver: version
-        // })
-        // config.setValue(val)
-        // this.props.onChange()
     };
     // 删除模板
     onDeleteTemplate =  (name)=>{
@@ -262,8 +260,6 @@ class Modbus extends Component {
             });
             this.setState({
                 appTemplateList: list
-            }, ()=>{
-                console.log(this.state.appTemplateList)
             });
         });
         http.get('/api/user_configurations_list?conf_type=Template&app=APP00000025')
@@ -327,13 +323,13 @@ class Modbus extends Component {
                                    this.setSetting('channel_type', val)
                                }}
                            >
-                               <Option value="socket">串口</Option>
-                               <Option value="TCP">TCP协议</Option>
+                               <Option value="serial">串口</Option>
+                               <Option value="socket">TCP协议</Option>
                            </Select>
                        </Form.Item>
                    </Form>
                    {
-                       this.state.channel_type === 'socket'
+                       this.state.channel_type === 'serial'
                            ? <Form layout="inline">
                                <Divider  orientation="left">串口设定</Divider>
                                <Form.Item label="端口：">
@@ -525,21 +521,59 @@ class Modbus extends Component {
            )
        }
     }
+    installapp = () => {
+        let inst = undefined;
+        const applist = this.state.panes;
+        applist && applist.length > 0 && applist.map((item, key) =>{
+            console.log(key, item.inst_name)
+            if (item.inst_name.indexOf(key + 1) === -1) {
+                if (!inst){
+                    inst = 'modbus_' + (key + 1)
+                }
+            }
+        })
+        const data = {
+            app: 'APP00000025',
+            conf: {
+                apdu_type: this.state.apdu_type,
+                channel_type: this.state.channel_type,
+                dev_sn_prefix: this.state.dev_sn_prefix,
+                // devs: this.state.devs,
+                loop_gap: this.state.loop_gap,
+                serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
+                socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
+                tpls: this.state.templateList
+            },
+            gateway: this.props.match.params.sn,
+            id: 'app_install/' + this.props.match.params.sn + '/' + inst + '/APP00000259/' + new Date() * 1,
+            inst: inst ? inst : 'modbus_' + (this.state.panes.length + 1),
+            version: this.state.app_info.versionLatest
+        }
+        http.post('/api/gateways_applications_install', data).then(res=>{
+            if (res.ok) {
+                let title = '安装应用' + data.inst + '请求'
+                message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                    this.fetch()
+                })
+            } else {
+                message.error(res.error)
+            }
+        })
+    }
     showModal = () => {
         this.setState({
             visible: true
         });
     };
 
-    handleOk = e => {
-        console.log(e);
+    handleOk = () => {
         this.setState({
             visible: false
         });
     };
 
-    handleCancel = e => {
-        console.log(e);
+    handleCancel = () => {
         this.setState({
             visible: false,
             modalKey: 0
@@ -549,7 +583,6 @@ class Modbus extends Component {
         this.setState({ activeKey });
     };
     onEdit = (targetKey, action) => {
-        console.log(targetKey, action)
         this[action](targetKey);
     };
     add = () => {
@@ -577,20 +610,16 @@ class Modbus extends Component {
         }
         this.setState({ panes, activeKey });
     };
+    setActiveKey = (key)=>{
+        this.setState({activeKey: key})
+    }
     fetch = () => {
-        // const {gatewayInfo} = this.props.store
-        // let enable_beta = gatewayInfo.data.enable_beta
-        // if (enable_beta === undefined) {
-        //     enable_beta = 0
-        // }
-        console.log('22')
         http.get('/api/applications_read?app=APP00000025').then(res=>{
-            console.log(res)
             if (res.ok) {
                 this.setState({app_info: res.data})
             }
         })
-        http.get('/api/gateways_app_list?gateway=' + this.props.match.params.sn + '&beta=0').then(res=>{
+        http.get('/api/gateways_app_list?gateway=' + this.state.sn + '&beta=0').then(res=>{
             if (res.ok){
                 const app_list = [];
                 if (res.data && res.data.length > 0) {
@@ -599,8 +628,10 @@ class Modbus extends Component {
                             app_list.push(item)
                         }
                     })
-                    // this.props.store.gatewayInfo.setApps(app_list)
                 }
+                app_list.sort((a, b)=>{
+                    return a.inst_name.slice(-1) - b.inst_name.slice(-1)
+                })
                 this.setData(app_list)
             } else {
                 message.error(res.error)
@@ -609,36 +640,33 @@ class Modbus extends Component {
     }
     setData = (apps)=> {
         this.setState({
-            panes: apps
+            panes: apps, loading: false
         })
     };
     setSetting = (type, val, name) =>{
-        console.log(type, val, name)
         if (type === 'serial_opt') {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-            }, ()=>{
-                console.log(this.state.serial_opt)
             })
         }
         if (!name){
             this.setState({
                 [type]: val
-            }, ()=>{
-                console.log(this.state[type])
             })
         }
 
     };
     render () {
-        console.log(this.state.data)
         return (
             <div>
                 <div style={{ marginBottom: 16 }}>
-                    <Button onClick={this.showModal}>ADD</Button>
+                    <Button
+                        onClick={this.showModal}
+                        disabled={this.state.panes.length >= 8}
+                    >安装Modbus应用</Button>
                 </div>
                 <Modal
-                    title="ADD"
+                    title="安装Modbus应用"
                     visible={this.state.visible}
                     onOk={this.handleOk}
                     onCancel={this.handleCancel}
@@ -668,6 +696,13 @@ class Modbus extends Component {
                                 if (this.state.modalKey < 2) {
                                     this.setState({modalKey: this.state.modalKey + 1})
                                 }
+                                if (this.state.modalKey === 2){
+                                    this.setState({
+                                        visible: false
+                                    }, ()=>{
+                                        this.installapp()
+                                    })
+                                }
                             }}
                         >
                             {
@@ -682,21 +717,29 @@ class Modbus extends Component {
                     hideAdd
                     onChange={this.onChange}
                     activeKey={this.state.activeKey}
-                    type="editable-card"
+                    type="card"
                     onEdit={this.onEdit}
                     // tabBarExtraContent={operations}
                 >
-                    {this.state.panes.map((pane, key) => (
-                        <TabPane
-                            tab={pane.inst_name}
-                            key={key}
-                        >
-                            <ModbusPane
-                                key={key}
-                                pane={pane}
-                            />
-                        </TabPane>
-                    ))}
+                    {
+                    !this.state.loading
+                        ? this.state.panes && this.state.panes.length > 0
+                            ? this.state.panes.map((pane, key) => (
+                                <TabPane
+                                    tab={pane.inst_name}
+                                    key={key}
+                                >
+                                    <ModbusPane
+                                        key={key}
+                                        pane={pane}
+                                        fetch={this.fetch}
+                                        setActiveKey={this.setActiveKey}
+                                    />
+                                </TabPane>
+                            )   )
+                            : <Empty/>
+                        : <Table loading/>
+                    }
                 </Tabs>
             </div>
         );
