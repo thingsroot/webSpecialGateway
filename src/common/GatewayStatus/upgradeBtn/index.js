@@ -21,14 +21,17 @@ class Btn extends Component {
         modbusArr: []
     }
     componentDidMount () {
-        console.log(this.props)
         this.getVersion()
         setInterval(() => {
             this.getVersion()
         }, 10000);
     }
+    UNSAFE_componentWillReceiveProps (nextProps){
+        if (nextProps.match.params.sn !== this.props.match.params.sn) {
+            this.getVersion()
+        }
+    }
     menu = () =>{
-        console.log(this)
         return (
             <Menu>
                 <Menu.Item>
@@ -137,40 +140,46 @@ class Btn extends Component {
         }
     }
     getVersion () {
-        console.log(this.state)
-        console.log('getversion')
         const {gatewayInfo} = this.props.store;
         const beta = this.props.store.gatewayInfo.enabled ? 1 : 0;
         const app_list = gatewayInfo.apps;
         const {freeioe_version, skynet_version, mqtt_version, modbus_version} = this.state;
-        http.get('/api/applications_versions_latest?app=APP00000259&beta=' + beta).then(res=>{
-            if (res.ok){
-                this.setState({
-                    mqtt_version: res.data
-                })
-            }
-        })
-        http.get('/api/applications_versions_latest?app=freeioe&beta=' + beta).then(res=>{
-            if (res.ok){
-                this.setState({
-                    freeioe_version: res.data
-                })
-            }
-        })
-        http.get('/api/applications_versions_latest?app=bin/openwrt/19.07/arm_cortex-a7_neon-vfpv4/skynet&beta=' + beta).then(res=>{
-            if (res.ok){
-                this.setState({
-                    skynet_version: res.data
-                })
-            }
-        })
-        http.get('/api/applications_versions_latest?app=APP00000025&beta=' + beta).then(res=>{
-            if (res.ok){
-                this.setState({
-                    modbus_version: res.data
-                })
-            }
-        })
+        if (!mqtt_version) {
+            http.get('/api/applications_versions_latest?app=APP00000259&beta=' + beta).then(res=>{
+                if (res.ok){
+                    this.setState({
+                        mqtt_version: res.data
+                    })
+                }
+            })
+        }
+        if (!freeioe_version){
+            http.get('/api/applications_versions_latest?app=freeioe&beta=' + beta).then(res=>{
+                if (res.ok){
+                    this.setState({
+                        freeioe_version: res.data
+                    })
+                }
+            })
+        }
+        if (!skynet_version) {
+            http.get('/api/applications_versions_latest?app=bin/openwrt/19.07/arm_cortex-a7_neon-vfpv4/skynet&beta=' + beta).then(res=>{
+                if (res.ok){
+                    this.setState({
+                        skynet_version: res.data
+                    })
+                }
+            })
+        }
+        if (!modbus_version) {
+            http.get('/api/applications_versions_latest?app=APP00000025&beta=' + beta).then(res=>{
+                if (res.ok){
+                    this.setState({
+                        modbus_version: res.data
+                    })
+                }
+            })
+        }
         if (mqtt_version) {
             const mqttArr = [];
             app_list && app_list.length > 0 && app_list.map((item) => {

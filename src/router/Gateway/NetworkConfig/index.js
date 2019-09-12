@@ -11,12 +11,13 @@ const Option = Select.Option;
 class NetworkConfig extends Component {
     state = {
         data: [],
-        brlan_ip: '',
+        brlan_ip: undefined,
         netmask: '255.255.255.0',
-        inst_name: '',
+        inst_name: undefined,
         loading: true,
-        default_gw: '',
-        gw_interface: '',
+        default_gw: undefined,
+        gw_interface: undefined,
+        dns_servers: undefined,
         sn: this.props.match.params.sn
     }
     componentDidMount () {
@@ -40,6 +41,7 @@ class NetworkConfig extends Component {
     }
     getInfo = ()=>{
         this.getIsNetInfo().then(res=>{
+            console.log(res)
             if (!res && this.props.store.gatewayInfo.sn === this.state.sn) {
                 const beta = this.props.store.gatewayInfo.enabled ? 1 : 0;
                 const data = {
@@ -79,7 +81,7 @@ class NetworkConfig extends Component {
                 res.data.map(item=>{
                     if (item.name === 'net_info') {
                         const message = JSON.parse(item.pv);
-                        message.map(value=>{
+                        message && message.length > 0 && message.map(value=>{
                             if (value.interface === 'symrouter' || value.interface === 'loopback' || value.interface === 'wan6' || value.proto === 'dhcpv6'){
                                 return false;
                             } else {
@@ -92,6 +94,16 @@ class NetworkConfig extends Component {
                             default_gw: item.pv
                         })
                     }
+                    if (item.name === 'default_gw') {
+                        this.setState({
+                            default_gw: item.pv
+                        })
+                    }
+                    if (item.name === 'dns_servers') {
+                        this.setState({
+                            dns_servers: eval(item.pv)
+                        })
+                    }
                     if (item.name === 'gw_interface') {
                         this.setState({
                             gw_interface: item.pv
@@ -101,8 +113,6 @@ class NetworkConfig extends Component {
                 this.setState({
                     data: arr,
                     loading: false
-                }, ()=>{
-                    console.log(this.state.data, message)
                 })
             }
         })
@@ -121,7 +131,7 @@ class NetworkConfig extends Component {
                 resolve(isNetInfo)
             } else {
                 http.get('/api/gateways_app_list?gateway=' + this.state.sn).then(res=>{
-                    if (res.ok) {
+                    if (res.ok && res.data.length > 0) {
                         if (res.data && res.data.length > 0){
                             res.data.map(item=>{
                                 if (item.name === 'APP00000115') {
@@ -131,11 +141,14 @@ class NetworkConfig extends Component {
                             })
                             resolve(isNetInfo)
                         } else {
-                            reject(isNetInfo)
+                            console.log('null')
+                            resolve(isNetInfo)
                         }
                     } else {
-                        reject(isNetInfo)
+                        resolve(isNetInfo)
                     }
+                }).catch(()=>{
+                    reject(isNetInfo)
                 })
             }
         })
@@ -174,7 +187,6 @@ class NetworkConfig extends Component {
                   message.error(res.error)
               }
           })
-        console.log(data)
       };
       handleCancel = () => {
         this.setState({
@@ -182,12 +194,13 @@ class NetworkConfig extends Component {
         });
       };
     render (){
-        const {data, loading} = this.state;
+        const {data, loading, dns_servers} = this.state;
         return (
             <div>
                 <Card
                     loading={loading}
                 >
+                    <h2>| 网络接口</h2>
                 {
                     data && data.length > 0 && data.map((item, key)=>{
                         return (
@@ -209,10 +222,7 @@ class NetworkConfig extends Component {
                                             <div>
                                                 <p>网络协议：<span>{item.proto}</span></p>
                                                 <p>状态： <span>{item.up ? 'up' : 'down'}</span></p>
-                                                {
-                                                    console.log(item)
-                                                }
-                                                <p>IP地址：<span>{item['ipv4-address'] ? item['ipv4-address'][0].address + '/' + item['ipv4-address'][0].mask : ''}
+                                                <p>IP地址：<span>{item['ipv4-address'] && item['ipv4-address'].length > 0 && item['ipv4-address'][0].address ? item['ipv4-address'][0].address + '/' + item['ipv4-address'][0].mask : ''}
                                                     </span></p>
                                             </div>
                                         </div>
@@ -241,14 +251,11 @@ class NetworkConfig extends Component {
                                                 <Input
                                                     style={{width: 300}}
                                                     onChange={(e)=>{
-                                                        console.log(e.target.value)
                                                         this.setState({
                                                             brlan_ip: {...this.state.brlan_ip, address: e.target.value}
-                                                        }, ()=>{
-                                                            console.log(this.state.brlan_ip)
                                                         })
                                                     }}
-                                                    value={this.state.brlan_ip.address}
+                                                    value={this.state.brlan_ip && this.state.brlan_ip.address ? this.state.brlan_ip.address : ''}
                                                 />
                                             </div>
                                             <div>
@@ -278,12 +285,17 @@ class NetworkConfig extends Component {
                 </Card>
                 <div style={{marginTop: 20}}>
                     <Card loading={loading}>
-                        <p>| 默认网关&DNS</p>
-                        <div>
+                        <h2>| 默认网关&DNS</h2>
+                        <div style={{lineHeight: '30px', marginTop: '20px', marginLeft: '30px'}}>
                             <p>默认网关： {this.state.default_gw}</p>
                             <p>默认接口： {this.state.gw_interface}</p>
-                            <p>默认网关： 114.114.114.114</p>
-                            <p>默认网关： 114.114.115.115</p>
+                            {
+                                dns_servers && dns_servers.length > 0 &&  dns_servers.map((item, key)=>{
+                                    return (
+                                        <p key={key}>DNS{key + 1}: {item}</p>
+                                    )
+                                })
+                            }
                         </div>
                     </Card>
                 </div>

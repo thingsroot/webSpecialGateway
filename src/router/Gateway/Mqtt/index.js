@@ -17,7 +17,8 @@ import {
     Popconfirm,
     message,
     InputNumber,
-    Table
+    Table,
+    Empty
 } from 'antd';
 import './index.css'
 // import MqttForm from './MqttForm'
@@ -162,6 +163,7 @@ class Mqtt extends Component {
         this.state = {
             activeKey: '0',
             panes,
+            loading: true,
             modalKey: 0,
             app_list: [],
             userMessage: '',
@@ -204,10 +206,14 @@ class Mqtt extends Component {
     UNSAFE_componentWillReceiveProps (nextProps) {
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
             this.fetch(nextProps.match.params.sn)
+            this.setState({loading: true})
         }
     }
     componentWillUnmount (){
         clearInterval(this.t1)
+    }
+    setActiveKey = (key)=>{
+        this.setState({activeKey: key})
     }
     fetch = (sn) => {
         const vsn = sn ? sn : this.props.match.params.sn;
@@ -227,7 +233,7 @@ class Mqtt extends Component {
                     })
                     // this.props.store.gatewayInfo.setApps(app_list)
                 }
-                this.setState({app_list})
+                this.setState({app_list, loading: false})
             } else {
                 message.error(res.error)
             }
@@ -549,7 +555,7 @@ class Mqtt extends Component {
                 gateway: this.props.match.params.sn,
                 inst: inst_name,
                 app: 'APP00000259',
-                version: 275,
+                version: this.state.app_info.versionLatest,
                 conf: {
                     mqtt: {
                         server: serial_opt.address,
@@ -654,6 +660,7 @@ class Mqtt extends Component {
                                             modalKey: this.state.modalKey + 1
                                         })
                                     }
+                                    console.log(this.state.modalKey)
                                     if (this.state.modalKey === 2) {
                                         console.log(this.state)
                                         this.installMqtt()
@@ -902,7 +909,10 @@ class Mqtt extends Component {
                     type="card"
                     onEdit={this.onEdit}
                 >
-                    {this.state.app_list.map((pane, key) => (
+                    {
+                    !this.state.loading
+                    ? this.state.app_list && this.state.app_list.length > 0
+                    ? this.state.app_list.map((pane, key) => (
                         <TabPane
                             tab={pane.inst_name && pane.inst_name.replace('__', '通道')}
                             key={key}
@@ -910,9 +920,13 @@ class Mqtt extends Component {
                             <MqttPane
                                 pane={pane}
                                 fetch={this.fetch}
+                                setActiveKey={this.setActiveKey}
                             />
                         </TabPane>
-                    ))}
+                    ))
+                    : <Empty/>
+                    : <Table loading/>
+                    }
                 </Tabs>
             </div>
         );
