@@ -557,6 +557,9 @@ class Modbus extends Component {
                 message.info(title + '等待网关响应!')
                 this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
                     this.fetch()
+                    this.setState({
+                        modalKey: 0
+                    })
                 })
             } else {
                 message.error(res.error)
