@@ -173,12 +173,13 @@ class EditableTable extends React.Component {
                         <Popconfirm title="Sure to delete?"
                             onConfirm={() => this.handleDelete(record.key)}
                         >
-                            <Button type="danger">Delete</Button>
+                            <Button type="danger"
+                                disabled={this.props.disable}
+                            >Delete</Button>
                         </Popconfirm>
                     ) : null
             }
         ];
-
         this.state = {
             dataSource: [
                 // {
@@ -189,8 +190,25 @@ class EditableTable extends React.Component {
                 //     device: '设备名称'
                 // }
             ],
-            count: 0
+            count: '0'
         };
+    }
+    componentDidMount () {
+        console.log(this.props)
+        if (this.props.devs && this.props.devs.length > 0) {
+            const arr = [];
+            this.props.devs.map(item=>{
+                const obj = {
+                    key: item.key,
+                    number: item.sn,
+                    template: item.tpl,
+                    address: item.unit,
+                    device: item.name
+                }
+                arr.push(obj)
+            })
+            this.setState({dataSource: arr})
+        }
     }
     handleDelete = key => {
         const dataSource = [...this.state.dataSource];
@@ -214,6 +232,7 @@ class EditableTable extends React.Component {
         }, ()=>{
             this.props.getdevs(this.state.dataSource)
         });
+        console.log(dataSource)
     };
 
     handleSave = row => {
@@ -251,19 +270,22 @@ class EditableTable extends React.Component {
             }
             return {
                 ...col,
-                onCell: record => ({
-                    record,
-                    editable: col.editable,
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    handleSave: this.handleSave
-                })
+                onCell: record => {
+                    return  ({
+                        record,
+                        editable: col.editable,
+                        dataIndex: col.dataIndex,
+                        title: col.title,
+                        handleSave: this.handleSave
+                    })
+                }
             }
         });
         return (
             <div>
                 <Button
                     onClick={this.handleAdd}
+                    disabled={this.props.disable}
                     type="primary"
                     style={{marginBottom: 16}}
                 >

@@ -905,32 +905,34 @@ class Mqtt extends Component {
                         </Form>
                     </Modal>
                 </div>
-                <Tabs
-                    hideAdd
-                    onChange={this.onChange}
-                    activeKey={this.state.activeKey}
-                    type="card"
-                    onEdit={this.onEdit}
-                >
                     {
                     !this.state.loading
                     ? this.state.app_list && this.state.app_list.length > 0
-                    ? this.state.app_list.map((pane, key) => (
-                        <TabPane
-                            tab={pane.inst_name && pane.inst_name.replace('__', '通道')}
-                            key={key}
-                        >
-                            <MqttPane
-                                pane={pane}
-                                fetch={this.fetch}
-                                setActiveKey={this.setActiveKey}
-                            />
-                        </TabPane>
-                    ))
+                    ? <Tabs
+                        hideAdd
+                        onChange={this.onChange}
+                        activeKey={this.state.activeKey}
+                        type="card"
+                        onEdit={this.onEdit}
+                      >
+                    {
+                        this.state.app_list.map((pane, key) => (
+                            <TabPane
+                                tab={pane.inst_name && pane.inst_name.replace('__', '通道')}
+                                key={key}
+                            >
+                                <MqttPane
+                                    pane={pane}
+                                    fetch={this.fetch}
+                                    setActiveKey={this.setActiveKey}
+                                />
+                            </TabPane>
+                        ))
+                    }
+                      </Tabs>
                     : <Empty/>
                     : <Table loading/>
                     }
-                </Tabs>
             </div>
         );
     }
