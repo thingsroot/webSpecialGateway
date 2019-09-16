@@ -207,14 +207,10 @@ class MqttForm extends React.Component {
             if (type !== 'mqttForm') {
                 this.setState({
                     [type]: Object.assign({}, this.state[type], {[name]: val})
-                }, ()=>{
-                    console.log(this.state[type])
                 })
             } else {
                 this.setState({
                     serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-                }, ()=> {
-                    console.log(this.state.serial_opt)
                 })
             }
     }
@@ -642,7 +638,9 @@ class MqttForm extends React.Component {
                                 disabled={disabled}
                                 checked={this.state.tls_cert}
                                 onChange={(e) => {
-                                    this.setSetting('mqtt', e.target.checked, 'tls_cert')
+                                    this.setState({
+                                        tls_cert: e.target.checked
+                                    })
                                 }}
                             />
                         </Form.Item>

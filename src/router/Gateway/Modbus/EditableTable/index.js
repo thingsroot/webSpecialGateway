@@ -9,7 +9,6 @@ const EditableRow = ({form, index, ...props}) => (
         value={form}
         index={index}
     >
-        {console.log(props)}
         <tr {...props} />
     </EditableContext.Provider>
 );
@@ -44,9 +43,6 @@ class EditableCell extends React.Component {
 
     renderCell = form => {
         this.form = form;
-        // console.log(form,  'form')
-        // console.log(this.props.store)
-        // console.log(this.props)
         const {children, dataIndex, record, title} = this.props;
         const {editing} = this.state;
         return editing ? (
@@ -60,7 +56,6 @@ class EditableCell extends React.Component {
                     ],
                     initialValue: record[dataIndex]
                 })(this.getInput())}
-        {/*{console.log(record)}*/}
             </Form.Item>
         ) : (
             <div
@@ -74,7 +69,6 @@ class EditableCell extends React.Component {
     };
     getInput = ()=> {
         const {dataIndex} = this.props;
-        // console.log(dataIndex, 'index')
         if (dataIndex === 'address') {
            return (
                 <InputNumber
@@ -96,7 +90,6 @@ class EditableCell extends React.Component {
             )
         }
         if (dataIndex === 'template') {
-            console.log(this.props)
             return (
                 <Select
                     ref={node => (this.input = node)}
@@ -180,7 +173,9 @@ class EditableTable extends React.Component {
                         <Popconfirm title="Sure to delete?"
                             onConfirm={() => this.handleDelete(record.key)}
                         >
-                            <Button type="danger">Delete</Button>
+                            <Button type="danger"
+                                disabled={this.props.disable}
+                            >Delete</Button>
                         </Popconfirm>
                     ) : null
             }
@@ -198,13 +193,28 @@ class EditableTable extends React.Component {
             count: '0'
         };
     }
-    componentDidMount (){
+    componentDidMount () {
         console.log(this.props)
+        if (this.props.devs && this.props.devs.length > 0) {
+            const arr = [];
+            this.props.devs.map(item=>{
+                const obj = {
+                    key: item.key,
+                    number: item.sn,
+                    template: item.tpl,
+                    address: item.unit,
+                    device: item.name
+                }
+                arr.push(obj)
+            })
+            this.setState({dataSource: arr})
+        }
     }
-
     handleDelete = key => {
         const dataSource = [...this.state.dataSource];
-        this.setState({dataSource: dataSource.filter(item => item.key !== key)});
+        this.setState({dataSource: dataSource.filter(item => item.key !== key)}, ()=>{
+            this.props.getdevs(this.state.dataSource)
+        });
     };
 
     handleAdd = () => {
@@ -219,6 +229,8 @@ class EditableTable extends React.Component {
         this.setState({
             dataSource: [...dataSource, newData],
             count: count + 1
+        }, ()=>{
+            this.props.getdevs(this.state.dataSource)
         });
         console.log(dataSource)
     };
@@ -231,7 +243,9 @@ class EditableTable extends React.Component {
             ...item,
             ...row
         });
-        this.setState({dataSource: newData});
+        this.setState({dataSource: newData}, ()=>{
+            this.props.getdevs(this.state.dataSource)
+        });
     };
     render () {
         const list = this.props.templateList;
@@ -254,7 +268,6 @@ class EditableTable extends React.Component {
             if (!col.editable) {
                 return col;
             }
-            console.log(col)
             return {
                 ...col,
                 onCell: record => {

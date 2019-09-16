@@ -176,7 +176,10 @@ class ModbusPane extends Component {
                                                 })
                                             }}
                                         >
-                                            <Button type="danger">delete</Button>
+                                            <Button
+                                                type="danger"
+                                                disabled={this.state.disabled}
+                                            >delete</Button>
                                         </Popconfirm>
                                     ) : null
                                 }
@@ -192,14 +195,15 @@ class ModbusPane extends Component {
     }
 
     componentDidMount () {
-        console.log(this.props.pane)
         const { conf } = this.props.pane;
+        console.log(conf)
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
             dev_sn_prefix: conf.dev_sn_prefix,
             loop_gap: conf.loop_gap,
             tpls: conf.tpls,
+            templateList: conf.tpls,
             devs: conf.devs
         })
         if (conf.serial_opt) {
@@ -222,19 +226,14 @@ class ModbusPane extends Component {
 
     // }
     setSetting = (type, val, name) =>{
-        console.log(type, val, name)
         if (type === 'serial_opt') {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-            }, ()=>{
-                console.log(this.state.serial_opt)
             })
         }
         if (!name){
             this.setState({
                 [type]: val
-            }, ()=>{
-                console.log(this.state[type])
             })
         }
 
@@ -249,7 +248,7 @@ class ModbusPane extends Component {
                 loop_gap: this.state.loop_gap,
                 serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
                 socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
-                tpls: this.state.tpls
+                tpls: this.state.templateList
             },
             gateway: this.props.match.params.sn,
             id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
@@ -292,6 +291,7 @@ class ModbusPane extends Component {
         })
     };
     templateShow = () => {
+        this.refreshTemplateList()
         this.setState({
             showTemplateSelection: true
         })
@@ -339,14 +339,14 @@ class ModbusPane extends Component {
     //查看模板
     onViewTemplate = (conf, version) => {
         if (version !== undefined && version !== 0) {
-            window.open(`/template/${this.state.app_info.data.name}/${conf}/${version}`, '_blank')
+            window.open(`/template/APP00000025/${conf}/${version}`, '_blank')
         } else {
-            window.open(`/template/${this.state.app_info.data.name}/${conf}`)
+            window.open(`/template/APP00000025/${conf}`)
         }
     };
     //克隆模板
     onCloneTemplate = (conf, version)=> {
-        window.open(`/template/${this.state.app_info.data.name}/${conf}/${version}/clone`, '_blank')
+        window.open(`/template/APP00000025/${conf}/${version}/clone`, '_blank')
     };
     //添加模板
     onAddTemplate = (config)=>{
@@ -363,8 +363,25 @@ class ModbusPane extends Component {
             templateList: list
         })
     };
+    getDevs = (devs) => {
+        const arr = [];
+        if (devs && devs.length > 0){
+            devs.map(item=>{
+                const obj = {
+                    key: item.key,
+                    unit: item.address,
+                    name: item.device,   // 应用所属实例
+                    sn: item.number,
+                    tpl: item.template === '选择模板' ? undefined : item.template
+                }
+                arr.push(obj)
+            })
+            this.setState({devs: arr})
+        } else {
+            this.setState({devs: []})
+        }
+    }
     render (){
-        console.log(this.props)
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
         devs, tpls;
         // const Mt10 = {
@@ -572,7 +589,7 @@ class ModbusPane extends Component {
                 <Divider orientation="left">设备模板选择</Divider>
                 <Table
                     columns={this.state.tplsCloumns}
-                    dataSource={this.state.templateList}
+                    dataSource={this.state.templateList && this.state.templateList.length > 0 ? this.state.templateList : []}
                     pagination={false}
                 />
                 <Button
@@ -634,7 +651,12 @@ class ModbusPane extends Component {
                 </Modal>
                 <Divider orientation="left">设备列表</Divider>
                 <p>|设备列表</p>
-                <EditableTable disable={disabled}/>
+                    <EditableTable
+                        disable={disabled}
+                        getdevs={this.getDevs}
+                        templateList={this.state.templateList}
+                        devs={this.props.pane.conf.devs}
+                    />
                 <div>
                     使用网关sn作为设备sn的前缀:
                     <Checkbox
