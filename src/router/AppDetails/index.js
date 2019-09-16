@@ -150,7 +150,7 @@ class AppDetails extends Component {
                                 ? <Link
                                     className="button"
                                     to={`/appsinstall/${this.props.store.gatewayList.FirstGateway.sn}/${app_info.name}/install`}
-                                >
+                                  >
                                     <Icon type="download" />
                                     安装此应用
                                 </Link> : ''
