@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import { inject, observer} from 'mobx-react';
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm } from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal} from 'antd';
 // import Slide from 'react-slick'
 import http from '../../../../utils/Server';
+import EditableTable from  '../EditableTable'
 import './style.scss';
 const { Option } = Select;
 function cancel () {
@@ -15,84 +16,181 @@ function cancel () {
 class ModbusPane extends Component {
     constructor (props) {
         super(props)
-    }
-    state = {
-        // conf: {
-        tpls: [],
-        devs: [],
-        loop_gap: 1000,
-        apdu_type: 'TCP',
-        channel_type: 'serial',
-        serial_opt: {
-            port: '/dev/ttyS1',
-            baudrate: 9600,
-            stop_bits: 1,
-            data_bits: 8,
-            flow_control: 'OFF',
-            parity: 'None'
-        },
-        socket_opt: {
-            host: '127.0.0.1',
-            port: 499,
-            nodelay: true
-        },
-        devsCloumns: [
-            {
-                title: '地址',
-                dataIndex: 'unit',
-                key: 'unit'
-              },
-              {
-                title: '设备名称',
-                dataIndex: 'name',
-                key: 'name'
-              },
-              {
-                title: '设备序列号',
-                dataIndex: 'sn',
-                key: 'sn'
-              },
-              {
-                title: '模板',
-                dataIndex: 'tpl',
-                key: 'tpl'
-              },
-              {
-                title: '操作',
-                dataIndex: 'action',
-                key: 'action'
-              }
-        ],
-        tplsCloumns: [
+        const addTempLists = [
             {
                 title: '名称',
-                dataIndex: 'name',
-                key: 'name'
-              },
-              {
+                width: '20%',
+                dataIndex: 'conf_name',
+                key: 'conf_name',
+                render: text => <span>{text}</span>
+            }, {
                 title: '描述',
+                width: '30%',
                 dataIndex: 'description',
                 key: 'description'
-              },
-              {
+            }, {
                 title: '模板ID',
-                dataIndex: 'id',
-                key: 'id'
-              },
-              {
+                width: '15%',
+                dataIndex: 'name',
+                key: 'name'
+            }, {
                 title: '版本',
-                dataIndex: 'ver',
-                key: 'ver'
-              },
-              {
+                width: '10%',
+                key: 'latest_version',
+                dataIndex: 'latest_version'
+            }, {
                 title: '操作',
-                dataIndex: 'action',
-                key: 'action'
-              }
-        ],
-        disabled: true
-
+                width: '25%',
+                render: (record) => (
+                    record.latest_version !== undefined && record.latest_version !== 0 ? (
+                        <span>
+                        {/* <Button>
+                            <Link to={`/template/${record.app}/${record.name}/${record.latest_version}`}> 查看 </Link>
+                        </Button> */}
+                            {/* <span style={{padding: '0 2px'}}> </span>
+                        <Button>
+                            <Link to={`/template/${record.app}/${record.name}/${record.latest_version}/clone`}> 克隆 </Link>
+                        </Button> */}
+                            <Button
+                                onClick={()=>{
+                                    this.onViewTemplate(record.name, record.latest_version)
+                                }}
+                            > 查看 </Button>
+                        <span style={{padding: '0 1px'}}> </span>
+                            {
+                                record.owner !== '' ? (
+                                    <Button
+                                        onClick={()=>{
+                                            this.onCloneTemplate(record.name, record.latest_version)
+                                        }}
+                                    > 克隆 </Button> ) : null
+                            }
+                            <span style={{padding: '0 1px'}}> </span>
+                        <Button
+                            type="primary"
+                            onClick={()=>{
+                                const conf = {
+                                    description: record.description,
+                                    id: record.name,
+                                    key: 1,
+                                    name: record.conf_name,
+                                    ver: record.latest_version
+                                }
+                                this.onAddTemplate(conf)
+                            }}
+                        > 添加 </Button>
+                    </span>) : (
+                        <span>
+                        <Button
+                            onClick={()=>{
+                                this.onViewTemplate(record.name)
+                            }}
+                        > 查看 </Button>
+                    </span>)
+                )
+            }
+        ]
+        this. state = {
+            // conf: {
+            tpls: [],
+            devs: [],
+            loop_gap: 1000,
+            apdu_type: 'TCP',
+            channel_type: 'serial',
+            serial_opt: {
+                port: '/dev/ttyS1',
+                baudrate: 9600,
+                stop_bits: 1,
+                data_bits: 8,
+                flow_control: 'OFF',
+                parity: 'None'
+            },
+            socket_opt: {
+                host: '127.0.0.1',
+                port: 499,
+                nodelay: true
+            },
+            devsCloumns: [
+                {
+                    title: '地址',
+                    dataIndex: 'unit',
+                    key: 'unit'
+                },
+                {
+                    title: '设备名称',
+                    dataIndex: 'name',
+                    key: 'name'
+                },
+                {
+                    title: '设备序列号',
+                    dataIndex: 'sn',
+                    key: 'sn'
+                },
+                {
+                    title: '模板',
+                    dataIndex: 'tpl',
+                    key: 'tpl'
+                },
+                {
+                    title: '操作',
+                    dataIndex: 'action',
+                    key: 'action'
+                }
+            ],
+            tplsCloumns: [
+                {
+                    title: '名称',
+                    dataIndex: 'name',
+                    key: 'name'
+                },
+                {
+                    title: '描述',
+                    dataIndex: 'description',
+                    key: 'description'
+                },
+                {
+                    title: '模板ID',
+                    dataIndex: 'id',
+                    key: 'id'
+                },
+                {
+                    title: '版本',
+                    dataIndex: 'ver',
+                    key: 'ver'
+                },
+                {
+                    title: '操作',
+                    dataIndex: 'action',
+                    key: 'action',
+                    render: (conf, record)=>{
+                        return (
+                            <div>
+                                {
+                                    this.state.templateList.length >= 1 ? (
+                                        <Popconfirm
+                                            title="Sure to delete ?"
+                                            onConfirm={() => {
+                                                const list = this.state.templateList.filter(item => record.key !== item.key);
+                                                this.setState({
+                                                    templateList: list
+                                                })
+                                            }}
+                                        >
+                                            <Button type="danger">delete</Button>
+                                        </Popconfirm>
+                                    ) : null
+                                }
+                            </div>
+                        )
+                    }
+                }
+            ],
+            disabled: true,
+            templateList: [],
+            addTempLists
+        }
     }
+
     componentDidMount () {
         console.log(this.props.pane)
         const { conf } = this.props.pane;
@@ -192,13 +290,86 @@ class ModbusPane extends Component {
                 })
             }
         })
+    };
+    templateShow = () => {
+        this.setState({
+            showTemplateSelection: true
+        })
+    };
+    handleCancelAddTempList = ()=>{
+        this.setState({
+            showTemplateSelection: false
+        })
+    };
+    refreshTemplateList = () => {
+      this.setState({appTemplateList: []})
+        http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025').then(res=> {
+            let list = this.state.appTemplateList;
+            res.data && res.data.length > 0 && res.data.map((tp)=>{
+                if (undefined === list.find(item => item.name === tp.name) &&
+                    tp.latest_version !== undefined && tp.latest_version !== 0 ) {
+                    list.push(tp)
+                }
+            });
+            this.setState({
+                appTemplateList: list
+            });
+        });
+        http.get('/api/user_configurations_list?conf_type=Template&app=APP00000025')
+            .then(res=>{
+                if (res.ok) {
+                    let list = this.state.appTemplateList;
+                    res.data && res.data.length > 0 && res.data.map((tp)=>{
+                        if (undefined === list.find(item => item.name === tp.name) ) {
+                            list.push(tp)
+                        }
+                    });
+                    this.setState({
+                        appTemplateList: list
+                    });
+                }
+            });
+    };
+    onCreateNewTemplate = () => {
+        window.open('/appdetails/' + this.props.app_info.name + '/new_template', '_blank')
     }
+    search = () => {
+
+    };
+    //查看模板
+    onViewTemplate = (conf, version) => {
+        if (version !== undefined && version !== 0) {
+            window.open(`/template/${this.state.app_info.data.name}/${conf}/${version}`, '_blank')
+        } else {
+            window.open(`/template/${this.state.app_info.data.name}/${conf}`)
+        }
+    };
+    //克隆模板
+    onCloneTemplate = (conf, version)=> {
+        window.open(`/template/${this.state.app_info.data.name}/${conf}/${version}/clone`, '_blank')
+    };
+    //添加模板
+    onAddTemplate = (config)=>{
+        const list = this.state.templateList;
+        const obj = {
+            id: config.id,
+            desc: config.description,
+            name: config.name,
+            ver: config.ver,
+            key: list.length + 1
+        }
+        list.push(obj)
+        this.setState({
+            templateList: list
+        })
+    };
     render (){
         console.log(this.props)
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
-        const Mt10 = {
-            marginTop: '10px'
-        }
+        devs, tpls;
+        // const Mt10 = {
+        //     marginTop: '10px'
+        // }
         return (
             <div className="ModbusPane">
                 {/* <Carousel
@@ -400,25 +571,70 @@ class ModbusPane extends Component {
 
                 <Divider orientation="left">设备模板选择</Divider>
                 <Table
-                    dataSource={tpls && tpls.length > 0 ? tpls : []}
                     columns={this.state.tplsCloumns}
+                    dataSource={this.state.templateList}
                     pagination={false}
                 />
                 <Button
-                    style={Mt10}
+                    onClick={this.templateShow}
+                    style={{margin: '10px 0'}}
                     disabled={disabled}
-                >选择模板</Button>
+                >
+                    选择模板
+                </Button>
+                <Modal
+                    className="templateList"
+                    title="选择模板"
+                    visible={this.state.showTemplateSelection}
+                    onOk={this.handleCancelAddTempList}
+                    onCancel={this.handleCancelAddTempList}
+                    wrapClassName={'templatesModal'}
+                    okText="确定"
+                    cancelText="取消"
+                >
+                    <div
+                        style={{
+                            display: 'flex',
+                            position: 'absolute',
+                            right: 300,
+                            top: 10,
+                            zIndex: 999,
+                            lineHeight: '30px'
+                        }}
+                    >
+                        <Button
+                            onClick={()=>{
+                                // this.props.refreshTemplateList()
+                                this.refreshTemplateList()
+                            }}
+                        >
+                            刷新
+                        </Button>
+                        <span style={{padding: '0 20px'}}> </span>
+                        <Input.Search
+                            placeholder="网关名称、描述、序列号"
+                            onChange={this.search}
+                            style={{ width: 200 }}
+                        />
+                        <span style={{padding: '0 2px'}}> </span>
+                        <Button
+                            type="primary"
+                            onClick={this.onCreateNewTemplate}
+                        >
+                            创建新模板
+                        </Button>
+                    </div>
+                    <Table
+                        rowKey="key"
+                        dataSource={this.state.appTemplateList}
+                        columns={this.state.addTempLists}
+                        pagination={false}
+                        scroll={{ y: 240 }}
+                    />
+                </Modal>
                 <Divider orientation="left">设备列表</Divider>
                 <p>|设备列表</p>
-                <Button
-                    type="primary"
-                    disabled={disabled}
-                >添加</Button>
-                <Table
-                    columns={this.state.devsCloumns}
-                    dataSource={devs && devs.length > 0 ? devs : []}
-                    pagination={false}
-                />
+                <EditableTable disable={disabled}/>
                 <div>
                     使用网关sn作为设备sn的前缀:
                     <Checkbox

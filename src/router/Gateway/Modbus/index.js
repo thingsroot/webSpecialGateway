@@ -219,6 +219,9 @@ class Modbus extends Component {
              templateList: list
          })
     };
+    onCreateNewTemplate = () => {
+        window.open('/appdetails/' + this.props.app_info.name + '/new_template', '_blank')
+    }
     // 删除模板
     onDeleteTemplate =  (name)=>{
         let dataSource = this.state.showTempList;
@@ -721,7 +724,6 @@ class Modbus extends Component {
                 >
                     {this.showModbus()}
                 </Modal>
-                
                     {
                     !this.state.loading
                         ? this.state.panes && this.state.panes.length > 0

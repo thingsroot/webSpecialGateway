@@ -44,9 +44,9 @@ class EditableCell extends React.Component {
 
     renderCell = form => {
         this.form = form;
-        console.log(form, 'form')
-        console.log(this.props.store)
-        console.log(this.props)
+        // console.log(form,  'form')
+        // console.log(this.props.store)
+        // console.log(this.props)
         const {children, dataIndex, record, title} = this.props;
         const {editing} = this.state;
         return editing ? (
@@ -60,7 +60,7 @@ class EditableCell extends React.Component {
                     ],
                     initialValue: record[dataIndex]
                 })(this.getInput())}
-        {console.log(record)}
+        {/*{console.log(record)}*/}
             </Form.Item>
         ) : (
             <div
@@ -74,7 +74,7 @@ class EditableCell extends React.Component {
     };
     getInput = ()=> {
         const {dataIndex} = this.props;
-        console.log(dataIndex, 'index')
+        // console.log(dataIndex, 'index')
         if (dataIndex === 'address') {
            return (
                 <InputNumber
@@ -123,7 +123,6 @@ class EditableCell extends React.Component {
 
     }
     render () {
-        console.log(this.props)
         const {
             editable,
             dataIndex,
@@ -186,18 +185,17 @@ class EditableTable extends React.Component {
                     ) : null
             }
         ];
-
         this.state = {
             dataSource: [
-                {
-                    key: '0',
-                    number: '0',
-                    template: '选择模板',
-                    address: '0',
-                    device: '设备名称'
-                }
+                // {
+                //     key: '0',
+                //     number: '0',
+                //     template: '选择模板',
+                //     address: '0',
+                //     device: '设备名称'
+                // }
             ],
-            count: 0
+            count: '0'
         };
     }
     componentDidMount (){
@@ -222,6 +220,7 @@ class EditableTable extends React.Component {
             dataSource: [...dataSource, newData],
             count: count + 1
         });
+        console.log(dataSource)
     };
 
     handleSave = row => {
@@ -258,19 +257,22 @@ class EditableTable extends React.Component {
             console.log(col)
             return {
                 ...col,
-                onCell: record => ({
-                    record,
-                    editable: col.editable,
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    handleSave: this.handleSave
-                })
+                onCell: record => {
+                    return  ({
+                        record,
+                        editable: col.editable,
+                        dataIndex: col.dataIndex,
+                        title: col.title,
+                        handleSave: this.handleSave
+                    })
+                }
             }
         });
         return (
             <div>
                 <Button
                     onClick={this.handleAdd}
+                    disabled={this.props.disable}
                     type="primary"
                     style={{marginBottom: 16}}
                 >
