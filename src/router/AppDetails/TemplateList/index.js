@@ -1,10 +1,9 @@
-import React, { Component } from 'react'
-import http from '../../../utils/Server'
-import { Button, message, Tabs, Modal, Table, Divider} from 'antd';
+import React, { Component } from 'react';
+import http from '../../../utils/Server';
+import { Button, message, Tabs, Modal, Table, Divider } from 'antd';
 import { Link, withRouter } from 'react-router-dom';
 import TemplateForm from '../TemplateForm';
-import CopyForm from '../CopyForm'
-
+import CopyForm from '../CopyForm';
 const TabPane = Tabs.TabPane;
 const block = {
     display: 'block'
@@ -12,10 +11,11 @@ const block = {
 const none = {
     display: 'none'
 };
+
 @withRouter
- class TemplateList extends Component {
-    constructor (props) {
-        super(props)
+class TemplateList extends Component {
+    constructor () {
+        super();
         this.state = {
             deleteName: '',
             type: '',
@@ -25,7 +25,7 @@ const none = {
             showNew: false,
             showCopy: false,
             defaultActiveKey: 'private',
-            copyDate: {},
+            copyData: {},
             columns: [
                 {
                     title: '模板名称',
@@ -165,20 +165,25 @@ const none = {
             ]
         }
     }
-    componentDidMount () {
-        const { app, newTemplateVisible } = this.props;
-        if (newTemplateVisible) {
-            this.setState({showNew: newTemplateVisible})
+
+    componentDidMount (){
+        const { app, newTemplateVisiable } = this.props;
+        if (newTemplateVisiable) {
+            this.setState({showNew: newTemplateVisiable})
         }
-        http.get('/api/store_configurations_list?app=' + app + '&conf_type=Template').then(res=> {
-            if (res.ok) {
-                this.setState({template: res.data})
-            }
-        });
+        http.get('/api/store_configurations_list?app=' + app + '&conf_type=Template')
+            .then(res=>{
+                if (res.ok) {
+                    this.setState({
+                        templateList: res.data
+                    });
+                }
+            });
         this.refreshMyList()
     }
-    editContent = (conf, name, desc, version, publics, owner_type, type) => {
-        let new_name = name;
+
+    editContent = (conf, name, desc, version, publics, owner_type, type)=>{
+        let new_name = name
         if (type === 'copy') {
             new_name = name + '-copy'
         }
@@ -186,66 +191,76 @@ const none = {
             conf_name: new_name,
             description: desc,
             public: publics,
-            owner_type,
-            version
-        }
+            owner_type: owner_type,
+            version: version
+        };
         this.setState({
             type: type === 'copy' ? '复制' : '编辑',
-            conf
+            conf: conf
         });
         if (version !== 0) {
-            http.get('/api/configurations_version_read?conf=' + conf + '&version=' + version).then(res=> {
-                if (res.ok) {
-                    data.data = res.data;
-                    this.setState({copyData: data, showCopy: true})
-                } else {
-                    message.error(res.error);
-                }
-            })
+            http.get('/api/configurations_version_read?conf=' + conf + '&version=' + version)
+                .then(res=>{
+                    if (res.ok) {
+                        data.data = res.data;
+                        this.setState({copyData: data, showCopy: true})
+                    } else {
+                        message.error(res.error);
+                    }
+                })
         } else {
             this.setState({copyData: data, showCopy: true})
         }
     };
-    handleCreateSuccess = newData => {
-        let myList = [...this.state.myList, newData]
-        this.setState({myList})
-    };
-    refreshMyList = () => {
+
+    handleCreateSuccess = (newData) => {
+        let newList = [...this.state.myList, newData]
+        this.setState({
+            myList: newList
+        })
+        //list.unshift(res.data);
+    }
+
+    refreshMyList = ()=> {
         const { app } = this.props;
         if (app === undefined) {
             return
         }
-        http.get('/api/user_configurations_list?app=' + app).then(res=> {
+        http.get('/api/user_configurations_list?app=' + app).then(res=>{
             this.setState({myList: res.data})
-        })
-    };
-    deleteTemplate = name => {
+        });
+    }
+
+    deleteTemplate = (name)=>{
         this.setState({
             visible: true,
             deleteName: name
         })
     };
-    // 取消删除
-    cancelDelete = () => {
+    //取消删除
+    cancelDelete = ()=>{
         this.setState({
-            visible: true,
+            visible: false,
             deleteName: ''
         })
     };
-    handleDelete = () => {
-        http.post('/api/configurations_remove', {name: this.state.deleteName}).then(res=> {
-            if (res.ok === false) {
-                message.error('删除失败，请联系管理员！')
-            } else {
-                message.error('删除成功！')
-            }
-            this.setState({
-                visible: false,
-                deleteName: ''
-            })
-        })
+
+    handleDelete = ()=>{
+        http.post('/api/configurations_remove', {name: this.state.deleteName})
+            .then(res=>{
+                if (res.ok === false) {
+                    message.error('删除失败，请联系管理员！')
+                } else {
+                    message.error('删除成功！')
+                }
+                this.setState({
+                    visible: false,
+                    deleteName: ''
+                })
+            });
     };
-    callback = value => {
+
+    callback = (value)=>{
         this.setState({
             defaultActiveKey: value
         })
@@ -255,23 +270,23 @@ const none = {
         const { app } = this.props;
         const { myList, type, conf, templateList, columns, columns2, showNew, showCopy, copyData, defaultActiveKey } = this.state;
         return (
-            <div className={templateList}>
+            <div className="templateList">
                 <Button
                     type="primary"
-                    onClick={()=>{
+                    onClick={() => {
                         this.setState({showNew: true})
                     }}
                 >
-                    创建模板
+                    新建模板
                 </Button>
                 <TemplateForm
                     type={type}
                     conf={conf}
                     visible={showNew}
-                    onCancel={()=> {
+                    onCancel={() => {
                         this.setState({showNew: false})
                     }}
-                    onOk={()=> {
+                    onOK={() => {
                         this.setState({showNew: false})
                     }}
                     onSuccess={this.handleCreateSuccess}
@@ -281,13 +296,13 @@ const none = {
                     type={type}
                     conf={conf}
                     visible={showCopy}
-                    onCancel={()=>{
+                    onCancel={() => {
                         this.setState({showCopy: false})
                     }}
-                    onOk={()=>{
-                        this.setState({showCopy: false}, ()=> {
-                        this.refreshMyList()
-                    })
+                    onOK={() => {
+                        this.setState({showCopy: false}, ()=>{
+                            this.refreshMyList()
+                        })
                     }}
                     onSuccess={this.handleCreateSuccess}
                     app={app}
@@ -295,7 +310,7 @@ const none = {
                 />
                 <Modal
                     title="提示信息"
-                    okText="确认"
+                    okText="确定"
                     cancelText="取消"
                     visible={this.state.visible}
                     onOk={this.handleDelete}
@@ -315,8 +330,10 @@ const none = {
                             style={myList === undefined || myList.length === 0 ? none : block}
                             columns={columns}
                             rowKey="name"
-                            detaSource={myList}
-                        />
+                            dataSource={myList}
+                        >
+
+                        </Table>
                         <p
                             className="empty"
                             style={myList.length > 0 ? none : block}
@@ -333,7 +350,9 @@ const none = {
                             columns={columns2}
                             rowKey="name"
                             dataSource={templateList}
-                        />
+                        >
+
+                        </Table>
                         <p
                             className="empty"
                             style={templateList && templateList.length > 0 ? none : block}
@@ -342,7 +361,6 @@ const none = {
                         </p>
                     </TabPane>
                 </Tabs>
-
             </div>
         );
     }

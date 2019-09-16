@@ -20,7 +20,7 @@ const none = {
 @withRouter
 @inject('store')
 @observer
-class AppDetail extends Component {
+class AppDetails extends Component {
     state = {
         user: '',
         app_info: '',
@@ -30,55 +30,50 @@ class AppDetail extends Component {
         app: '',
         desc: '',
         groupName: '',
-        newTemplateVisible: false,
-        name: '',
-        activeKey: ''
+        newTemplateVisiable: false,
+        name: ''
     };
     UNSAFE_componentWillMount () {
         this.setState({
             name: this.props.match.params.name.replace(/\*/g, '/')
         })
     }
-    componentDidMount () {
+    componentDidMount (){
         this.loadApp(this.state.name)
     }
-    UNSAFE_componentWillReceiveProps (nextProps) {
-        if (nextProps.location.pathname !== this.props.location.pathname) {
+    UNSAFE_componentWillReceiveProps (nextProps){
+        if (nextProps.location.pathname !== this.props.location.pathname){
             this.loadApp(this.state.name)
         }
     }
-    loadApp = name => {
+    loadApp = (name) => {
         let user = this.props.store.session.user_id;
         let app = name ? name : this.state.name;
-        let action = this.props.match.params.action ? this.props.match.params.action : 'description';
+        let action = this.props.match.params.action ? this.props.match.params.action : 'description'
         if (action === 'new_template') {
-            this.setState({
-                activeKey: 'templates',
-                newTemplateVisible: true
-            })
+            this.setState( {activeKey: 'templates', newTemplateVisiable: true} )
         } else {
-            this.setState({
-                activeKey: action
-            })
+            this.setState( {activeKey: action})
         }
         this.setState({
-            user,
-            app
-        }, ()=> {
-            this.getDetails()
+            user: user,
+            app: app
+        }, ()=>{
+            this.getDetails();
         })
     }
-    getDetails = ()=> {
+    getDetails = ()=>{
         const {name} = this.state;
-        http.get('/api/applications_read?app=' + name).then(res=> {
+        http.get('/api/applications_read?app=' + name).then(res=>{
             if (res.data.data.name.indexOf('/') !== -1) {
                 res.data.data.name = res.data.data.name.replace(/\//g, '*')
             }
             if (!res.ok) {
                 message.error('无法获取应用信息')
-                this.props.history.push('./myapps')
+                this.props.history.push('/myapps')
                 return
             }
+
             this.setState({
                 app_info: res.data.data,
                 versionList: res.data.versionList,
@@ -86,19 +81,21 @@ class AppDetail extends Component {
                 desc: res.data.data.description,
                 time: res.data.data.modified.substr(0, 11)
             });
-            sessionStorage.setItem('app_name', res.data.data.app_name)
-        })
+            sessionStorage.setItem('app_name', res.data.data.app_name);
+        });
     };
-    updateVersionList = () => {
-        http.get('/api/versions_list?app=' + this.state.name).then(res=> {
+    updateVersionList = ()=> {
+        http.get('/api/versions_list?app=' + this.state.name).then(res=>{
             if (res.ok && res.data) {
-                this.setState({versionList: res.data})
+                this.setState({
+                    versionList: res.data
+                })
             }
-        })
-    };
-    callback = key => {
-        this.setState({activeKey: key})
+        });
     }
+    callback = (key)=>{
+        this.setState({activeKey: key})
+    };
     render () {
         let { app, app_info, time, user, desc } = this.state;
         return (
@@ -131,6 +128,7 @@ class AppDetail extends Component {
                         </p>
                     </div>
                     <div className="btnGroup">
+
                         <Link
                             className="button"
                             style={app_info.owner === user ? block : none}
@@ -196,7 +194,7 @@ class AppDetail extends Component {
                     >
                         <TemplateList
                             app={app}
-                            newTemplateVisible={this.state.newTemplateVisible}
+                            newTemplateVisiable={this.state.newTemplateVisiable}
                         />
                     </TabPane>
                 </Tabs>
@@ -204,6 +202,6 @@ class AppDetail extends Component {
             </div>
         );
     }
-
 }
-export default AppDetail
+
+export default AppDetails;

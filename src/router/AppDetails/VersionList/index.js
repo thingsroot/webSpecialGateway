@@ -1,5 +1,6 @@
-import React, {Component} from 'react';
+import React, { PureComponent } from 'react';
 import { Button } from 'antd';
+// import http from '../../../utils/Server';
 import UploadForm from '../UploadForm';
 
 const block = {
@@ -10,13 +11,13 @@ const none = {
     display: 'none',
     cursor: 'pointer'
 };
-
-class VersionList extends Component {
+class VersionList extends PureComponent {
     state = {
         user: '',
         name: '',
         visible: false
-    }
+    };
+
     showModal = () => {
         this.setState({visible: true})
     };
@@ -74,7 +75,8 @@ class VersionList extends Component {
                     style={dataSource.length > 0 ? none : block}
                 >请先上传版本！</p>
             </div>
-        )
+        );
     }
 }
+
 export default VersionList;

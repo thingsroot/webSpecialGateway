@@ -50,13 +50,12 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                 }
                 if (this.props.type === '复制') {
                     http.post('/api/configurations_create', params).then(res=>{
-
+                        let conf_info = res.data;
+                        conf_name = res.data.name;
                         if (res.ok === false) {
                             message.error('复制模板信息失败！');
                         } else {
                             if (this.props.copyData.version !== 0) {
-                                let conf_info = res.data;
-                                conf_name = res.data.name;
                                 let params = {
                                     conf: conf_name,
                                     version: 1,
@@ -111,12 +110,16 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                         <Form.Item label="模板名称">
                             {getFieldDecorator('conf_name', { initialValue: copyData.conf_name }, {
                                 rules: [{ required: true, message: '请填写模板名称!' }]
-                            })(<Input type="text"/>)}
+                            })(
+                                <Input type="text"/>
+                            )}
                         </Form.Item>
                         <Form.Item label="描述">
                             {getFieldDecorator('description', { initialValue: copyData.description }, {
                                 rules: [{ required: true, message: '请填写描述信息!' }]
-                            })(<Input type="textarea" />)}
+                            })(
+                                <Input type="textarea" />
+                            )}
                         </Form.Item>
                         <Form.Item
                             className="collection-create-form_last-form-item"
