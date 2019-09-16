@@ -221,7 +221,7 @@ class Modbus extends Component {
          })
     };
     onCreateNewTemplate = () => {
-        window.open('/appdetails/' + this.props.app_info.name + '/new_template', '_blank')
+        window.open('/appdetails/APP00000025/new_template', '_blank')
     }
     // 删除模板
     onDeleteTemplate =  (name)=>{
@@ -690,6 +690,7 @@ class Modbus extends Component {
                     <Button
                         onClick={this.showModal}
                         disabled={this.state.panes.length >= 8}
+                        loading={this.state.loading}
                     >安装Modbus应用</Button>
                 </div>
                 <Modal
@@ -754,7 +755,7 @@ class Modbus extends Component {
                             {
                                 this.state.panes.map((pane, key) => (
                                     <TabPane
-                                        tab={pane.inst_name}
+                                        tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
                                         key={key}
                                     >
                                         <ModbusPane

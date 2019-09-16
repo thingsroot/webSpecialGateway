@@ -59,7 +59,7 @@ const TemplateForm = Form.create({name: 'template_form'})(
                                 initialValue: 'User'
                             })(
                                 <Radio.Group>
-                                    {this.state.userGroups.length > 0 ? <Radio value="Cloud Company Group">公司</Radio> : ''}
+                                    {this.state.userGroups && this.state.userGroups.length > 0 ? <Radio value="Cloud Company Group">公司</Radio> : ''}
                                     <Radio value="User">个人</Radio>
                                 </Radio.Group>
                             )}

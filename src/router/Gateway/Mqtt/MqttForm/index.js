@@ -59,7 +59,6 @@ class EditableCell extends React.Component {
             if (error && error[e.currentTarget.id]) {
                 return;
             }
-            console.log(values, record)
             this.toggleEdit();
             handleSave({...record, ...values});
         });
@@ -188,7 +187,6 @@ class MqttForm extends React.Component {
         };
     }
     componentDidMount () {
-        console.log(this.props)
         if (this.props.pane.conf) {
             const { conf } = this.props.pane;
             this.setState({
@@ -260,7 +258,6 @@ class MqttForm extends React.Component {
             }
             return file;
         });
-        console.log(fileList)
         this.setState({fileList});
     }
     handleListChange1 = info => {
@@ -371,7 +368,6 @@ class MqttForm extends React.Component {
                                 onChange={this.changeGroup}
                             > */}
                                 <Row className="highSenior">
-                                    {console.log(this.state.options_ex)}
                                     <Col span={24}>
                                         <Checkbox
                                             disabled={this.state.disabled}
@@ -761,9 +757,6 @@ class MqttForm extends React.Component {
                     <Col span={4}>
                         <Form.Item>
                             <span>高级选项：</span>
-                            {
-                                console.log(this.props)
-                            }
                             <Checkbox
                                 checked={this.state.seniorIndeterminate}
                                 onChange={this.seniorChange}

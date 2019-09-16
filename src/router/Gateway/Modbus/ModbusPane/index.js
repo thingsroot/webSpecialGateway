@@ -196,7 +196,6 @@ class ModbusPane extends Component {
 
     componentDidMount () {
         const { conf } = this.props.pane;
-        console.log(conf)
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,

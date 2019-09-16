@@ -258,7 +258,7 @@ const none = {
             <div className={templateList}>
                 <Button
                     type="primary"
-                    onclick={()=>{
+                    onClick={()=>{
                         this.setState({showNew: true})
                     }}
                 >

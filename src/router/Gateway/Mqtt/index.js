@@ -243,14 +243,10 @@ class Mqtt extends Component {
         if (type !== 'mqttForm') {
             this.setState({
                 [type]: Object.assign({}, this.state[type], {[name]: val})
-            }, ()=>{
-                console.log(this.state[type])
             })
         } else {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-            }, ()=> {
-                console.log(this.state.serial_opt)
             })
         }
     }
@@ -300,9 +296,7 @@ class Mqtt extends Component {
             return file;
         });
 
-        this.setState({fileList}, ()=>{
-            console.log(fileList)
-        });
+        this.setState({fileList});
     }
     handleListChange1 = info => {
         if (info.file.size / 1024 > 8) {
@@ -413,7 +407,6 @@ class Mqtt extends Component {
                                 onChange={this.changeGroup}
                             > */}
                                 <Row className="highSenior">
-                                    {console.log(this.state.options_ex)}
                                     <Col span={24}>
                                         <Checkbox
                                             value="禁止数据上送"
@@ -495,7 +488,6 @@ class Mqtt extends Component {
         this.setState({activeKey});
     };
     onEdit = (targetKey, action) => {
-        console.log(targetKey, action, this[action](targetKey), this)
         this[action](targetKey);
     };
     add = () => {
@@ -531,7 +523,10 @@ class Mqtt extends Component {
         return name
     };
     installMqtt = () => {
-        console.log(this.state)
+        if (!this.state.serial_opt.contentText) {
+            message.info('请先上传CA证书！')
+            return false;
+        }
         const { serial_opt } = this.state;
         const { app_list} = this.state;
         let flag = false;
@@ -627,6 +622,7 @@ class Mqtt extends Component {
                     <Button
                         onClick={this.add}
                         disabled={this.state.app_list.length >= 2}
+                        loading={this.state.loading}
                     >安装MQTT</Button>
                     <Modal
                         title="安装应用"
@@ -663,9 +659,7 @@ class Mqtt extends Component {
                                             modalKey: this.state.modalKey + 1
                                         })
                                     }
-                                    console.log(this.state.modalKey)
                                     if (this.state.modalKey === 2) {
-                                        console.log(this.state)
                                         this.installMqtt()
                                     }
                                 }}
@@ -918,7 +912,7 @@ class Mqtt extends Component {
                     {
                         this.state.app_list.map((pane, key) => (
                             <TabPane
-                                tab={pane.inst_name && pane.inst_name.replace('__', '通道')}
+                                tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
                                 key={key}
                             >
                                 <MqttPane

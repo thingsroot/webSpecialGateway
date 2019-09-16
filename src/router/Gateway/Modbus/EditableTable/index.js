@@ -68,6 +68,7 @@ class EditableCell extends React.Component {
         );
     };
     getInput = ()=> {
+        console.log(this.props)
         const {dataIndex} = this.props;
         if (dataIndex === 'address') {
            return (
@@ -77,6 +78,7 @@ class EditableCell extends React.Component {
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
+                    disabled={this.props.disabled}
                 />
            )
         }
@@ -86,6 +88,7 @@ class EditableCell extends React.Component {
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
+                    disabled={this.props.disabled}
                 />
             )
         }
@@ -96,6 +99,7 @@ class EditableCell extends React.Component {
                     onPressEnter={this.save}
                     onBlur={this.save}
                     defaultValue=""
+                    disabled={this.props.disabled}
                     style={{ width: 120 }}
                 >
                     {
@@ -194,7 +198,6 @@ class EditableTable extends React.Component {
         };
     }
     componentDidMount () {
-        console.log(this.props)
         if (this.props.devs && this.props.devs.length > 0) {
             const arr = [];
             this.props.devs.map(item=>{
@@ -232,7 +235,6 @@ class EditableTable extends React.Component {
         }, ()=>{
             this.props.getdevs(this.state.dataSource)
         });
-        console.log(dataSource)
     };
 
     handleSave = row => {
@@ -249,6 +251,7 @@ class EditableTable extends React.Component {
     };
     render () {
         const list = this.props.templateList;
+        const disabled = this.props.disable;
         const {dataSource} = this.state;
         const components = {
             body: {
@@ -258,6 +261,7 @@ class EditableTable extends React.Component {
                     return (
                         <EditableCell
                             list={list}
+                            disabled={disabled}
                             {...restProps}
                         />
                     )
