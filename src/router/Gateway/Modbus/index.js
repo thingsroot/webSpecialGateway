@@ -516,10 +516,15 @@ class Modbus extends Component {
                    <Divider orientation="left">设备列表</Divider>
                    <p>|设备列表</p>
                    {/*<Table  pagination={false}/>*/}
-                   <EditableTable />
+                    <EditableTable
+                        templateList={this.state.templateList}
+                    />
                </Fragment>
            )
        }
+    }
+    getDevs = (devs) => {
+        console.log(devs)
     }
     installapp = () => {
         let inst = undefined;
@@ -716,34 +721,37 @@ class Modbus extends Component {
                 >
                     {this.showModbus()}
                 </Modal>
-                <Tabs
-                    hideAdd
-                    onChange={this.onChange}
-                    activeKey={this.state.activeKey}
-                    type="card"
-                    onEdit={this.onEdit}
-                    // tabBarExtraContent={operations}
-                >
+                
                     {
                     !this.state.loading
                         ? this.state.panes && this.state.panes.length > 0
-                            ? this.state.panes.map((pane, key) => (
-                                <TabPane
-                                    tab={pane.inst_name}
-                                    key={key}
-                                >
-                                    <ModbusPane
+                                ? <Tabs
+                                    hideAdd
+                                    onChange={this.onChange}
+                                    activeKey={this.state.activeKey}
+                                    type="card"
+                                    onEdit={this.onEdit}
+                                    // tabBarExtraContent={operations}
+                                  >
+                            {
+                                this.state.panes.map((pane, key) => (
+                                    <TabPane
+                                        tab={pane.inst_name}
                                         key={key}
-                                        pane={pane}
-                                        fetch={this.fetch}
-                                        setActiveKey={this.setActiveKey}
-                                    />
-                                </TabPane>
-                            )   )
+                                    >
+                                        <ModbusPane
+                                            key={key}
+                                            pane={pane}
+                                            fetch={this.fetch}
+                                            setActiveKey={this.setActiveKey}
+                                        />
+                                    </TabPane>
+                                ))
+                            }
+                            </Tabs>
                             : <Empty/>
                         : <Table loading/>
                     }
-                </Tabs>
             </div>
         );
     }

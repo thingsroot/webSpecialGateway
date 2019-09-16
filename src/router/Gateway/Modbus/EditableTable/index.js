@@ -1,6 +1,6 @@
 import React from 'react'
 import {Table, Input, Button, Popconfirm, Form, InputNumber, Select} from 'antd';
-
+import { inject, observer} from 'mobx-react';
 const EditableContext = React.createContext();
 const { Option } = Select;
 
@@ -9,12 +9,14 @@ const EditableRow = ({form, index, ...props}) => (
         value={form}
         index={index}
     >
+        {console.log(props)}
         <tr {...props} />
     </EditableContext.Provider>
 );
 
 const EditableFormRow = Form.create()(EditableRow);
-
+@inject('store')
+@observer
 class EditableCell extends React.Component {
     state = {
         editing: false
@@ -43,6 +45,8 @@ class EditableCell extends React.Component {
     renderCell = form => {
         this.form = form;
         console.log(form, 'form')
+        console.log(this.props.store)
+        console.log(this.props)
         const {children, dataIndex, record, title} = this.props;
         const {editing} = this.state;
         return editing ? (
@@ -56,6 +60,7 @@ class EditableCell extends React.Component {
                     ],
                     initialValue: record[dataIndex]
                 })(this.getInput())}
+        {console.log(record)}
             </Form.Item>
         ) : (
             <div
@@ -72,12 +77,13 @@ class EditableCell extends React.Component {
         console.log(dataIndex, 'index')
         if (dataIndex === 'address') {
            return (
-               <InputNumber
-                   min={0}
-                   max={255}
-                   ref={node => (this.input = node)}
-                   onPressEnter={this.save}
-                   onBlur={this.save}/>
+                <InputNumber
+                    min={0}
+                    max={255}
+                    ref={node => (this.input = node)}
+                    onPressEnter={this.save}
+                    onBlur={this.save}
+                />
            )
         }
         if (dataIndex === 'device' || dataIndex === 'number') {
@@ -90,6 +96,7 @@ class EditableCell extends React.Component {
             )
         }
         if (dataIndex === 'template') {
+            console.log(this.props)
             return (
                 <Select
                     ref={node => (this.input = node)}
@@ -98,13 +105,25 @@ class EditableCell extends React.Component {
                     defaultValue=""
                     style={{ width: 120 }}
                 >
-                    <Option value="jack">Jack</Option>
+                    {
+                        this.props.list && this.props.list.length > 0
+                        ? this.props.list.map((item, key) => {
+                            return (
+                                <Option
+                                    value={item.name}
+                                    key={key}
+                                >{item.name}</Option>
+                            )
+                        })
+                        : ''
+                    }
                 </Select>
             )
         }
 
     }
     render () {
+        console.log(this.props)
         const {
             editable,
             dataIndex,
@@ -159,7 +178,9 @@ class EditableTable extends React.Component {
                 dataIndex: 'operation',
                 render: (text, record) =>
                     this.state.dataSource.length >= 1 ? (
-                        <Popconfirm title="Sure to delete?" onConfirm={() => this.handleDelete(record.key)}>
+                        <Popconfirm title="Sure to delete?"
+                            onConfirm={() => this.handleDelete(record.key)}
+                        >
                             <Button type="danger">Delete</Button>
                         </Popconfirm>
                     ) : null
@@ -178,6 +199,9 @@ class EditableTable extends React.Component {
             ],
             count: 0
         };
+    }
+    componentDidMount (){
+        console.log(this.props)
     }
 
     handleDelete = key => {
@@ -210,19 +234,28 @@ class EditableTable extends React.Component {
         });
         this.setState({dataSource: newData});
     };
-
     render () {
+        const list = this.props.templateList;
         const {dataSource} = this.state;
         const components = {
             body: {
                 row: EditableFormRow,
-                cell: EditableCell
+                // cell: EditableCell
+                cell: function (restProps) {
+                    return (
+                        <EditableCell
+                            list={list}
+                            {...restProps}
+                        />
+                    )
+                }
             }
         };
         const columns = this.columns.map(col => {
             if (!col.editable) {
                 return col;
             }
+            console.log(col)
             return {
                 ...col,
                 onCell: record => ({
@@ -239,7 +272,8 @@ class EditableTable extends React.Component {
                 <Button
                     onClick={this.handleAdd}
                     type="primary"
-                    style={{marginBottom: 16}}>
+                    style={{marginBottom: 16}}
+                >
                     Add
                 </Button>
                 <Table
