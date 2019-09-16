@@ -94,7 +94,6 @@ class ModbusPane extends Component {
 
     }
     componentDidMount () {
-        console.log(this.props.pane)
         const { conf } = this.props.pane;
         this.setState({
             apdu_type: conf.apdu_type,
@@ -124,19 +123,14 @@ class ModbusPane extends Component {
 
     // }
     setSetting = (type, val, name) =>{
-        console.log(type, val, name)
         if (type === 'serial_opt') {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-            }, ()=>{
-                console.log(this.state.serial_opt)
             })
         }
         if (!name){
             this.setState({
                 [type]: val
-            }, ()=>{
-                console.log(this.state[type])
             })
         }
 
@@ -194,7 +188,6 @@ class ModbusPane extends Component {
         })
     }
     render (){
-        console.log(this.props)
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
         const Mt10 = {
             marginTop: '10px'

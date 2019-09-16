@@ -9,7 +9,6 @@ const EditableRow = ({form, index, ...props}) => (
         value={form}
         index={index}
     >
-        {console.log(props)}
         <tr {...props} />
     </EditableContext.Provider>
 );
@@ -44,9 +43,6 @@ class EditableCell extends React.Component {
 
     renderCell = form => {
         this.form = form;
-        console.log(form, 'form')
-        console.log(this.props.store)
-        console.log(this.props)
         const {children, dataIndex, record, title} = this.props;
         const {editing} = this.state;
         return editing ? (
@@ -60,7 +56,6 @@ class EditableCell extends React.Component {
                     ],
                     initialValue: record[dataIndex]
                 })(this.getInput())}
-        {console.log(record)}
             </Form.Item>
         ) : (
             <div
@@ -74,7 +69,6 @@ class EditableCell extends React.Component {
     };
     getInput = ()=> {
         const {dataIndex} = this.props;
-        console.log(dataIndex, 'index')
         if (dataIndex === 'address') {
            return (
                 <InputNumber
@@ -96,7 +90,6 @@ class EditableCell extends React.Component {
             )
         }
         if (dataIndex === 'template') {
-            console.log(this.props)
             return (
                 <Select
                     ref={node => (this.input = node)}
@@ -123,7 +116,6 @@ class EditableCell extends React.Component {
 
     }
     render () {
-        console.log(this.props)
         const {
             editable,
             dataIndex,
@@ -189,24 +181,22 @@ class EditableTable extends React.Component {
 
         this.state = {
             dataSource: [
-                {
-                    key: '0',
-                    number: '0',
-                    template: '选择模板',
-                    address: '0',
-                    device: '设备名称'
-                }
+                // {
+                //     key: '0',
+                //     number: '0',
+                //     template: '选择模板',
+                //     address: '0',
+                //     device: '设备名称'
+                // }
             ],
             count: 0
         };
     }
-    componentDidMount (){
-        console.log(this.props)
-    }
-
     handleDelete = key => {
         const dataSource = [...this.state.dataSource];
-        this.setState({dataSource: dataSource.filter(item => item.key !== key)});
+        this.setState({dataSource: dataSource.filter(item => item.key !== key)}, ()=>{
+            this.props.getdevs(this.state.dataSource)
+        });
     };
 
     handleAdd = () => {
@@ -221,6 +211,8 @@ class EditableTable extends React.Component {
         this.setState({
             dataSource: [...dataSource, newData],
             count: count + 1
+        }, ()=>{
+            this.props.getdevs(this.state.dataSource)
         });
     };
 
@@ -232,7 +224,9 @@ class EditableTable extends React.Component {
             ...item,
             ...row
         });
-        this.setState({dataSource: newData});
+        this.setState({dataSource: newData}, ()=>{
+            this.props.getdevs(this.state.dataSource)
+        });
     };
     render () {
         const list = this.props.templateList;
@@ -255,7 +249,6 @@ class EditableTable extends React.Component {
             if (!col.editable) {
                 return col;
             }
-            console.log(col)
             return {
                 ...col,
                 onCell: record => ({

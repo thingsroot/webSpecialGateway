@@ -144,6 +144,7 @@ class Modbus extends Component {
             visible: false,
             modalKey: 0,
             app_info: {},
+            devs: [],
             configStore: new ConfigStore(),
             loop_gap: 1000,
             apdu_type: 'TCP',
@@ -517,6 +518,7 @@ class Modbus extends Component {
                    <p>|设备列表</p>
                    {/*<Table  pagination={false}/>*/}
                     <EditableTable
+                        getdevs={this.getDevs}
                         templateList={this.state.templateList}
                     />
                </Fragment>
@@ -524,13 +526,27 @@ class Modbus extends Component {
        }
     }
     getDevs = (devs) => {
-        console.log(devs)
+        const arr = [];
+        if (devs && devs.length > 0){
+            devs.map(item=>{
+                const obj = {
+                    key: item.key,
+                    unit: item.address,
+                    name: item.device,   // 应用所属实例
+                    sn: item.number,
+                    tpl: item.template === '选择模板' ? undefined : item.template
+                }
+                arr.push(obj)
+            })
+            this.setState({devs: arr})
+        } else {
+            this.setState({devs: []})
+        }
     }
     installapp = () => {
         let inst = undefined;
         const applist = this.state.panes;
         applist && applist.length > 0 && applist.map((item, key) =>{
-            console.log(key, item.inst_name)
             if (item.inst_name.indexOf(key + 1) === -1) {
                 if (!inst){
                     inst = 'modbus_' + (key + 1)
@@ -543,7 +559,7 @@ class Modbus extends Component {
                 apdu_type: this.state.apdu_type,
                 channel_type: this.state.channel_type,
                 dev_sn_prefix: this.state.dev_sn_prefix,
-                // devs: this.state.devs,
+                devs: this.state.devs,
                 loop_gap: this.state.loop_gap,
                 serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
                 socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
@@ -721,7 +737,6 @@ class Modbus extends Component {
                 >
                     {this.showModbus()}
                 </Modal>
-                
                     {
                     !this.state.loading
                         ? this.state.panes && this.state.panes.length > 0
