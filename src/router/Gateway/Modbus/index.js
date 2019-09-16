@@ -220,7 +220,9 @@ class Modbus extends Component {
          })
     };
     onCreateNewTemplate = () => {
-        window.open('/appdetails/' + this.props.app_info.name + '/new_template', '_blank')
+        // window.open('/appdetails/' + this.props.app_info.name + '/new_template', '_blank')
+        window.open('/appdetails/APP00000025/new_template', '_blank')
+
     }
     // 删除模板
     onDeleteTemplate =  (name)=>{

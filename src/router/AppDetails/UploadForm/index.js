@@ -1,7 +1,7 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import {Modal, Form, Input, Checkbox, Upload, Icon, Button, message} from 'antd';
 import { withRouter } from 'react-router-dom';
-import reqwest from 'reqwest'
+import reqwest from 'reqwest';
 const { TextArea } = Input;
 
 const CollectionCreateForm = Form.create()(
@@ -14,7 +14,7 @@ const CollectionCreateForm = Form.create()(
         };
         handleCreate = () => {
             const { fileList } = this.state;
-            const formData = new FormData()
+            const formData = new FormData();
             if (fileList.length > 1) {
                 message.error('不能上传多个文件')
                 return
@@ -23,13 +23,13 @@ const CollectionCreateForm = Form.create()(
                 message.error('请选择要上传的文件')
                 return
             }
-            fileList.forEach(file => {
-                formData.append('app_file', file)
+            fileList.forEach((file) => {
+                formData.append('app_file', file);
             });
             const form = this.props.form;
             form.validateFields((err, values) => {
                 if (err) {
-                    return
+                    return;
                 }
                 formData.append('app', this.props.app);
                 formData.append('version', values.version);
@@ -58,45 +58,46 @@ const CollectionCreateForm = Form.create()(
                     }
                 });
                 form.resetFields();
-            })
-    };
+            });
+        };
+
         checkChange = (e)=>{
             console.log(e.target.checked);
             console.log(this)
-        }
+        };
+
         render () {
             const { visible, onCancel, form, initialVersion } = this.props;
             initialVersion;
             const { fileList } = this.state;
-            const {getFieldDecorator} = form;
+            const { getFieldDecorator } = form;
             const isChecked = (rule, value, callback) => {
                 if (value !== true) {
                     callback('请您同意使用条款！')
-
                 }
-                callback()
+                callback();
             };
             const props = {
                 multiple: false,
                 action: '/api/api/v1/applications.versions.create',
-                onRemove: file=> {
-                    this.setState(state=> {
+                onRemove: (file) => {
+                    this.setState((state) => {
                         const index = state.fileList.indexOf(file);
                         const newFileList = state.fileList.slice();
                         newFileList.splice(index, 1);
                         return {
                             fileList: newFileList
-                        }
-                    })
+                        };
+                    });
                 },
-                beforeUpload: file=> {
-                    this.setState(state=>({
+                beforeUpload: (file) => {
+                    this.setState(state => ({
                         fileList: [...state.fileList, file]
                     }));
-                    return false
+                    return false;
                 },
                 fileList
-            }
+            };
             return (
                 <Modal
                     visible={visible}
@@ -112,7 +113,10 @@ const CollectionCreateForm = Form.create()(
                             {getFieldDecorator('version', { initialValue: this.state.initialVersion }, {
                                 rules: [{ required: true, message: '新版本号大于旧版本号！' }]
                             })(
-                                <Input type="number"/>
+                                <Input
+                                    type="number"
+                                    min={1}
+                                />
                             )}
                         </Form.Item>
                         <Form.Item label="上传文件">
@@ -147,5 +151,5 @@ const CollectionCreateForm = Form.create()(
                 </Modal>
             );
         }
-    })
-export default CollectionCreateForm
+    });
+export default CollectionCreateForm;
