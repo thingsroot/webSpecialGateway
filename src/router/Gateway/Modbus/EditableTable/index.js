@@ -3,6 +3,7 @@ import {Table, Input, Button, Popconfirm, Form, InputNumber, Select} from 'antd'
 import { inject, observer} from 'mobx-react';
 const EditableContext = React.createContext();
 const { Option } = Select;
+import './index.scss'
 
 const EditableRow = ({form, index, ...props}) => (
     <EditableContext.Provider
@@ -89,6 +90,7 @@ class EditableCell extends React.Component {
                     onPressEnter={this.save}
                     onBlur={this.save}
                     disabled={this.props.disabled}
+                    autocomplete="off"
                 />
             )
         }
@@ -286,15 +288,7 @@ class EditableTable extends React.Component {
             }
         });
         return (
-            <div>
-                <Button
-                    onClick={this.handleAdd}
-                    disabled={this.props.disable}
-                    type="primary"
-                    style={{marginBottom: 16}}
-                >
-                    Add
-                </Button>
+            <div className="editableTable">
                 <Table
                     components={components}
                     rowClassName={() => 'editable-row'}
@@ -302,6 +296,13 @@ class EditableTable extends React.Component {
                     dataSource={dataSource}
                     columns={columns}
                 />
+                <Button
+                    onClick={this.handleAdd}
+                    disabled={this.props.disable}
+                    type="primary"
+                >
+                    添加设备列表
+                </Button>
             </div>
         );
     }

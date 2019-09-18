@@ -1,8 +1,8 @@
-import React from 'react'
+import React, {Fragment} from 'react'
 import {
     Button,
     Checkbox,
-    Col, Collapse,
+    Col,
     Divider,
     Form,
     Icon,
@@ -13,9 +13,10 @@ import {
     Table,
     Upload
 } from 'antd';
-import { inject, observer} from 'mobx-react';
-import { withRouter } from 'react-router-dom';
+import {inject, observer} from 'mobx-react';
+import {withRouter} from 'react-router-dom';
 import http from '../../../../utils/Server';
+
 const EditableContext = React.createContext();
 
 const EditableRow = ({form, index, ...props}) => (
@@ -27,17 +28,11 @@ const EditableRow = ({form, index, ...props}) => (
     </EditableContext.Provider>
 );
 const EditableFormRow = Form.create()(EditableRow);
+
 function cancel () {
     message.error('取消卸载应用');
-  }
-const {Panel} = Collapse;
-const coustomPanelStyle = {
-    background: '#f7f7f7',
-    borderRadius: 4,
-    marginBottom: 24,
-    border: 0,
-    overflow: 'hidden'
 }
+
 @withRouter
 class EditableCell extends React.Component {
     state = {
@@ -83,7 +78,7 @@ class EditableCell extends React.Component {
                     onPressEnter={this.save}
                     onBlur={this.save}
                     autoComplete="off"
-                   />)}
+                />)}
             </Form.Item>
         ) : (
             <div
@@ -120,6 +115,7 @@ class EditableCell extends React.Component {
         );
     }
 }
+
 @withRouter
 @inject('store')
 @observer
@@ -157,6 +153,7 @@ class MqttForm extends React.Component {
             fileList1: [],
             fileList2: [],
             disabled: true,
+            openDefault: false,
             serial_opt: {},
             options: {
                 enable_data_cache: true,
@@ -186,9 +183,10 @@ class MqttForm extends React.Component {
             }
         };
     }
+
     componentDidMount () {
         if (this.props.pane.conf) {
-            const { conf } = this.props.pane;
+            const {conf} = this.props.pane;
             this.setState({
                 options: conf.options,
                 mqtt: conf.mqtt,
@@ -201,16 +199,17 @@ class MqttForm extends React.Component {
             }
         }
     }
+
     setSetting = (type, val, name) => {
-            if (type !== 'mqttForm') {
-                this.setState({
-                    [type]: Object.assign({}, this.state[type], {[name]: val})
-                })
-            } else {
-                this.setState({
-                    serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
-                })
-            }
+        if (type !== 'mqttForm') {
+            this.setState({
+                [type]: Object.assign({}, this.state[type], {[name]: val})
+            })
+        } else {
+            this.setState({
+                serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
+            })
+        }
     }
     getTextInfo = (file) => {
         const reader = new FileReader();
@@ -219,7 +218,7 @@ class MqttForm extends React.Component {
             let targetNum = result.target.result;
             // targetNum = targetNum.replace(/[\n\r]/g, '');
             // targetNum = targetNum.replace(/[ ]/g, '');
-           this.setSetting('mqtt', targetNum, 'tls_cert')
+            this.setSetting('mqtt', targetNum, 'tls_cert')
         }
         return false;
     };
@@ -343,115 +342,103 @@ class MqttForm extends React.Component {
         this.setState({seniorIndeterminate: !this.state.seniorIndeterminate})
     };
     changeGroup = (checkedValues) => {
-        this.setSetting('mqttForm', [...checkedValues], 'groupList' )
+        this.setSetting('mqttForm', [...checkedValues], 'groupList')
     };
 
     moreChange () {
         if (this.state.seniorIndeterminate) {
             return (
-                <Collapse
-                    bordered={false}
-                    expandIcon={({isActive}) =>
-                        <Icon
-                            type="caret-right"
-                            rotate={isActive ? 90 : 0}
-                        />}
-                >
-                    <Panel
-                        header="更多"
-                        key="1"
-                        style={coustomPanelStyle}
-                    >
-                        <Form.Item>
-                            {/* <Checkbox.Group
+                <Form.Item>
+                    {/* <Checkbox.Group
                                 style={{width: '100%'}}
                                 onChange={this.changeGroup}
                             > */}
-                                <Row className="highSenior">
-                                    <Col span={24}>
-                                        <Checkbox
-                                            disabled={this.state.disabled}
-                                            value="禁止数据上送"
-                                            checked={this.state.options_ex.diable_data}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'diable_data')
-                                            }}
-                                        >禁止数据上送：</Checkbox>
-                                    </Col>
-                                    <Col
-                                        span={24}
-                                        style={{display: 'flex'}}
-                                    >
-                                        <span style={{lineHeight: '30px'}}>事件上送（最小等级）：</span>
-                                        <Input
-                                            style={{width: 150}}
-                                            value={this.state.options_ex.upload_event}
-                                            disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.value, 'upload_event')
-                                            }}
-                                        />
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox
-                                            // value="禁止设备输出"
-                                            checked={this.state.options_ex.disable_output}
-                                            disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'disable_output')
-                                            }}
-                                        >
-                                        禁止设备输出：</Checkbox>
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox
-                                            value="禁止设备指令"
-                                            checked={this.state.options_ex.diable_command}
-                                            disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'diable_command')
-                                            }}
-                                        >禁止设备指令：</Checkbox>
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox
-                                            value="禁止设备信息上送"
-                                            checked={this.state.options_ex.disable_devices}
-                                            disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'disable_devices')
-                                            }}
-                                        >禁止设备信息上送：</Checkbox>
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox
-                                            value="禁止上送紧急数据"
-                                            checked={this.state.options_ex.disable_data_em}
-                                            disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'disable_data_em')
-                                            }}
-                                        >禁止上送紧急数据：</Checkbox>
-                                    </Col>
-                                    <Col span={24}>
-                                        <Checkbox
-                                            value="禁止压缩（调试使用"
-                                            checked={this.state.options_ex.disable_compress}
-                                            disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'disable_compress')
-                                            }}
-                                        >禁止压缩（调试使用）：</Checkbox>
-                                    </Col>
-                                </Row>
-                            {/* </Checkbox.Group> */}
-                        </Form.Item>
-                    </Panel>
-
-                </Collapse>
+                    <Row className="highSenior">
+                        <Col span={24}>
+                            <Checkbox
+                                disabled={this.state.disabled}
+                                value="禁止数据上送"
+                                checked={this.state.options_ex.diable_data}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.checked, 'diable_data')
+                                }}
+                            >禁止数据上送：</Checkbox>
+                        </Col>
+                        <Col
+                            span={24}
+                            style={{display: 'flex'}}
+                        >
+                            <label
+                                className={this.state.disabled ? 'disableColor' : ''}
+                                style={{lineHeight: '30px', marginLeft: '7px'}}
+                            >事件上送（最小等级）：</label>
+                            <Input
+                                style={{width: 150}}
+                                value={this.state.options_ex.upload_event}
+                                disabled={this.state.disabled}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.value, 'upload_event')
+                                }}
+                            />
+                        </Col>
+                        <Col span={24}>
+                            <Checkbox
+                                // value="禁止设备输出"
+                                checked={this.state.options_ex.disable_output}
+                                disabled={this.state.disabled}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.checked, 'disable_output')
+                                }}
+                            >
+                                禁止设备输出：</Checkbox>
+                        </Col>
+                        <Col span={24}>
+                            <Checkbox
+                                value="禁止设备指令"
+                                checked={this.state.options_ex.diable_command}
+                                disabled={this.state.disabled}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.checked, 'diable_command')
+                                }}
+                            >禁止设备指令：</Checkbox>
+                        </Col>
+                        <Col span={24}>
+                            <Checkbox
+                                value="禁止设备信息上送"
+                                checked={this.state.options_ex.disable_devices}
+                                disabled={this.state.disabled}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.checked, 'disable_devices')
+                                }}
+                            >禁止设备信息上送：</Checkbox>
+                        </Col>
+                        <Col span={24}>
+                            <Checkbox
+                                value="禁止上送紧急数据"
+                                checked={this.state.options_ex.disable_data_em}
+                                disabled={this.state.disabled}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.checked, 'disable_data_em')
+                                }}
+                            >禁止上送紧急数据：</Checkbox>
+                        </Col>
+                        <Col span={24}>
+                            <Checkbox
+                                value="禁止压缩（调试使用"
+                                checked={this.state.options_ex.disable_compress}
+                                disabled={this.state.disabled}
+                                onChange={(e) => {
+                                    this.setSetting('options_ex', e.target.checked, 'disable_compress')
+                                }}
+                            >禁止压缩（调试使用）：</Checkbox>
+                        </Col>
+                    </Row>
+                    {/* </Checkbox.Group> */}
+                </Form.Item>
             )
         }
     }
+
     toggleDisable = () => {
         if (!this.state.disabled) {
             const data = {
@@ -466,11 +453,11 @@ class MqttForm extends React.Component {
                 },
                 id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`
             }
-            http.post('/api/gateways_applications_conf', data).then(res=>{
+            http.post('/api/gateways_applications_conf', data).then(res => {
                 if (res.ok) {
                     let title = '配置应用' + data.inst + '请求'
                     message.info(title + '等待网关响应!')
-                    this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                    this.props.store.action.pushAction(res.data, title, '', data, 10000, () => {
                         this.props.fetch()
                     })
                 }
@@ -478,23 +465,24 @@ class MqttForm extends React.Component {
         }
         this.setState({disabled: !this.state.disabled})
     };
-    removeApp = () =>{
+    removeApp = () => {
         const data = {
             gateway: this.props.match.params.sn,
             inst: this.props.pane.inst_name,
             id: `app_remove/${this.props.match.params.sn}/${this.props.pane.inst_name}/${new Date() * 1}`
         }
-        http.post('/api/gateways_applications_remove', data).then(res=>{
+        http.post('/api/gateways_applications_remove', data).then(res => {
             if (res.ok) {
                 let title = '卸载应用' + data.inst + '请求'
                 message.info(title + '等待网关响应!')
-                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                this.props.store.action.pushAction(res.data, title, '', data, 10000, () => {
                     this.props.fetch()
                     this.props.setActiveKey('0')
                 })
             }
         })
     }
+
     render () {
         // const {getFieldDecorator} = this.props.form;
         const {dataSource, fileList, fileList1, fileList2, disabled, mqtt, options} = this.state;
@@ -521,255 +509,306 @@ class MqttForm extends React.Component {
         })
         return (
             <Form
+                layout="inline"
                 className="login-form login-form-mqtt"
             >
-                <Row gutter={24}>
-                    <Col span={24}>
-                        <Button
-                            style={{marginLeft: '10pxs', marginRight: '20px'}}
-                            type="primary"
-                            onClick={this.toggleDisable}
+                <Button
+                    style={{marginLeft: '10pxs', marginRight: '20px'}}
+                    type="primary"
+                    onClick={this.toggleDisable}
+                >
+                    {!this.state.disabled ? '保存' : '编辑'}
+                </Button>
+                {
+                    !disabled
+                        ? <Button
+                            style={{
+                                marginRight: '20px'
+                            }}
+                            onClick={() => {
+                                this.setState({disabled: true})
+                            }}
                         >
-                            {!this.state.disabled ? '保存' : '编辑'}
-                        </Button>
-                        {
-                            !disabled
-                            ? <Button
-                                style={{
-                                    marginRight: '20px'
-                                }}
-                                onClick={()=>{
-                                    this.setState({disabled: true})
-                                }}
-                              >
                             取消编辑
-                              </Button>
-                            : ''
-                        }
+                        </Button>
+                        : ''
+                }
 
-                        <Popconfirm
-                            title="确定要删除应用吗?"
-                            onConfirm={this.removeApp}
-                            onCancel={cancel}
-                            okText="删除"
-                            cancelText="取消"
-                        >
-                            <Button
-                                style={{marginLeft: '10pxs'}}
-                                type="danger"
-                            >
-                                删除
-                            </Button>
-                        </Popconfirm>
-                        <Divider>服务器信息</Divider>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="MQTT地址：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.server ? mqtt.server : ''}
-                                    onChange={(e) => {
-                                    this.setSetting('mqtt', e.target.value, 'server')
-                                }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="MQTT端口：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.port ? mqtt.port : ''}
-                                    onChange={(e) => {
-                                        this.setSetting('mqtt', e.target.value, 'port')
-                                    }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="MQTT用户(留空使用标准规则)：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.username ? mqtt.username : ''}
-                                    onChange={(e) => {
-                                        this.setSetting('mqtt', e.target.value, 'username')
-                                    }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="MQTT密码(留空使用标准规则)：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.password ? mqtt.password : ''}
-                                    onChange={(e) => {
-                                        this.setSetting('mqtt', e.target.value, 'password')
-                                    }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="客户端ID(留空使用标准规则)：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.client_id ? mqtt.client_id : ''}
-                                    onChange={(e) => {
-                                        this.setSetting('mqtt', e.target.value, 'client_id')
-                                    }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="使用TLS：">
-                            <Checkbox
-                                disabled={disabled}
-                                checked={this.state.tls_cert}
-                                onChange={(e) => {
-                                    this.setState({
-                                        tls_cert: e.target.checked
-                                    })
-                                }}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                        <Form.Item label="CA证书(文本)：">
-                            <Upload
-                                action=""
-                                name="file1"
-                                beforeUpload={this.getTextInfo}
-                                fileList={fileList}
-                                onChange={this.handleListChange}
-                            >
-                                <Button disabled={disabled}>
-                                    <Icon type="upload"/> 点击上传
-                                </Button>
-                            </Upload>
-                        </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                        <Form.Item label="Client证书(文本)：">
-                            <Upload
-                                action=""
-                                name="file2"
-                                beforeUpload={this.getTextInfo1}
-                                fileList={fileList1}
-                                onChange={this.handleListChange1}
-                            >
-                                <Button disabled={disabled}>
-                                    <Icon type="upload"/> 点击上传
-                                </Button>
-                            </Upload>
-                        </Form.Item>
-                    </Col>
-                    <Col span={24}>
-                        <Form.Item label="Client密钥(文本)：">
-                            <Upload
-                                action=""
-                                beforeUpload={this.getTextInfo2}
-                                name="file3"
-                                fileList={fileList2}
-                                onChange={this.handleListChange2}
-                            >
-                                <Button disabled={disabled}>
-                                    <Icon type="upload"/> 点击上传
-                                </Button>
-                            </Upload>
-                        </Form.Item>
-                    </Col>
-                    <Divider>数据传输选项</Divider>
-                    <Col span={12}>
-                        <Form.Item label="上送周期(秒)：">
-                            <InputNumber
-                                value={options && options.period ? options.period : ''}
-                                disabled={disabled}
-                                onChange={(e) => {
-                                    this.setSetting('options', e, 'period')
-                                }}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="最大数据间隔(秒)：">
-                            <InputNumber
-                                value={options && options.ttl ? options.ttl : ''}
-                                disabled={disabled}
-                                onChange={(value) => {
-                                    this.setSetting('options', value, 'ttl')
-                                }}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="最大打包数量：">
-                            <InputNumber
-                                value={options && options.data_upload_dpp ? options.data_upload_dpp : ''}
-                                disabled={disabled}
-                                onChange={(value) => {
-                                    this.setSetting('options', value, 'data_upload_dpp')
-                                }}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={12}>
-                        <Form.Item label="开启短线缓存：">
-                           <Checkbox
-                               disabled={disabled}
-                               defaultChecked={options && options.enable_data_cache ? options.enable_data_cache : false}
-                               onChange={(e) => {
-                                   this.setSetting('options', e.target.checked, 'enable_data_cache')
-                               }}
-                           />
-                        </Form.Item>
-                    </Col>
-                    <Divider>需要上传的设备列表</Divider>
-                    <Col span={24}>
-                        <Form.Item label="需要上传的设备列表">
-                            <div>
-                                <Button
-                                    onClick={this.handleAdd}
-                                    type="primary"
-                                    style={{marginBottom: 16}}
-                                    disabled={disabled}
-                                >
-                                    Add
-                                </Button>
-                                <Table
-                                    components={components}
-                                    rowClassName={() => 'editable-row'}
-                                    bordered
-                                    dataSource={dataSource}
-                                    columns={columns}
-                                />
-                            </div>
-                        </Form.Item>
-                    </Col>
-                    <Divider>高级选项</Divider>
-                    <Col span={4}>
-                        <Form.Item>
-                            <span>高级选项：</span>
-                            <Checkbox
-                                checked={this.state.seniorIndeterminate}
-                                onChange={this.seniorChange}
-                                disabled={disabled}
-                            />
-                        </Form.Item>
+                <Popconfirm
+                    title="确定要删除应用吗?"
+                    onConfirm={this.removeApp}
+                    onCancel={cancel}
+                    okText="删除"
+                    cancelText="取消"
+                >
+                    <Button
+                        style={{marginLeft: '10pxs'}}
+                        type="danger"
+                    >
+                        删除
+                    </Button>
+                </Popconfirm>
+                <Divider>服务器信息</Divider>
+                <Row>
+                    <Col span={8}>
+                    <Form.Item label="MQTT地址：">
+                        <Input
+                            allowClear={!disabled}
+                            autoComplete="off"
+                            disabled={disabled}
+                            value={mqtt && mqtt.server ? mqtt.server : ''}
+                            onChange={(e) => {
+                                this.setSetting('mqtt', e.target.value, 'server')
+                            }}
+                        />
+                    </Form.Item>
                     </Col>
                     <Col span={8}>
-                        <Form.Item>
-                            {this.moreChange()}
-                        </Form.Item>
+                    <Form.Item label="MQTT端口：">
+                        <Input
+                            allowClear={!disabled}
+                            autoComplete="off"
+                            disabled={disabled}
+                            value={mqtt && mqtt.port ? mqtt.port : ''}
+                            onChange={(e) => {
+                                this.setSetting('mqtt', e.target.value, 'port')
+                            }}
+                        />
+                    </Form.Item>
                     </Col>
+                    <Col span={8}>
+                    <Form.Item label="???：">
+                        <Checkbox
+                            disabled={disabled}
+                            checked={this.state.openDefault}
+                            onChange={(e) => {
+                                this.setState({
+                                    openDefault: e.target.checked
+                                })
+                            }}
+                        />
+                    </Form.Item>
+                    </Col>
+                    {
+                        this.state.openDefault
+                            ? <Fragment>
+                                <Col span={8}>
+                                <Form.Item label="MQTT用户：">
+                                    <Input
+                                        allowClear={!disabled}
+                                        autoComplete="off"
+                                        disabled={disabled}
+                                        value={mqtt && mqtt.username ? mqtt.username : ''}
+                                        onChange={(e) => {
+                                            this.setSetting('mqtt', e.target.value, 'username')
+                                        }}
+                                    />
+                                </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                <Form.Item label="MQTT密码：">
+                                    <Input
+                                        allowClear={!disabled}
+                                        autoComplete="off"
+                                        disabled={disabled}
+                                        value={mqtt && mqtt.password ? mqtt.password : ''}
+                                        onChange={(e) => {
+                                            this.setSetting('mqtt', e.target.value, 'password')
+                                        }}
+                                    />
+                                </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                <Form.Item label="客户端ID：">
+                                    <Input
+                                        allowClear={!disabled}
+                                        autoComplete="off"
+                                        disabled={disabled}
+                                        value={mqtt && mqtt.client_id ? mqtt.client_id : ''}
+                                        onChange={(e) => {
+                                            this.setSetting('mqtt', e.target.value, 'client_id')
+                                        }}
+                                    />
+                                </Form.Item>
+                                </Col>
+                            </Fragment> : null
+                    }
+                    <Col span={24}>
+                    <Form.Item label="使用TLS：">
+                        <Checkbox
+                            disabled={disabled}
+                            checked={this.state.tls_cert}
+                            onChange={(e) => {
+                                this.setState({
+                                    tls_cert: e.target.checked
+                                })
+                            }}
+                        />
+                    </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                    <Form.Item label="CA证书(文本)：">
+                        <Upload
+                            action=""
+                            name="file1"
+                            beforeUpload={this.getTextInfo}
+                            fileList={fileList}
+                            onChange={this.handleListChange}
+                        >
+                            <Button disabled={disabled}>
+                                <Icon type="upload"/> 点击上传
+                            </Button>
+                        </Upload>
+                    </Form.Item>
+                    </Col>
+                    {
+                        this.state.tls_cert
+                            ? <Fragment>
+                                <Col span={8}>
+                                <Form.Item label="Client证书(文本)：">
+                                    <Upload
+                                        action=""
+                                        name="file2"
+                                        beforeUpload={this.getTextInfo1}
+                                        fileList={fileList1}
+                                        onChange={this.handleListChange1}
+                                    >
+                                        <Button disabled={disabled}>
+                                            <Icon type="upload"/> 点击上传
+                                        </Button>
+                                    </Upload>
+                                </Form.Item>
+                                </Col>
+                                <Col span={8}>
+                                <Form.Item label="Client密钥(文本)：">
+                                    <Upload
+                                        action=""
+                                        beforeUpload={this.getTextInfo2}
+                                        name="file3"
+                                        fileList={fileList2}
+                                        onChange={this.handleListChange2}
+                                    >
+                                        <Button disabled={disabled}>
+                                            <Icon type="upload"/> 点击上传
+                                        </Button>
+                                    </Upload>
+                                </Form.Item>
+                                </Col>
+                            </Fragment> : null
+                    }
                 </Row>
+                <Divider>数据传输选项</Divider>
+                <Col span={6}>
+                <Form.Item label="上送周期(秒)：">
+                    <InputNumber
+                        value={options && options.period ? options.period : ''}
+                        disabled={disabled}
+                        onChange={(e) => {
+                            this.setSetting('options', e, 'period')
+                        }}
+                    />
+                </Form.Item>
+                </Col>
+                <Col span={6}>
+                <Form.Item label="最大数据间隔(秒)：">
+                    <InputNumber
+                        value={options && options.ttl ? options.ttl : ''}
+                        disabled={disabled}
+                        onChange={(value) => {
+                            this.setSetting('options', value, 'ttl')
+                        }}
+                    />
+                </Form.Item>
+                </Col>
+                <Col span={6}>
+                <Form.Item label="最大打包数量：">
+                    <InputNumber
+                        value={options && options.data_upload_dpp ? options.data_upload_dpp : ''}
+                        disabled={disabled}
+                        onChange={(value) => {
+                            this.setSetting('options', value, 'data_upload_dpp')
+                        }}
+                    />
+                </Form.Item>
+                </Col>
+                <Col span={6}>
+                <Form.Item label="开启短线缓存：">
+                    <Checkbox
+                        disabled={disabled}
+                        defaultChecked={options && options.enable_data_cache ? options.enable_data_cache : false}
+                        onChange={(e) => {
+                            this.setSetting('options', e.target.checked, 'enable_data_cache')
+                        }}
+                    />
+                </Form.Item>
+                </Col>
+                <Divider>需要上传的设备列表</Divider>
+                <Form.Item label="需要上传的设备列表">
+                    <div>
+                        <Button
+                            onClick={this.handleAdd}
+                            type="primary"
+                            style={{marginBottom: 16}}
+                            disabled={disabled}
+                        >Add</Button>
+                        <Table
+                            components={components}
+                            rowClassName={() => 'editable-row'}
+                            bordered
+                            dataSource={dataSource}
+                            columns={columns}
+                        />
+                    </div>
+                </Form.Item>
+                <Divider>高级选项</Divider>
+                <Form.Item>
+                    <span>高级选项：</span>
+                    <Checkbox
+                        checked={this.state.seniorIndeterminate}
+                        onChange={this.seniorChange}
+                        disabled={disabled}
+                    />
+                </Form.Item>
+                <Form.Item>
+                    {this.moreChange()}
+                </Form.Item>
+                <br/>
+                <Button
+                    style={{marginLeft: '10pxs', marginRight: '20px'}}
+                    type="primary"
+                    onClick={this.toggleDisable}
+                >
+                    {!this.state.disabled ? '保存' : '编辑'}
+                </Button>
+                {
+                    !disabled
+                        ? <Button
+                            style={{
+                                marginRight: '20px'
+                            }}
+                            onClick={() => {
+                                this.setState({disabled: true})
+                            }}
+                        >
+                            取消编辑
+                        </Button>
+                        : ''
+                }
+
+                <Popconfirm
+                    title="确定要删除应用吗?"
+                    onConfirm={this.removeApp}
+                    onCancel={cancel}
+                    okText="删除"
+                    cancelText="取消"
+                >
+                    <Button
+                        style={{marginLeft: '10pxs'}}
+                        type="danger"
+                    >
+                        删除
+                    </Button>
+                </Popconfirm>
             </Form>
         )
     }

@@ -300,7 +300,7 @@ class Modbus extends Component {
                <div className="ModbusModal">
                    <Form layout="inline">
                        <Divider  orientation="left">应用配置信息</Divider>
-                       <Form.Item label="采集间隔:">
+                       <Form.Item label="采集间隔:（ms）">
                            <InputNumber
                                min={1}
                                max={10000}
@@ -552,6 +552,7 @@ class Modbus extends Component {
         let inst = undefined;
         const applist = this.state.panes;
         applist && applist.length > 0 && applist.map((item, key) =>{
+            console.log(item, key)
             if (item.inst_name.indexOf(key + 1) === -1) {
                 if (!inst){
                     inst = 'modbus_' + (key + 1)
@@ -615,11 +616,11 @@ class Modbus extends Component {
         this[action](targetKey);
     };
     add = () => {
-        const { data } = this.state;
+        const { panes } = this.state;
         const activeKey = `newTab${this.newTabIndex++}`;
-        const inst_name = 'Modbus配置' + (this.state.data.length + 1);
-        data.push({ inst_name, content: 'New Tab Pane' + activeKey, key: activeKey });
-        this.setState({ data, activeKey });
+        const inst_name = 'Modbus配置' + (this.state.panes.length + 1);
+        panes.push({ title: inst_name, content: 'New Tab Pane' + activeKey, key: activeKey });
+        this.setState({ panes, activeKey });
     };
     remove = targetKey => {
         let { activeKey } = this.state;
@@ -747,18 +748,19 @@ class Modbus extends Component {
                     !this.state.loading
                         ? this.state.panes && this.state.panes.length > 0
                                 ? <Tabs
-                                    hideAdd
                                     onChange={this.onChange}
                                     activeKey={this.state.activeKey}
-                                    type="card"
+                                    type="editable-card"
                                     onEdit={this.onEdit}
                                     // tabBarExtraContent={operations}
                                   >
                             {
                                 this.state.panes.map((pane, key) => (
                                     <TabPane
-                                        tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
+                                        // tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('modbus_', '通道') : pane.inst_name}
+                                        tab={pane.inst_name}
                                         key={key}
+                                        closable={pane.closable}
                                     >
                                         <ModbusPane
                                             key={key}

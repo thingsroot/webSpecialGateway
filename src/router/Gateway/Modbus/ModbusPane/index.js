@@ -107,7 +107,7 @@ class ModbusPane extends Component {
             },
             socket_opt: {
                 host: '127.0.0.1',
-                port: 499,
+                port: 502,
                 nodelay: true
             },
             devsCloumns: [
@@ -165,6 +165,12 @@ class ModbusPane extends Component {
                     render: (conf, record)=>{
                         return (
                             <div>
+                                <Button
+                                    disabled={this.state.disabled}
+                                    onClick={()=>{
+                                        this.onViewTemplate(record.name, record.latest_version)
+                                    }}
+                                > 查看 </Button>&nbsp;&nbsp;
                                 {
                                     this.state.templateList.length >= 1 ? (
                                         <Popconfirm
@@ -439,6 +445,7 @@ class ModbusPane extends Component {
                                 this.setSetting('loop_gap', val)
                             }}
                         />
+                        &nbsp; ms
                     </Form.Item>
                     <Form.Item label="协议类型:">
                         <Select
@@ -462,7 +469,7 @@ class ModbusPane extends Component {
                             }}
                         >
                             <Option value="serial">串口</Option>
-                            <Option value="TCP">TCP协议</Option>
+                            <Option value="TCP">Internet</Option>
                         </Select>
                     </Form.Item>
                 </Form>
@@ -479,8 +486,8 @@ class ModbusPane extends Component {
                                         this.setSetting('serial_opt', value, 'port')
                                     }}
                                 >
-                                    <Option value="/dev/ttyS1">/dev/ttyS1</Option>
-                                    <Option value="/dev/ttyS2">/dev/ttyS2</Option>
+                                    <Option value="/dev/ttyS1">COM1</Option>
+                                    <Option value="/dev/ttyS2">COM2</Option>
                                 </Select>
                             </Form.Item>
                             <Form.Item label="波特率:">
@@ -556,7 +563,8 @@ class ModbusPane extends Component {
                         </Form>
                         </div>
                         : <div>
-                        <Form layout="inline">
+                            <Divider  orientation="left">Internet</Divider>
+                            <Form layout="inline">
                             <Form.Item label="IP地址:">
                                 <Input
                                     disabled={disabled}
@@ -567,11 +575,13 @@ class ModbusPane extends Component {
                                 />
                             </Form.Item>
                             <Form.Item label="端口:">
-                                <Input
+                                <InputNumber
                                     disabled={disabled}
+                                    min={1}
+                                    max={65535}
                                     defaultValue={socket_opt.port}
-                                    onChange={(value)=>{
-                                        this.setSetting('socket_opt', value, 'port')
+                                    onChange={(val)=>{
+                                        this.setSetting('loop_gap', val)
                                     }}
                                 />
                             </Form.Item>
@@ -649,14 +659,13 @@ class ModbusPane extends Component {
                     />
                 </Modal>
                 <Divider orientation="left">设备列表</Divider>
-                <p>|设备列表</p>
                     <EditableTable
                         disable={disabled}
                         getdevs={this.getDevs}
                         templateList={this.state.templateList}
                         devs={this.props.pane.conf.devs}
                     />
-                <div>
+                <div style={{display: 'none'}}>
                     使用网关sn作为设备sn的前缀:
                     <Checkbox
                         disabled={disabled}
@@ -667,6 +676,39 @@ class ModbusPane extends Component {
                     />
                 </div>
                 {/* </Carousel> */}
+                <Button
+                    style={{ marginTop: '10px'}}
+                    type="primary"
+                    onClick={this.toggleDisable}
+                >
+                    {!this.state.disabled ? '保存' : '编辑'}
+                </Button>
+                &nbsp;&nbsp;
+                {
+                    !disabled
+                        ? <Button
+                            onClick={()=>{
+                                this.setState({
+                                    disabled: true
+                                })
+                            }}
+                        >
+                            取消编辑
+                        </Button>
+                        : ''
+                }
+                &nbsp;&nbsp;
+                <Popconfirm
+                    title="确定要删除应用Modbus吗?"
+                    onConfirm={this.removeModbus}
+                    onCancel={cancel}
+                    okText="确定"
+                    cancelText="取消"
+                >
+                    <Button
+                        type="danger"
+                    >删除</Button>
+                </Popconfirm>
             </div>
         );
     }
