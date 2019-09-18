@@ -78,7 +78,7 @@ class EditableCell extends React.Component {
                     onPressEnter={this.save}
                     onBlur={this.save}
                     autoComplete="off"
-                />)}
+                   />)}
             </Form.Item>
         ) : (
             <div
@@ -528,7 +528,7 @@ class MqttForm extends React.Component {
                             onClick={() => {
                                 this.setState({disabled: true})
                             }}
-                        >
+                          >
                             取消编辑
                         </Button>
                         : ''
@@ -789,7 +789,7 @@ class MqttForm extends React.Component {
                             onClick={() => {
                                 this.setState({disabled: true})
                             }}
-                        >
+                          >
                             取消编辑
                         </Button>
                         : ''
