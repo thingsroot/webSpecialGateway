@@ -7,8 +7,15 @@
   cursor: pointer;
 }
 
-.editable-row:hover .editable-cell-value-wrap {
-  border: 1px solid #d9d9d9;
-  border-radius: 4px;
-  padding: 4px 11px;
+//.editable-row:hover .editable-cell-value-wrap {
+//  border: 1px solid #d9d9d9;
+//  border-radius: 4px;
+//  padding: 4px 11px;
+//}
+
+.editableTable .ant-table-wrapper {
+  margin-bottom: -40px;
+}
+.ant-table-wrapper input {
+  width: 10rem;
 }
