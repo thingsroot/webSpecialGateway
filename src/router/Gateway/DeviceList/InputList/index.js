@@ -31,23 +31,7 @@ class ExpandedRowRender extends PureComponent {
                 return (<span title={text}>{text}</span>)
             }},
             { title: '时间', dataIndex: 'tm', key: 'tm', width: '180px' },
-            { title: '质量戳', dataIndex: 'q', key: 'q', width: '60px' },
-            {
-                title: '操作',
-                dataIndex: 'operation',
-                key: 'operation',
-                width: '120px',
-                render: (record, props) => {
-                return (
-                    <span className="table-operation">
-                    <Button onClick={()=>{
-                        this.showModal(props)
-                    }}
-                    >浏览数据</Button>
-                    </span>
-                )
-                }
-            }
+            { title: '质量戳', dataIndex: 'q', key: 'q', width: '60px' }
         ]
     }
 

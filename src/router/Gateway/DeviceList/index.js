@@ -23,7 +23,7 @@ const columns = [{
         className: 'cursor'
         // sorter: true
     }, {
-        title: 'I/O/C',
+        title: '输入/输出',
         dataIndex: 'meta.ioc',
         key: 'meta.ioc',
         className: 'cursor'
@@ -36,7 +36,7 @@ const columns = [{
         className: 'cursor'
         // sorter: true
     }, {
-        title: '所属实例',
+        title: '所属通道',
         key: 'meta.app_inst',
         dataIndex: 'meta.app_inst',
         className: 'cursor'
@@ -141,7 +141,7 @@ class DevicesList extends Component {
         let data = [];
         if (devices && devices.length > 0){
             devices.map((item=>{
-                item.meta.ioc = '' + (item.inputs ? item.inputs.length : '0') + '/' + (item.outputs ? Object.keys(item.outputs).length : '0') + '/' + (item.commands ? item.commands.length : '0');
+                item.meta.ioc = '' + (item.inputs ? item.inputs.length : '0') + '/' + (item.outputs ? Object.keys(item.outputs).length : '0');
                 if (item.meta.outputs > 0){
                     item.meta.set_data = true
                 }
@@ -200,9 +200,9 @@ class DevicesList extends Component {
             <div>
                 <div className="toolbar">
                     <p style={{color: '#ccc'}}>
-                        {'数据上送周期: ' + gatewayInfo.data.data_upload_period + ' 毫秒'}
+                        {/* {'数据上送周期: ' + gatewayInfo.data.data_upload_period + ' 毫秒'}
                         <span style={{padding: '0 5px'}}></span>
-                        {'全量数据上送周期: ' + gatewayInfo.data.data_upload_cov_ttl + ' 秒'}
+                        {'全量数据上送周期: ' + gatewayInfo.data.data_upload_cov_ttl + ' 秒'} */}
                     </p>
                     <p>
                         {
@@ -301,7 +301,7 @@ class DevicesList extends Component {
                         }
                         return className;
                     }}
-                    expandedRowRender={Collapses}
+                    expandedRowRender={this.state.uploadOneShort || gatewayInfo.data.data_upload ? Collapses : false}
                     expandRowByClick
                     pagination={false}
                 />

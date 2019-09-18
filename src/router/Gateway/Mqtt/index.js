@@ -680,7 +680,7 @@ class Mqtt extends Component {
                                 {this.state.modalKey === 0 && this.state.modalKey !== 1 && this.state.modalKey !== 2
                                     ? <Fragment>
                                         <Col span={24}>
-                                            {/* <Form.Item label="实例名：">
+                                            <Form.Item label="实例名：">
                                                     <Input
                                                         allowClear
                                                         autoComplete="off"
@@ -689,7 +689,7 @@ class Mqtt extends Component {
                                                             this.setSetting('mqttForm', e.target.value, 'instance')
                                                         }}
                                                     />
-                                            </Form.Item> */}
+                                            </Form.Item>
                                             <Divider>服务器信息</Divider>
                                         </Col>
                                         <Col span={12}>

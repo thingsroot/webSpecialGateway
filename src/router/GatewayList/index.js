@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import http from '../../utils/Server';
-import { Table, Tabs, Button, message, Input, Icon, Tag } from 'antd';
+import { Table, Tabs, Button, message, Input, Icon, Tag, Menu, Dropdown, Popconfirm } from 'antd';
 import './style.scss';
 import { inject, observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -70,45 +70,36 @@ class MyGates extends Component {
                     }
                 }
               }, {
-                title: '设备数',
-                key: 'device_devs_num',
-                dataIndex: 'device_devs_num',
-                width: '65px'
-                }, {
-                title: '应用数',
-                key: 'device_apps_num',
-                dataIndex: 'device_apps_num',
-                width: '65px'
-                }, {
                 title: '操作',
                 key: 'action',
                 width: '240px',
                 render: (text, record, props) => {
                     props;
+                    console.log(record)
                   return (
                       <span>
                         <Link to={{
                             pathname: `/gateway/${record.sn}/devices`,
                             state: record
                         }}
+                            disabled={record.device_status !== 'ONLINE'}
                         >
-                            <Button key="1">设备</Button>
+                            <Button
+                                key="1"
+                                disabled={record.device_status !== 'ONLINE'}    
+                            >设备</Button>
                         </Link>
                         <span style={{padding: '0 1px'}} />
-                        <Link to={{
-                            pathname: `/gateway/${record.sn}/modbus`,
-                            state: record
-                        }}
+                        <Dropdown
+                            overlay={this.menu(record)}
+                            disabled={record.device_status !== 'ONLINE'}
                         >
-                            <Button key="2">modbus</Button>
-                        </Link>
-                        <Link to={{
-                            pathname: `/gateway/${record.sn}/mqtt`,
-                            state: record
-                        }}
-                        >
-                            <Button key="3">mqtt</Button>
-                        </Link>
+                            <Button
+                                disabled={record.device_status !== 'ONLINE'}
+                            >
+                            更多 <Icon type="down" />
+                            </Button>
+                        </Dropdown>
                         </span>
                     )
                 }
@@ -141,7 +132,46 @@ class MyGates extends Component {
     componentWillUnmount () {
         clearInterval(timer)
     }
-
+    menu = (record) => {
+        return (
+            <Menu>
+                <Menu.Item>
+                    <Link to={{
+                            pathname: `/gateway/${record.sn}/mqtt`,
+                            state: record
+                        }}
+                    >
+                        MQTT通道
+                    </Link>
+              </Menu.Item>
+                <Menu.Item>
+                    <Link to={{
+                            pathname: `/gateway/${record.sn}/modbus`,
+                            state: record
+                        }}
+                    >
+                            Modbus通道
+                    </Link>
+                </Menu.Item>
+              <Menu.Divider />
+                <Menu.Item key="4">
+                    <Popconfirm
+                        title="你确定要删除这个网关吗?"
+                        onConfirm={()=>{
+                            this.confirm(record)
+                        }}
+                        okText="确认"
+                        cancelText="取消"
+                    >
+                        <Button key="3"
+                            disabled={record.is_shared}
+                            style={{border: 'none'}}
+                            type="danger"
+                        >删除网关</Button>
+                    </Popconfirm>
+                </Menu.Item>
+            </Menu>)
+    }
     refreshDevicesList (){
         let status = this.state.status;
         http.get('/api/gateways_list?status=' + status).then(res=>{
@@ -165,16 +195,14 @@ class MyGates extends Component {
         })
     }
     confirm (record) {
-        if (record.device_status === 'ONLINE'){
-            http.post('/api/gateways_remove', {
-                name: record.name
-            }).then(res=>{
-                if (res.ok){
-                    message.success('移除网关成功')
-                }
-                this.refreshDevicesList()
-            })
-        }
+        http.post('/api/gateways_remove', {
+            name: record.name
+        }).then(res=>{
+            if (res.ok){
+                message.success('移除网关成功')
+            }
+            this.refreshDevicesList()
+        })
     }
 
     filterGatewayList = (data, filter_text) => {
@@ -243,18 +271,6 @@ class MyGates extends Component {
                         zIndex: 999
                     }}
                 >添加网关</Button>
-                <Button
-                    type="primary"
-                    style={{
-                        position: 'absolute',
-                        right: 0,
-                        top: 0,
-                        zIndex: 999
-                    }}
-                    onClick={()=>{
-                        this.props.history.push('/virtualgateways')
-                    }}
-                >添加虚拟网关</Button>
                 <div
                     style={{
                         display: 'flex',

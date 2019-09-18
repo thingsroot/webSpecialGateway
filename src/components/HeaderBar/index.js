@@ -61,35 +61,6 @@ class HeaderBar extends PureComponent {
                         个人设置
                     </span>
                 </Menu.Item>
-                <Menu.Item
-                    key="13"
-                    style={{lineHeight: '30px'}}
-                    onClick={
-                        ()=>{
-                            window.location.href = '/virtualgateways'
-                        }
-                    }
-                >
-                    <Icon type="laptop" />
-                    <span>
-                        虚拟网关
-                    </span>
-                </Menu.Item>
-
-                <Menu.Item
-                    key="14"
-                    style={{lineHeight: '30px'}}
-                    onClick={
-                        ()=>{
-                            window.location.href = '/accesskeys'
-                        }
-                    }
-                >
-                    <Icon type="key" />
-                    <span>
-                        Accesskeys
-                    </span>
-                </Menu.Item>
                 <Menu.Divider />
                 <Menu.Item
                     key="15"

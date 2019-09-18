@@ -3,7 +3,6 @@ import { Collapse, Icon, Tooltip, Input } from 'antd';
 import { withRouter } from 'react-router-dom';
 import InputList from '../InputList';
 import DevicesOutputs from '../OutputList';
-import DevicesCommands from '../CommandList';
 const Panel = Collapse.Panel;
 
 
@@ -167,39 +166,6 @@ class Collapses extends Component {
                             vsn={this.props.meta.sn}
                             filterText={this.state.outputFilter}
                             regFilterChangeCB={this.RegisterOutputFilterChangeCB}
-                        />
-                    </Panel>
-                    <Panel
-                        disabled={this.props.commands && Object.keys(this.props.commands).length > 0 ? false : true}
-                        header={
-                            <p className="collapseHead">
-                                <span>控制指令</span>
-                                {
-                                    this.props.commands && Object.keys(this.props.commands).length > 0
-                                    ? <Input
-                                        style={{marginLeft: '50%', maxWidth: '300px'}}
-                                        type="text"
-                                        allowClear
-                                        placeholder="搜索名称、描述"
-                                        onClick={(e)=>{
-                                            e.stopPropagation();
-                                        }}
-                                        onChange={(e)=>{
-                                            this.changeCommandFilter(e)
-                                        }}
-                                      /> : null
-                                }
-                                <span style={{padding: '0 30px'}}> </span>
-                            </p>
-                        }
-                        key="3"
-                    >
-                        <DevicesCommands
-                            commands={this.props.commands}
-                            sn={this.props.meta.gateway}
-                            vsn={this.props.meta.sn}
-                            filterText={this.state.commandFilter}
-                            regFilterChangeCB={this.RegisterCommandFilterChangeCB}
                         />
                     </Panel>
                 </Collapse>

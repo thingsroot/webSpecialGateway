@@ -12,7 +12,7 @@ const AppDetails = LoadableComponent(()=>import('../../router/AppDetails'));
 const GatewayList = LoadableComponent(()=>import('../../router/GatewayList'));
 // const Developer = LoadableComponent(()=>import('../../router/Developer'));
 // const AppStore = LoadableComponent(()=>import('../../router/AppStore'));
-// const UserSettings = LoadableComponent(()=>import('../../router/UserSettings'));
+const UserSettings = LoadableComponent(()=>import('../../router/UserSettings'));
 // const AccessKeys = LoadableComponent(()=>import('../../router/AccessKeys'));
 // const VirtualGateways = LoadableComponent(()=>import('../../router/VirtualGateways'));
 const Gateway = LoadableComponent(()=>import('../../router/Gateway'));
@@ -127,12 +127,12 @@ class ContentMain extends Component {
                     component={TemplateDetails}
                     title={'模板详情'}
                 />
-                {/*
                 <PrivateRoute
                     path="/account"
                     component={UserSettings}
                     title={'用户信息'}
                 />
+                {/*
                 <PrivateRoute
                     path="/accesskeys"
                     component={AccessKeys}
