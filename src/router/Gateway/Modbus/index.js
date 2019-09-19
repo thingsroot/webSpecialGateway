@@ -757,14 +757,15 @@ class Modbus extends Component {
                             {
                                 this.state.panes.map((pane, key) => (
                                     <TabPane
-                                        // tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('modbus_', '通道') : pane.inst_name}
-                                        tab={pane.inst_name}
+                                        tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('modbus_', '通道') : pane.inst_name}
+                                        // tab={pane.inst_name}
                                         key={key}
-                                        closable={pane.closable}
+                                        closable={false}
                                     >
                                         <ModbusPane
                                             key={key}
                                             pane={pane}
+                                            panes={this.state.panes}
                                             fetch={this.fetch}
                                             setActiveKey={this.setActiveKey}
                                         />

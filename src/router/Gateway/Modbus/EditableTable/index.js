@@ -76,6 +76,7 @@ class EditableCell extends React.Component {
                 <InputNumber
                     min={0}
                     max={255}
+                    key={dataIndex}
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
@@ -90,7 +91,7 @@ class EditableCell extends React.Component {
                     onPressEnter={this.save}
                     onBlur={this.save}
                     disabled={this.props.disabled}
-                    autocomplete="off"
+                    autoComplete="off"
                 />
             )
         }
@@ -100,7 +101,7 @@ class EditableCell extends React.Component {
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
-                    defaultValue=""
+                    initialValue=""
                     disabled={this.props.disabled}
                     style={{ width: 120 }}
                 >
@@ -109,7 +110,7 @@ class EditableCell extends React.Component {
                         ? this.props.list.map((item, key) => {
                             return (
                                 <Option
-                                    value={item.name}
+                                    value={item.id}
                                     key={key}
                                 >{item.name}</Option>
                             )
@@ -196,15 +197,15 @@ class EditableTable extends React.Component {
                 //     device: '设备名称'
                 // }
             ],
-            count: '0'
+            count: 0
         };
     }
     componentDidMount () {
         if (this.props.devs && this.props.devs.length > 0) {
             const arr = [];
-            this.props.devs.map(item=>{
+            this.props.devs.map((item, key)=>{
                 const obj = {
-                    key: item.key,
+                    key,
                     number: item.sn,
                     template: item.tpl,
                     address: item.unit,

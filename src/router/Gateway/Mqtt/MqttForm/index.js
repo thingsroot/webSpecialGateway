@@ -2,7 +2,7 @@ import React from 'react'
 import {
     Button,
     Checkbox,
-    Col, Collapse,
+    Col,
     Divider,
     Form,
     Icon,
@@ -32,14 +32,7 @@ import AddDevList from './Transfer';
 // function cancel () {
 //     message.error('取消卸载应用');
 //   }
-const {Panel} = Collapse;
-const coustomPanelStyle = {
-    background: '#f7f7f7',
-    borderRadius: 4,
-    marginBottom: 24,
-    border: 0,
-    overflow: 'hidden'
-}
+//
 // @withRouter
 // class EditableCell extends React.Component {
 //     state = {
@@ -351,20 +344,6 @@ class MqttForm extends React.Component {
     moreChange () {
         if (this.state.seniorIndeterminate) {
             return (
-                <Collapse
-                    activeKey="1"
-                    bordered={false}
-                    expandIcon={({isActive}) =>
-                        <Icon
-                            type="caret-right"
-                            rotate={isActive ? 90 : 0}
-                        />}
-                >
-                    <Panel
-                        header="更多"
-                        key="1"
-                        style={coustomPanelStyle}
-                    >
                         <Form.Item>
                             {/* <Checkbox.Group
                                 style={{width: '100%'}}
@@ -385,13 +364,14 @@ class MqttForm extends React.Component {
                                         span={24}
                                         style={{display: 'flex'}}
                                     >
-                                        <span style={{lineHeight: '30px'}}>事件上送（最小等级）：</span>
-                                        <Input
-                                            style={{width: 150}}
-                                            value={this.state.options_ex.upload_event}
+                                        <span style={{lineHeight: '30px', marginLeft: '6px'}}>事件上送（最小等级）：</span>
+                                        <InputNumber
                                             disabled={this.state.disabled}
-                                            onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.value, 'upload_event')
+                                            min={1}
+                                            max={100}
+                                            defaultValue={this.state.options_ex.upload_event}
+                                            onChange={(value)=>{
+                                                this.setSetting('options_ex', value, 'upload_event')
                                             }}
                                         />
                                     </Col>
@@ -449,9 +429,6 @@ class MqttForm extends React.Component {
                                 </Row>
                             {/* </Checkbox.Group> */}
                         </Form.Item>
-                    </Panel>
-
-                </Collapse>
             )
         }
     }
@@ -754,6 +731,22 @@ class MqttForm extends React.Component {
                            />
                         </Form.Item>
                     </Col>
+                    <Divider>高级选项</Divider>
+                    <Col span={4}>
+                        <Form.Item>
+                            <span>高级选项：</span>
+                            <Checkbox
+                                checked={this.state.seniorIndeterminate}
+                                onChange={this.seniorChange}
+                                disabled={disabled}
+                            />
+                        </Form.Item>
+                    </Col>
+                    <Col span={8}>
+                        <Form.Item>
+                            {this.moreChange()}
+                        </Form.Item>
+                    </Col>
                     <Divider>需要上传的设备列表</Divider>
                     <Col span={24}>
                         {/* <Form.Item label="需要上传的设备列表">
@@ -781,22 +774,7 @@ class MqttForm extends React.Component {
                             disabled={this.state.disabled}
                         />
                     </Col>
-                    <Divider>高级选项</Divider>
-                    <Col span={4}>
-                        <Form.Item>
-                            <span>高级选项：</span>
-                            <Checkbox
-                                checked={this.state.seniorIndeterminate}
-                                onChange={this.seniorChange}
-                                disabled={disabled}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={8}>
-                        <Form.Item>
-                            {this.moreChange()}
-                        </Form.Item>
-                    </Col>
+
                 </Row>
             </Form>
         )

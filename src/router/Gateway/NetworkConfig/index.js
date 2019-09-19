@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import http from '../../../utils/Server';
 import { inject, observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { message, Modal, Input, Select, Card } from 'antd';
+import { message, Modal, Input, Select, Card, Form } from 'antd';
 import './style.scss';
 const Option = Select.Option;
 @inject('store')
@@ -247,34 +247,38 @@ class NetworkConfig extends Component {
                                             cancelText="取消"
                                         >
                                             <div>
-                                                <span>I P 地址:</span>
-                                                <Input
-                                                    style={{width: 300}}
-                                                    onChange={(e)=>{
-                                                        this.setState({
-                                                            brlan_ip: {...this.state.brlan_ip, address: e.target.value}
-                                                        })
-                                                    }}
-                                                    value={this.state.brlan_ip && this.state.brlan_ip.address ? this.state.brlan_ip.address : ''}
-                                                />
+                                                <Form.Item label="I P 地址:">
+                                                    <Input
+                                                        style={{width: 300}}
+                                                        onChange={(e)=>{
+                                                            this.setState({
+                                                                brlan_ip: {...this.state.brlan_ip, address: e.target.value}
+                                                            })
+                                                        }}
+                                                        value={this.state.brlan_ip && this.state.brlan_ip.address ? this.state.brlan_ip.address : ''}
+                                                    />
+                                                </Form.Item>
+
                                             </div>
                                             <div>
-                                                <span>子网掩码:</span>
-                                                <Select
-                                                    defaultValue="255.255.255.0"
-                                                    style={{width: 300}}
-                                                    onChange={(value)=>{
-                                                        this.setState({
-                                                            netmask: value
-                                                        })
-                                                    }}
-                                                >
-                                                    <Option value="255.255.255.0">255.255.255.0</Option>
-                                                    <Option value="255.255.254.0">255.255.254.0</Option>
-                                                    <Option value="255.255.252.0">255.255.252.0</Option>
-                                                    <Option value="255.255.128.0">255.255.128.0</Option>
-                                                    <Option value="255.255.0.0">255.255.0.0</Option>
-                                                </Select>
+                                                <Form.Item label="子网掩码:">
+                                                    <Select
+                                                        defaultValue="255.255.255.0"
+                                                        style={{width: 300}}
+                                                        onChange={(value)=>{
+                                                            this.setState({
+                                                                netmask: value
+                                                            })
+                                                        }}
+                                                    >
+                                                        <Option value="255.255.255.0">255.255.255.0</Option>
+                                                        <Option value="255.255.254.0">255.255.254.0</Option>
+                                                        <Option value="255.255.252.0">255.255.252.0</Option>
+                                                        <Option value="255.255.128.0">255.255.128.0</Option>
+                                                        <Option value="255.255.0.0">255.255.0.0</Option>
+                                                    </Select>
+                                                </Form.Item>
+
                                             </div>
                                         </Modal>
                                     </div>
