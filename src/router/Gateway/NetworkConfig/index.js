@@ -15,10 +15,12 @@ class NetworkConfig extends Component {
         netmask: '255.255.255.0',
         inst_name: undefined,
         loading: true,
+        visible: false,
         default_gw: undefined,
         gw_interface: undefined,
         dns_servers: undefined,
-        sn: this.props.match.params.sn
+        sn: this.props.match.params.sn,
+        running_action: false
     }
     componentDidMount () {
        this.getInfo()
@@ -39,37 +41,69 @@ class NetworkConfig extends Component {
     componentWillUnmount (){
         clearInterval(this.t1)
     }
+    showConfirm = (res) => {
+        const $this = this;
+        Modal.confirm({
+          title: '未安装net_info应用，是否安装?',
+          content: '未安装net_info应用，是否安装',
+          okText: '安装',
+          cancelText: '取消',
+          onOk () {
+              $this.installNet_info(res)
+              return false
+            // return new Promise((resolve, reject) => {
+            //   setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+            // }).catch(() => console.log('Oops errors!'));
+          },
+          onCancel () {
+              message.info('取消安装net_info')
+              console.log($this.props)
+              $this.props.history.push(`/gateway/${$this.props.match.params.sn}/devices`)
+              return false
+          }
+        });
+      }
     getInfo = ()=>{
         this.getIsNetInfo().then(res=>{
-            console.log(res)
-            if (!res && this.props.store.gatewayInfo.sn === this.state.sn) {
-                const beta = this.props.store.gatewayInfo.enabled ? 1 : 0;
-                const data = {
-                    app: 'APP00000115',
-                    conf: {},
-                    gateway: this.state.sn,
-                    id: `app_install/${this.state.sn}/net_info/APP00000115/${new Date() * 1}`,
-                    inst: 'net_info'
-                }
-                message.info('该网关未安装Netinfo应用，将为您自动安装，请稍后。')
-                http.get('/api/applications_versions_latest?app=APP00000115&beta=' + beta).then(res=>{
-                    if (res.ok) {
-                        data.version = res.data;
-                        http.post('/api/gateways_applications_install', data).then(Response=>{
-                            if (Response.ok){
-                                let title = '安装应用' + data.inst + '请求'
-                                message.info(title + '等待网关响应!')
-                                this.props.store.action.pushAction(Response.data, title, '', data, 10000,  ()=> {
-                                    this.getWanInfo('net_info')
-                                })
-                            }
-                        })
-                    } else {
-                        message.error(res.error)
-                    }
-                })
+            if (res) {
+                this.getWanInfo('net_info')
+            } else {
+                this.showConfirm(res)
+                clearInterval(this.t1)
             }
         })
+    }
+    installNet_info = (res) => {
+        if (!res && this.props.store.gatewayInfo.sn === this.state.sn) {
+            const beta = this.props.store.gatewayInfo.enabled ? 1 : 0;
+            const data = {
+                app: 'APP00000115',
+                conf: {},
+                gateway: this.state.sn,
+                id: `app_install/${this.state.sn}/net_info/APP00000115/${new Date() * 1}`,
+                inst: 'net_info'
+            }
+            message.info('该网关未安装Netinfo应用，将为您自动安装，请稍后。')
+            http.get('/api/applications_versions_latest?app=APP00000115&beta=' + beta).then(res=>{
+                if (res.ok) {
+                    data.version = res.data;
+                    http.post('/api/gateways_applications_install', data).then(Response=>{
+                        if (Response.ok){
+                            let title = '安装应用' + data.inst + '请求'
+                            message.info(title + '等待网关响应!')
+                            this.props.store.action.pushAction(Response.data, title, '', data, 10000,  ()=> {
+                                this.getWanInfo('net_info')
+                                this.t1 = setInterval(() => {
+                                    this.getWanInfo('net_info')
+                                }, 10000);
+                            })
+                        }
+                    })
+                } else {
+                    message.error(res.error)
+                }
+            })
+        }
     }
     getWanInfo  = (instname) => {
         this.setState({
@@ -110,12 +144,45 @@ class NetworkConfig extends Component {
                         })
                     }
                 })
+                arr && arr.length > 0 && arr.map((item, index)=>{
+                    if (item.interface === 'lan') {
+                        arr.splice(index, 1)
+                        arr.unshift(item)
+                    }
+                })
                 this.setState({
                     data: arr,
                     loading: false
                 })
             }
         })
+    }
+    startnetinfo = (inst_name) =>{
+        if (!this.state.running_action){
+            message.info('应用未启动，将为你自动启动')
+            const data = {
+                gateway: this.props.match.params.sn,
+                inst: inst_name,
+                id: `gateways/start/${this.props.match.params.sn}/${new Date() * 1}`
+            }
+            http.post('/api/gateways_applications_start', data).then(res=>{
+                if (res.ok) {
+                    message.success('启动' + data.inst + '请求发送成功')
+                    this.props.store.action.pushAction(res.data, '启动应用', '', data, 10000,  ()=> {
+                        this.props.update_app_list();
+                    })
+                    setTimeout(()=> {
+                        this.setState({ running_action: true })
+                    }, 2000)
+                } else {
+                    message.error('启动' +  data.inst + '请求发送失败。 错误:' + res.error)
+                }
+            }).catch(req=>{
+                req;
+                message.error('发送请求失败！')
+                this.setState({ running_action: false });
+            })
+        }
     }
     getIsNetInfo = ()=>{
         let isNetInfo = false;
@@ -126,6 +193,9 @@ class NetworkConfig extends Component {
                     if (item.name === 'APP00000115') {
                         isNetInfo = true;
                         this.getWanInfo(item.inst_name)
+                        if (item.status !== 'running') {
+                            this.startnetinfo(item.inst_name)
+                        }
                     }
                 })
                 resolve(isNetInfo)
@@ -137,6 +207,9 @@ class NetworkConfig extends Component {
                                 if (item.name === 'APP00000115') {
                                     isNetInfo = true;
                                     this.getWanInfo(item.inst_name)
+                                    if (item.status !== 'running') {
+                                        this.startnetinfo(item.inst_name)
+                                    }
                                 }
                             })
                             resolve(isNetInfo)
@@ -208,7 +281,7 @@ class NetworkConfig extends Component {
                                     key={key}
                                     className="networkpagelist"
                                 >
-                                    <p className="networkpagelist_title">{item.device}</p>
+                                    <p className="networkpagelist_title">{item.interface}</p>
                                     <div className="networkpagelist_content">
                                         <div className="networkpagelist_left">
                                             <div className="networkinfo_top">
@@ -238,6 +311,7 @@ class NetworkConfig extends Component {
                                             </div>
                                             : ''
                                         }
+                                        <div className="modal_">
                                         <Modal
                                             title="修改br-lan IP地址与子网掩码"
                                             visible={this.state.visible}
@@ -245,6 +319,7 @@ class NetworkConfig extends Component {
                                             onCancel={this.handleCancel}
                                             okText="更改"
                                             cancelText="取消"
+                                            maskStyle={{backgroundColor: 'rgba(0,0,0,0.15)'}}
                                         >
                                             <div>
                                                 <Form.Item label="I P 地址:">
@@ -281,6 +356,7 @@ class NetworkConfig extends Component {
 
                                             </div>
                                         </Modal>
+                                        </div>
                                     </div>
                             </div>
                         )

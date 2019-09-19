@@ -1,40 +1,27 @@
-import React, {Component, Fragment} from 'react';
+import React, {Component} from 'react';
 import http from '../../../utils/Server';
 import MqttPane from './MqttForm';
 import {
     Tabs,
     Button,
-    Modal,
+    // Modal,
     Form,
     Row,
     Col,
     Input,
-    Divider,
+    // Divider,
     Checkbox,
-    Upload,
+    // Upload,
     Icon,
     Collapse,
     Popconfirm,
     message,
-    InputNumber,
+    // InputNumber,
     Table,
     Empty
 } from 'antd';
-import './index.css'
-// import MqttForm from './MqttForm'
+import './index.css';
 import { inject, observer} from 'mobx-react';
-const EditableContext = React.createContext();
-
-const EditableRow = ({form, index, ...props}) => (
-    <EditableContext.Provider
-        value={form}
-        index={index}
-    >
-        <tr {...props} />
-    </EditableContext.Provider>
-);
-const EditableFormRow = Form.create()(EditableRow);
-
 const {Panel} = Collapse;
 const coustomPanelStyle = {
     background: '#f7f7f7',
@@ -43,88 +30,6 @@ const coustomPanelStyle = {
     border: 0,
     overflow: 'hidden'
 }
-@inject('store')
-@observer
-class EditableCell extends React.Component {
-    state = {
-        editing: true
-    };
-
-    toggleEdit = () => {
-        const editing = !this.state.editing;
-        this.setState({editing}, () => {
-            if (editing) {
-                this.input.focus();
-            }
-        });
-    };
-
-    save = e => {
-        const {record, handleSave} = this.props;
-        this.form.validateFields((error, values) => {
-            if (error && error[e.currentTarget.id]) {
-                return;
-            }
-            this.toggleEdit();
-            handleSave({...record, ...values});
-        });
-    };
-
-    renderCell = form => {
-        this.form = form;
-        const {children, dataIndex, record, title} = this.props;
-        const {editing} = this.state;
-        return editing ? (
-            <Form.Item style={{margin: 0}}>
-                {form.getFieldDecorator(dataIndex, {
-                    rules: [
-                        {
-                            required: true,
-                            message: `${title} 必填项.`
-                        }
-                    ],
-                    initialValue: record[dataIndex]
-                })(<Input
-                    ref={node => (this.input = node)}
-                    onPressEnter={this.save}
-                    onBlur={this.save}
-                    autoComplete="off"
-                   />)}
-            </Form.Item>
-        ) : (
-            <div
-                className="editable-cell-value-wrap"
-                style={{paddingRight: 24}}
-                onClick={this.toggleEdit}
-            >
-                {children}
-            </div>
-        );
-    };
-
-    render () {
-        const {
-            editable,
-            dataIndex,
-            title,
-            record,
-            index,
-            handleSave,
-            children,
-            ...restProps
-        } = this.props;
-        dataIndex, title, record, index, handleSave
-        return (
-            <td {...restProps}>
-                {editable ? (
-                    <EditableContext.Consumer>{this.renderCell}</EditableContext.Consumer>
-                ) : (
-                    children
-                )}
-            </td>
-        );
-    }
-}
 const {TabPane} = Tabs;
 @inject('store')
 @observer
@@ -132,10 +37,7 @@ class Mqtt extends Component {
     constructor (props) {
         super(props);
         this.newTabIndex = 0;
-        const panes = [
-            // {title: 'Mqtt配置1', content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: '1'},
-            // {title: 'Mqtt配置2', content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: '2'}
-        ];
+        const panes = [];
         const NUMBER_CYCLE = 60;
         const NUMBER_MAXDATE = 300
         const NUMBER_MAXQUANTITY = 1024
@@ -170,13 +72,7 @@ class Mqtt extends Component {
             seniorIndeterminate: false, //高级选项
             visible: false,
             applist: [],
-            dataSource: [
-                // {
-                //     key: '0',
-                //     name: '',
-                // },
-
-            ],
+            dataSource: [],
             count: 0,
             fileList: [],
             fileList1: [],
@@ -199,9 +95,9 @@ class Mqtt extends Component {
     }
     componentDidMount () {
         this.fetch()
-        this.t1 = setInterval(() => {
-            this.fetch()
-        }, 10000);
+        // this.t1 = setInterval(() => {
+        //     this.fetch()
+        // }, 10000);
     }
     UNSAFE_componentWillReceiveProps (nextProps) {
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
@@ -231,7 +127,6 @@ class Mqtt extends Component {
                             app_list.push(item)
                         }
                     })
-                    // this.props.store.gatewayInfo.setApps(app_list)
                 }
                 this.setState({app_list, loading: false})
             } else {
@@ -255,8 +150,6 @@ class Mqtt extends Component {
         reader.readAsText(file);
         reader.onload = (result) => {
             let targetNum = result.target.result;
-            // targetNum = targetNum.replace(/[\n\r]/g, '');
-            // targetNum = targetNum.replace(/[ ]/g, '');
             this.setSetting('mqttForm', targetNum, 'contentText')
         }
         return false;
@@ -402,10 +295,6 @@ class Mqtt extends Component {
                         style={coustomPanelStyle}
                     >
                         <Form.Item>
-                            {/* <Checkbox.Group
-                                style={{width: '100%'}}
-                                onChange={this.changeGroup}
-                            > */}
                                 <Row className="highSenior">
                                     <Col span={24}>
                                         <Checkbox
@@ -491,12 +380,47 @@ class Mqtt extends Component {
         this[action](targetKey);
     };
     add = () => {
-        const {panes} = this.state;
-        // const activeKey = `newTab${this.newTabIndex++}`;
-        // const title = 'Mqtt配置' + (this.state.panes.length + 1);
-        // panes.push({title, content: 'New Tab Pane' + activeKey, key: activeKey});
-        // panes.push({title, content: <MqttForm wrappedComponentRef={(form) => this.formRef = form} />, key: activeKey});
-        this.setState({panes, visible: true});
+        let inst_name = '';
+        if (!this.state.app_list.some(function (item) {
+            if (item.inst_name === 'mqtt_1') {
+                return true
+            }
+        })) {
+            inst_name = 'mqtt_1'
+        } else {
+            inst_name = 'mqtt_2'
+        }
+        const data = {
+            inst_name: inst_name,
+            status: 'Not installed',
+            conf: {
+                has_options_ex: 'no',
+                mqtt: {
+                    enable_tls: false
+                },
+                options: {
+                    data_upload_dpp: 1024,
+                    period: 60,
+                    ttl: 300
+                },
+                dev: [],
+                options_ex: {
+                    diable_command: false,
+                    diable_data: false,
+                    disable_compress: false,
+                    disable_data_em: false,
+                    disable_devices: false,
+                    disable_output: false,
+                    upload_event: 0
+
+                }
+            }
+        }
+        const { app_list } = this.state;
+        app_list.push(data)
+        this.setState({
+            app_list
+        })
     };
 
     handleCancel = () => {
@@ -504,24 +428,7 @@ class Mqtt extends Component {
             visible: false,
             modalKey: 0
         })
-    };
-    MatchTheButton = (key) => {
-        let name = '';
-        switch (key) {
-            case 0:
-                name = '下一步'
-                break;
-            case 1:
-                name = '下一步'
-                break;
-            case 2:
-                name = '安装'
-                break;
-            default:
-                break;
-        }
-        return name
-    };
+    }
     installMqtt = () => {
         if (!this.state.serial_opt.contentText) {
             message.info('请先上传CA证书！')
@@ -593,320 +500,32 @@ class Mqtt extends Component {
                 }
             })
     }
-    render () {
-        const {dataSource, fileList, fileList1, fileList2} = this.state;
-        const components = {
-            body: {
-                row: EditableFormRow,
-                cell: EditableCell
-            }
-        };
-        const columns = this.columns.map(col => {
-            if (!col.editable) {
-                return col
-            }
-            return {
-                ...col,
-                onCell: record => ({
-                    record,
-                    editable: col.editable,
-                    dataIndex: col.dataIndex,
-                    title: col.title,
-                    handleSave: this.handleSave
-                })
+    removeNotInstall = (record) =>{
+        const app_list = this.state.app_list;
+        app_list.map((item, key) => {
+            if (item.inst_name === record) {
+                app_list.splice(key, 1)
             }
         })
+
+        this.setState({
+            app_list,
+            activeKey: '0'
+        })
+    }
+    render () {
         return (
             <div className="parents-mqtt">
                 <div style={{marginBottom: '16px'}}>
-                    <Button
-                        onClick={this.add}
-                        disabled={this.state.app_list.length >= 2}
-                        loading={this.state.loading}
-                    >安装MQTT</Button>
-                    <Modal
-                        title="安装应用"
-                        width="800px"
-                        visible={this.state.visible}
-                        onOk={this.handleSubmit}
-                        onCancel={this.handleCancel}
-                        destroyOnClose="true"
-                        footer={[
-                            <Button
-                                key="0"
-                                onClick={this.handleCancel}
-                            >
-                                取消
-                            </Button>,
-                            <Button
-                                key="1"
-                                disabled={this.state.modalKey === 0}
-                                onClick={()=> {
-                                    if (this.state.modalKey > 0) {
-                                        this.setState({
-                                            modalKey: this.state.modalKey - 1
-                                        })
-                                    }
-                                }}
-                            >
-                                上一步
-                            </Button>,
-                            <Button
-                                key="2"
-                                onClick={()=> {
-                                    if (this.state.modalKey < 2) {
-                                        this.setState({
-                                            modalKey: this.state.modalKey + 1
-                                        })
-                                    }
-                                    if (this.state.modalKey === 2) {
-                                        this.installMqtt()
-                                    }
-                                }}
-                            >
-                                {
-                                    this.MatchTheButton(this.state.modalKey)
-                                }
-                            </Button>
-                        ]}
-                    >
-                        {/*<MqttForm*/}
-                        {/*    wrappedComponentRef={(form) => this.formRef = form}*/}
-                        {/*/>*/}
-                        <Form
-                            className="login-form login-form-mqtt"
-                        >
-                            <Row gutter={24}>
-                                {this.state.modalKey === 0 && this.state.modalKey !== 1 && this.state.modalKey !== 2
-                                    ? <Fragment>
-                                        <Col span={24}>
-                                            <Form.Item label="实例名：">
-                                                    <Input
-                                                        allowClear
-                                                        autoComplete="off"
-                                                        defaultValue={this.state.serial_opt.instance}
-                                                        onChange={(e) => {
-                                                            this.setSetting('mqttForm', e.target.value, 'instance')
-                                                        }}
-                                                    />
-                                            </Form.Item>
-                                            <Divider>服务器信息</Divider>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="MQTT地址：">
-                                                    <Input
-                                                        allowClear
-                                                        autoComplete="off"
-                                                        defaultValue={this.state.serial_opt.address}
-                                                        onChange={(e) => {
-                                                            this.setSetting('mqttForm', e.target.value, 'address')
-                                                        }}
-                                                    />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="MQTT端口：">
-                                                    <Input
-                                                        allowClear
-                                                        autoComplete="off"
-                                                        defaultValue={this.state.serial_opt.port}
-                                                        onChange={(e) => {
-                                                            this.setSetting('mqttForm', e.target.value, 'port')
-                                                        }}
-                                                    />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="MQTT用户(留空使用标准规则)：">
-                                                    <Input
-                                                        allowClear
-                                                        autoComplete="off"
-                                                        defaultValue={this.state.serial_opt.user}
-                                                        onChange={(e) => {
-                                                            this.setSetting('mqttForm', e.target.value, 'user')
-                                                        }}
-                                                    />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="MQTT密码(留空使用标准规则)：">
-                                                    <Input
-                                                        allowClear
-                                                        autoComplete="off"
-                                                        defaultValue={this.state.serial_opt.password}
-                                                        onChange={(e) => {
-                                                            this.setSetting('mqttForm', e.target.value, 'password')
-                                                        }}
-                                                    />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="客户端ID(留空使用标准规则)：">
-                                                    <Input
-                                                        allowClear
-                                                        autoComplete="off"
-                                                        defaultValue={this.state.serial_opt.userId}
-                                                        onChange={(e) => {
-                                                            this.setSetting('mqttForm', e.target.value, 'userId')
-                                                        }}
-                                                    />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="使用TLS：">
-                                               <Checkbox
-                                                   onChange={(e) => {
-                                                       this.setSetting('mqttForm', e.target.checked, 'tls')
-                                                   }}
-                                               />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={24}>
-                                            <Form.Item label="CA证书(文本)：">
-                                                <Upload
-                                                    action=""
-                                                    name="file1"
-                                                    beforeUpload={this.getTextInfo}
-                                                    fileList={fileList}
-                                                    onChange={this.handleListChange}
-                                                >
-                                                    <Button>
-                                                        <Icon type="upload"/> 点击上传
-                                                    </Button>
-                                                </Upload>
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={24}>
-                                            <Form.Item label="Client证书(文本)：">
-                                                <Upload
-                                                    action=""
-                                                    name="file2"
-                                                    beforeUpload={this.getTextInfo1}
-                                                    fileList={fileList1}
-                                                    onChange={this.handleListChange1}
-                                                >
-                                                    <Button>
-                                                        <Icon type="upload"/> 点击上传
-                                                    </Button>
-                                                </Upload>
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={24}>
-                                            <Form.Item label="Client密钥(文本)：">
-                                                <Upload
-                                                    action=""
-                                                    beforeUpload={this.getTextInfo2}
-                                                    name="file3"
-                                                    fileList={fileList2}
-                                                    onChange={this.handleListChange2}
-                                                >
-                                                    <Button>
-                                                        <Icon type="upload"/> 点击上传
-                                                    </Button>
-                                                </Upload>
-                                            </Form.Item>
-                                        </Col>
-                                    </Fragment>
-                                    : <div/>
-                                }
-                                {this.state.modalKey === 1 && this.state.modalKey !== 0 && this.state.modalKey !== 2
-                                    ? <Fragment>
-                                        <Divider>数据传输选项</Divider>
-                                        <Col span={12}>
-                                            <Form.Item label="上送周期(秒)：">
-                                                <InputNumber
-                                                    defaultValue={60}
-                                                    onChange={(e) => {
-                                                        this.setSetting('mqttForm', e, 'onCycle')
-                                                    }}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="最大数据间隔(秒)：">
-                                                <InputNumber
-                                                    defaultValue={300}
-                                                    onChange={(value) => {
-                                                        this.setSetting('mqttForm', value, 'onMaxDate')
-                                                    }}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="最大打包数量：">
-                                                <InputNumber
-                                                    defaultValue={1024}
-                                                    onChange={(value) => {
-                                                        this.setSetting('mqttForm', value, 'onMaxQuantity')
-                                                    }}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={12}>
-                                            <Form.Item label="开启短线缓存：">
-                                                <Checkbox
-                                                    onChange={(e) => {
-                                                        this.setSetting('mqttForm', e.target.checked, 'openLazy')
-                                                    }}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                    </Fragment>
-                                    : <div/>
-                                }
-                                {this.state.modalKey === 2 && this.state.modalKey !== 1 && this.state.modalKey !== 0
-                                    ? <Fragment>
-                                        <Divider>需要上传的设备列表</Divider>
-                                        <Col span={24}>
-                                            <Form.Item label="需要上传的设备列表">
-                                                <div>
-                                                    <Button
-                                                        onClick={this.handleAdd}
-                                                        type="primary"
-                                                        style={{marginBottom: 16}}
-                                                    >
-                                                        Add
-                                                    </Button>
-                                                    <Table
-                                                        components={components}
-                                                        rowClassName={() => 'editable-row'}
-                                                        bordered
-                                                        dataSource={dataSource}
-                                                        columns={columns}
-                                                    />
-                                                </div>
-                                            </Form.Item>
-                                        </Col>
-                                        <Divider>高级选项</Divider>
-                                        <Col span={4}>
-                                            <Form.Item>
-                                                <span>高级选项：</span>
-                                                <Checkbox
-                                                    checked={this.state.seniorIndeterminate}
-                                                    onChange={this.seniorChange}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col span={8}>
-                                            <Form.Item>
-                                                {this.moreChange()}
-                                            </Form.Item>
-                                        </Col>
-                                    </Fragment>
-                                    : <div/>
-                                }
-                            </Row>
-                        </Form>
-                    </Modal>
                 </div>
                     {
                     !this.state.loading
                     ? this.state.app_list && this.state.app_list.length > 0
                     ? <Tabs
-                        hideAdd
+                        hideAdd={this.state.app_list.length >= 2}
                         onChange={this.onChange}
                         activeKey={this.state.activeKey}
-                        type="card"
+                        type="editable-card"
                         onEdit={this.onEdit}
                       >
                     {
@@ -914,11 +533,14 @@ class Mqtt extends Component {
                             <TabPane
                                 tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
                                 key={key}
+                                closable={false}
                             >
                                 <MqttPane
+                                    removenotinstall={this.removeNotInstall}
                                     pane={pane}
                                     fetch={this.fetch}
                                     setActiveKey={this.setActiveKey}
+                                    app_info={this.state.app_info}
                                 />
                             </TabPane>
                         ))

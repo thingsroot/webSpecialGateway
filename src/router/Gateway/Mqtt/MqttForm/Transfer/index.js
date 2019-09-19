@@ -2,16 +2,6 @@ import { Transfer } from 'antd';
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import http from '../../../../../utils/Server';
-// const mockData = [];
-// for (let i = 0; i < 20; i++) {
-//   mockData.push({
-//     key: i.toString(),
-//     title: `content${i + 1}`,
-//     description: `description of content${i + 1}`
-//   });
-// }
-
-// const oriTargetKeys = mockData.filter(item => +item.key % 3 > 1).map(item => item.key);
 @withRouter
 class App extends React.Component {
   state = {
@@ -21,7 +11,6 @@ class App extends React.Component {
     mockData: []
   };
   componentDidMount () {
-    console.log(this.props)
     const { devs } = this.props;
     http.get('/api/gateways_dev_list?gateway=' + this.props.match.params.sn).then(res=>{
       if (res.ok) {
@@ -37,9 +26,6 @@ class App extends React.Component {
                   }
               })
           }
-          // this.props.store.gatewayInfo.setDevices(dev_list);
-          // this.setData(dev_list)
-          console.log(dev_list)
           this.setState({
             mockData: dev_list
           })
@@ -52,12 +38,11 @@ class App extends React.Component {
           loading: false,
           sign: false,
           targetKeys: arr
-      }, ()=>{
-        console.log(this.state.targetKeys)
       })
     })
   }
   handleChange = (nextTargetKeys, direction, moveKeys) => {
+    direction, moveKeys;
     this.setState({ targetKeys: nextTargetKeys });
     const arr = [];
     if (nextTargetKeys.length > 0) {
@@ -70,30 +55,17 @@ class App extends React.Component {
       })
     }
     this.props.setdevs(arr)
-    console.log('targetKeys: ', nextTargetKeys);
-    console.log('direction: ', direction);
-    console.log('moveKeys: ', moveKeys);
   };
 
   handleSelectChange = (sourceSelectedKeys, targetSelectedKeys) => {
     this.setState({ selectedKeys: [...sourceSelectedKeys, ...targetSelectedKeys] });
-
-    console.log('sourceSelectedKeys: ', sourceSelectedKeys);
-    console.log('targetSelectedKeys: ', targetSelectedKeys);
   };
-
-//   handleScroll = (direction, e) => {
-//     console.log('direction:', direction);
-//     console.log('target:', e.target);
-//   };
-
   handleDisable = disabled => {
     this.setState({ disabled });
   };
 
   render () {
     const { targetKeys, selectedKeys, mockData } = this.state;
-    console.log(targetKeys, selectedKeys)
     return (
       <div>
         <Transfer

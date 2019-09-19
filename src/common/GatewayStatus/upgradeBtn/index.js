@@ -209,18 +209,23 @@ class Btn extends Component {
 
     }
     render () {
+        const { firmwareBtnFlag, MqttBtnFlag, ModbusBtnFlag} = this.state
         return (
             <div>
                 <Dropdown
                     overlay={this.menu}
-                    // disabled={this.state.allBtnFlag}
+                    disabled={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag}
                 >
                         <Button
                             type="primary"
                             className="ant-dropdown-link"
                             style={{width: 200}}
                         >
-                            网关升级 <Icon type="down" />
+                            {
+                                !firmwareBtnFlag || !MqttBtnFlag || !ModbusBtnFlag
+                                ? '网关升级'
+                                : '已是最新版本'
+                            } <Icon type="down" />
                         </Button>
                     </Dropdown>
             </div>
