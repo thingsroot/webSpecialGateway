@@ -86,7 +86,7 @@ class MyGates extends Component {
                         >
                             <Button
                                 key="1"
-                                disabled={record.device_status !== 'ONLINE'}    
+                                disabled={record.device_status !== 'ONLINE'}
                             >设备</Button>
                         </Link>
                         <span style={{padding: '0 1px'}} />

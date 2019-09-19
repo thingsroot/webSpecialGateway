@@ -125,7 +125,7 @@ class Status extends Component {
                         </div>
                     </Tooltip>
                 </div>
-                    <div className="upgrade">
+                    <div className="install upgrade">
                         <UpgradeBtn />
                     </div>
             </div>

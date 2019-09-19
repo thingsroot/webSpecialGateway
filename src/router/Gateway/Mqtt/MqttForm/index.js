@@ -461,6 +461,10 @@ class MqttForm extends React.Component {
         })
     }
     toggleDisable = () => {
+        if (!this.state.disabled && this.props.pane.status === 'Not installed') {
+            this.installMqtt()
+            return false;
+        }
         if (!this.state.disabled) {
             const data = {
                 gateway: this.props.match.params.sn,
@@ -486,7 +490,77 @@ class MqttForm extends React.Component {
         }
         this.setState({disabled: !this.state.disabled})
     };
+    installMqtt = () => {
+        if (this.state.mqtt.enable_tls && !this.state.serial_opt.contentText) {
+            message.info('请先上传CA证书！')
+            return false;
+        }
+        const { serial_opt } = this.state;
+        const devs = serial_opt.dataSource;
+        const arr = [];
+        devs && devs.length > 0 && devs.map((item) =>{
+            arr.push({
+                key: item.key,
+                sn: item.name
+            })
+        })
+        const data = {
+                gateway: this.props.match.params.sn,
+                inst: this.props.pane.inst_name,
+                app: 'APP00000259',
+                version: this.props.app_info.versionLatest,
+                conf: {
+                    mqtt: this.state.mqtt,
+                    // {
+                    //     server: serial_opt.address,
+                    //     port: serial_opt.port,
+                    //     username: serial_opt.user,
+                    //     password: serial_opt.password,
+                    //     client_id: serial_opt.userId,
+                    //     enable_tls: serial_opt.tls,
+                    //     tls_cert: serial_opt.contentText,
+                    //     client_cert: serial_opt.contentClient,
+                    //     client_key: serial_opt.contentClientPw
+                    // },
+                    options: this.state.options,
+                    // {
+                    //     period: serial_opt.cycle,
+                    //     ttl: serial_opt.maxDate,
+                    //     data_upload_dpp: serial_opt.maxQuantity,
+                    //     enable_data_cache: serial_opt.openLazy
+                    // },
+                    devs: arr,
+                    has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
+                    options_ex: this.state.options_ex
+                },
+                id: 'app_install/' + this.props.match.params.sn + '/' + this.props.pane.inst_name + '/APP00000259/' + new Date() * 1
+            }
+            this.setState({
+                visible: false
+            })
+            http.post('/api/gateways_applications_install', data).then(res=>{
+                if (res.ok) {
+                    let title = '安装应用' + data.inst + '请求成功!'
+                    message.info(title + '等待网关响应!')
+                    this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                        this.props.fetch()
+                        // this.setState({
+                        //     modalKey: 0
+                        // })
+                        this.setState({
+                            disabled: true
+                        })
+                    })
+                } else {
+                    message.error(res.error)
+                }
+            })
+    }
     removeApp = () =>{
+        if (this.props.pane.status === 'Not installed') {
+            this.props.removenotinstall(this.props.pane.inst_name)
+            return false;
+        }
         const data = {
             gateway: this.props.match.params.sn,
             inst: this.props.pane.inst_name,
@@ -608,18 +682,16 @@ class MqttForm extends React.Component {
                         <Form.Item label="使用TLS：">
                             <Checkbox
                                 disabled={disabled}
-                                checked={this.state.tls_cert}
+                                checked={this.state.mqtt.enable_tls}
                                 onChange={(e) => {
-                                    this.setState({
-                                        tls_cert: e.target.checked
-                                    })
+                                    this.setSetting('mqtt', e.target.checked, 'enable_tls')
                                 }}
                             />
                         </Form.Item>
                     </Col>
                     <div>
                         {
-                            this.state.tls_cert
+                            this.state.mqtt.enable_tls
                             ? <div>
                                 <Col span={2}>
                                     <Form.Item label="MQTT用户">

@@ -692,7 +692,7 @@ class ModbusPane extends Component {
                                     disabled: true
                                 })
                             }}
-                        >
+                          >
                             取消编辑
                         </Button>
                         : ''
