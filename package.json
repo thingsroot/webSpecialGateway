@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@uiw/react-markdown-editor": "^1.1.7",
-    "antd": "^3.13.2",
+    "antd": "^3.23.3",
     "axios": "^0.18.0",
     "babel-preset-react-app": "^7.0.1",
     "bfj": "6.1.1",

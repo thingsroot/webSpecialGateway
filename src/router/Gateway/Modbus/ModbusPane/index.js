@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import { inject, observer} from 'mobx-react';
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal} from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Progress, Result} from 'antd';
 // import Slide from 'react-slick'
 import http from '../../../../utils/Server';
 import EditableTable from  '../EditableTable'
 import './style.scss';
+import GatewayMQTT from '../../../../utils/GatewayMQTT';
+import ReactList from 'react-list';
 const { Option } = Select;
 function cancel () {
     message.info('取消删除应用');
@@ -94,6 +96,12 @@ class ModbusPane extends Component {
         ];
         this. state = {
             // conf: {
+            mqtt: new GatewayMQTT(),
+            number: 0,
+            isShow: false,
+            result: true,
+            ShowResult: false,
+            pressVisible: false,
             tpls: [],
             devs: [],
             loop_gap: 1000,
@@ -231,6 +239,11 @@ class ModbusPane extends Component {
                 socket_opt: conf.socket_opt
             })
         }
+        if (this.props.pane.status === 'Not installed') {
+            this.setState({
+                disabled: false
+            })
+        }
     }
     // UNSAFE_componentWillReceiveProps (nextProps) {
     //     console.log(this.refs.Carousel)
@@ -253,6 +266,46 @@ class ModbusPane extends Component {
         }
 
     };
+    addaccout = () =>{
+        const number = this.state.number;
+        if (number <= 89) {
+            this.setState({
+                number: number + 8
+            }, () => {
+                setTimeout(() => {
+                    this.addaccout()
+                }, 200);
+            })
+        }
+    }
+    tick (time){
+        const { mqtt } = this.state;
+        mqtt.tick(time)
+
+        const data = {
+            duration: time || 60,
+            name: this.props.match.params.sn,
+            id: `sys_enable_log/${this.props.match.params.sn}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_enable_log', data)
+    }
+    startChannel =()=>{
+        const mqtt = this.state.mqtt;
+        this.tick(60)
+        this.t1 = setInterval(()=>this.tick(60), 59000);
+        mqtt.connect(this.props.match.params.sn, '/log')
+    }
+    stopChannel =()=>{
+        const { mqtt } = this.state;
+        mqtt.unsubscribe('/log')
+        clearInterval(this.t1)
+        const data = {
+            duration: 0,
+            name: this.props.match.params.sn,
+            id: `sys_enable_log/${this.props.match.params.sn}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_enable_log', data)
+    }
     installapp = () => {
         const data = {
             app: 'APP00000025',
@@ -273,23 +326,43 @@ class ModbusPane extends Component {
         }
         http.post('/api/gateways_applications_install', data).then(res=>{
             if (res.ok) {
-                let title = '安装应用' + data.inst + '请求'
-                message.info(title + '等待网关响应!')
-                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                // let title = '安装应用' + data.inst + '请求'
+                // message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
+                    console.log(action)
                     this.props.fetch()
-                    // this.setState({
-                    //     modalKey: 0
-                    // })
+                    if (action) {
+                        this.setState({
+                            number: 100,
+                            result: true,
+                            ShowResult: true
+                        }, ()=>{
+                            this.stopChannel()
+                        })
+                    } else {
+                        this.setState({result: false, ShowResult: true, number: 99})
+                    }
                 })
             } else {
                 message.error(res.error)
+                this.setState({
+                    number: 99
+                })
             }
         })
     }
     AppConf = () => {
         if (this.props.pane.status === 'Not installed') {
             console.log('未安装应用，')
-            this.installapp()
+            this.startChannel()
+            this.setState({
+                pressVisible: true
+            }, ()=>{
+                this.addaccout()
+            })
+            setTimeout(() => {
+                this.installapp()
+            }, 3000);
             return false;
         }
         const data = {
@@ -333,6 +406,10 @@ class ModbusPane extends Component {
         })
     };
     removeModbus = () =>{
+        if (this.props.pane.status === 'Not installed') {
+            this.props.removenotinstall(this.props.pane.inst_name)
+            return false
+        }
         const data = {
             gateway: this.props.match.params.sn,
             inst: this.props.pane.inst_name,
@@ -511,7 +588,7 @@ class ModbusPane extends Component {
     render (){
         const conf = this.props.pane.conf
 
-        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
+        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow} = this.state;
         devs, tpls;
         // const Mt10 = {
         //     marginTop: '10px'
@@ -792,7 +869,7 @@ class ModbusPane extends Component {
                         }}
                     />
                 </div>
-                <div style={{display: 'flex'}}>
+                <div style={{display: 'flex', marginTop: '20px'}}>
                         <Button
                             style={{marginLeft: '10pxs', marginRight: '20px'}}
                             type="primary"
@@ -829,6 +906,99 @@ class ModbusPane extends Component {
                             : ''
                         }
                         </div>
+                        <Modal
+                            title={!this.state.isShow ? '新增通道进度' : '查看日志'}
+                            visible={this.state.pressVisible}
+                            footer={
+                                isShow
+                                ? <Button
+                                    key="buy"
+                                    onClick={()=>{
+                                        this.setState({pressVisible: false})
+                                    }}
+                                  >关闭窗口</Button>
+                                : null}
+                            closable={false}
+                        >
+                            {
+                                isShow
+                                ? <div style={{maxHeight: '300px', overflowY: 'auto'}}>
+                                <ReactList
+                                    pageSize={1}
+                                    ref="content"
+                                    axis="y"
+                                    type="simple"
+                                    length={mqtt.log_channel.Data.length}
+                                    itemRenderer={(key)=>{
+                                        return (<div key={key}>
+                                            <div className="tableHeaders">
+                                                <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
+                                                {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
+                                                {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
+                                                {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
+                                                <div>{mqtt.log_channel.Data[key].content}</div>
+                                            </div>
+                                        </div>)
+                                    }}
+                                />
+                            </div>
+                            : <div>
+                                {
+                                    this.state.ShowResult
+                                    ? this.state.result && this.state.number === 100
+                                    ? <Result
+                                        status="success"
+                                        title="新增Modbus通道成功！"
+                                        subTitle=""
+                                        extra={[
+                                        <Button
+                                            type="primary"
+                                            key="console"
+                                            onClick={()=>{
+                                                this.setState({isShow: true})
+                                            }}
+                                        >
+                                            查看日志
+                                        </Button>,
+                                        <Button
+                                            key="buy"
+                                            onClick={()=>{
+                                                this.setState({pressVisible: false})
+                                            }}
+                                        >关闭窗口</Button>
+                                        ]}
+                                      />
+                                    : <Result
+                                        status="warning"
+                                        title="There are some problems with your operation."
+                                        extra={
+                                        <Button
+                                            type="primary"
+                                            key="console"
+                                            onClick={()=>{
+                                                this.setState({isShow: true})
+                                            }}
+                                        >
+                                            查看日志
+                                        </Button>
+                                        }
+                                      />
+                                    : <Progress
+                                        style={{
+                                            marginLeft: '50%',
+                                            transform: 'translate(-50%, 0)'
+                                        }}
+                                        type="circle"
+                                        strokeColor={{
+                                            '0%': '#108ee9',
+                                            '100%': '#87d068'
+                                        }}
+                                        percent={this.state.number}
+                                      />
+                                }
+                            </div>
+                            }
+                </Modal>
             </div>
         );
     }
