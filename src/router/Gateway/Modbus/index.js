@@ -97,6 +97,7 @@ class Modbus extends Component {
             });
     }
     onChange = activeKey => {
+        console.log(activeKey)
         this.setState({ activeKey });
     };
     onEdit = (targetKey, action) => {
@@ -105,37 +106,44 @@ class Modbus extends Component {
     add = () => {
         let inst = undefined;
         const applist = this.state.panes;
-        applist && applist.length > 0 && applist.map((item, key) =>{
-            if (item.inst_name.indexOf(key + 1) === -1) {
-                if (!inst){
-                    inst = 'modbus_' + (key + 1)
+        if (applist && applist.length > 0 && applist.length < 8) {
+            applist.map((item, key) =>{
+                if (item.inst_name.indexOf(key + 1) === -1) {
+                    if (!inst){
+                        inst = 'modbus_' + (key + 1)
+                    }
                 }
-            }
-        })
-        const data = {
-            inst_name: inst ? inst : 'modbus_' + (this.state.panes.length + 1),
-            status: 'Not installed',
-            conf: {
-                apdu_type: 'TCP',
-                channel_type: 'serial',
-                devs: [],
-                loop_gap: '1000',
-                serial_opt: {
-                    port: '/dev/ttyS1',
-                    baudrate: '9600',
-                    stop_bits: '1',
-                    data_bits: '8',
-                    flow_control: 'OFF',
-                    parity: 'None'
+            });
+            const data = {
+                inst_name: inst ? inst : 'modbus_' + (this.state.panes.length + 1),
+                status: 'Not installed',
+                conf: {
+                    apdu_type: 'TCP',
+                    channel_type: 'TCP',
+                    devs: [],
+                    loop_gap: '1000',
+                    // serial_opt: {
+                    //     port: '/dev/ttyS1',
+                    //     baudrate: '9600',
+                    //     stop_bits: '1',
+                    //     data_bits: '8',
+                    //     flow_control: 'OFF',
+                    //     parity: 'None'
+                    // },
+                    socket_opt: {
+                        host: '127.0.0.1',
+                        port: 502,
+                        nodelay: true
+                    },
+                    tpls: []
                 },
-                tpls: []
-            },
-            version: this.state.app_info.versionLatest
+                version: this.state.app_info.versionLatest
+            }
+            applist.push(data)
+            this.setState({
+                panes: applist
+            })
         }
-        applist.push(data)
-        this.setState({
-            panes: applist
-        })
     }
     setActiveKey = (key)=>{
         this.setState({activeKey: key})

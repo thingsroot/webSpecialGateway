@@ -16,6 +16,7 @@ function cancel () {
 class ModbusPane extends Component {
     constructor (props) {
         super(props)
+        this.parentList = this.props.panes
         const addTempLists = [
             {
                 title: '名称',
@@ -98,7 +99,7 @@ class ModbusPane extends Component {
             devs: [],
             loop_gap: 1000,
             apdu_type: 'TCP',
-            channel_type: 'serial',
+            channel_type: 'TCP',
             serial_opt: {
                 port: '',
                 baudrate: 9600,
@@ -205,13 +206,14 @@ class ModbusPane extends Component {
 
     }
     UNSAFE_componentWillMount () {
-        this.props.panes.length ? this.props.panes.map((pane, key)=> {
-            key;
-            this.transformOption(pane.conf)
-        }) : null
-}
-    componentDidMount () {
+        // this.props.panes.length ? this.props.panes.map((pane, key)=> {
+        //     key;
+        //     this.transformOption(pane.conf)
+        // }) : null
+
+
         const { conf } = this.props.pane;
+        console.log(conf)
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
@@ -231,6 +233,9 @@ class ModbusPane extends Component {
                 socket_opt: conf.socket_opt
             })
         }
+}
+    componentDidMount () {
+
     }
     // UNSAFE_componentWillReceiveProps (nextProps) {
     //     console.log(this.refs.Carousel)
@@ -241,10 +246,18 @@ class ModbusPane extends Component {
 
     // }
     setSetting = (type, val, name) =>{
+        console.log(type, val, name)
         if (type === 'serial_opt') {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
             })
+            console.log(this.state.serial_opt, 'serial')
+        }
+        if (type === 'socket_opt') {
+            this.setState({
+                socket_opt: Object.assign({}, this.state.socket_opt, {[name]: val})
+            })
+            console.log(this.state.socket_opt, 'socket')
         }
         if (!name){
             this.setState({
@@ -263,7 +276,7 @@ class ModbusPane extends Component {
                 devs: this.state.devs,
                 loop_gap: this.state.loop_gap,
                 serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
+                socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
                 tpls: this.state.tpls
             },
             gateway: this.props.match.params.sn,
@@ -300,13 +313,13 @@ class ModbusPane extends Component {
                 devs: this.state.devs,
                 loop_gap: this.state.loop_gap,
                 serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
+                socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
                 tpls: this.state.templateList
             },
             gateway: this.props.match.params.sn,
             id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
             inst: this.props.pane.inst_name
-        }
+        };
         http.post('/api/gateways_applications_conf', data).then(res=>{
             if (res.ok) {
                 let title = '配置应用' + data.inst + '请求'
@@ -436,59 +449,119 @@ class ModbusPane extends Component {
             this.setState({devs: []})
         }
     };
-    transformOption = (conf) => {
-        console.log(conf)
-        if (conf) {
-            if (conf.serial_opt) {
-                if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
-                    console.log(1)
-                    return [
-                        <Option
-                            value="/dev/ttyS1"
-                            key="/dev/ttyS1"
-                            disabled
-                        >COM1</Option>,
-                        <Option
-                            value="/dev/ttyS2"
-                            key="/dev/ttyS2"
-                        >COM2</Option>
-                    ]
-
-                } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
-                    console.log(2)
-                    return [
-                        <Option
-                            value="/dev/ttyS2"
-                            key="/dev/ttyS2"
-                            disabled
-                        >COM2</Option>,
-                        <Option
-                            value="/dev/ttyS1"
-                            key="/dev/ttyS1"
-                        >COM1</Option>
-                    ]
-                } else {
-                    console.log(4)
-                    return [
-                        <Option
-                            value=""
-                            key="disabled"
-                        >disabled</Option>
-                    ]
+    transformOption = () => {
+        console.log(this.parentList)
+        if (this.state.channel_type === 'serial') {
+            this.parentList.length ? this.parentList.map((pane, index) => {
+                console.log(pane, index)
+                let conf = pane.conf
+                if (conf) {
+                    console.log('success')
+                    if (conf.serial_opt) {
+                        if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
+                            console.log(1)
+                            return [
+                                <Option
+                                    value="/dev/ttyS1"
+                                    key="/dev/ttyS1"
+                                    disabled
+                                >COM1</Option>,
+                                <Option
+                                    value="/dev/ttyS2"
+                                    key="/dev/ttyS2"
+                                >COM2</Option>
+                            ]
+                        } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
+                            console.log(2)
+                            return [
+                                <Option
+                                    value="/dev/ttyS2"
+                                    key="/dev/ttyS2"
+                                    disabled
+                                >COM2</Option>,
+                                <Option
+                                    value="/dev/ttyS1"
+                                    key="/dev/ttyS1"
+                                >COM1</Option>
+                            ]
+                        } else {
+                            console.log(4)
+                            return [
+                                <Option
+                                    value=""
+                                    key="disabled"
+                                >disabled</Option>
+                            ]
+                        }
+                    } else {
+                        console.log(2333)
+                        return [
+                            <Option
+                                value="/dev/ttyS1"
+                                key="/dev/ttyS1"
+                            >COM1</Option>,
+                            <Option
+                                value="/dev/ttyS2"
+                                key="/dev/ttyS2"
+                            >COM2</Option>
+                        ]
+                    }
                 }
-            } else {
-                return [
-                    <Option
-                        value="/dev/ttyS1"
-                        key="/dev/ttyS1"
-                    >COM1</Option>,
-                    <Option
-                        value="/dev/ttyS2"
-                        key="/dev/ttyS2"
-                    >COM2</Option>
-                ]
-            }
-        }
+            }) : null
+           }
+
+        // if (conf) {
+        //     console.log('success')
+        //     if (conf.serial_opt) {
+        //         if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
+        //             console.log(1)
+        //             return [
+        //                 <Option
+        //                     value="/dev/ttyS1"
+        //                     key="/dev/ttyS1"
+        //                     disabled
+        //                 >COM1</Option>,
+        //                 <Option
+        //                     value="/dev/ttyS2"
+        //                     key="/dev/ttyS2"
+        //                 >COM2</Option>
+        //             ]
+        //         } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
+        //             console.log(2)
+        //             return [
+        //                 <Option
+        //                     value="/dev/ttyS2"
+        //                     key="/dev/ttyS2"
+        //                     disabled
+        //                 >COM2</Option>,
+        //                 <Option
+        //                     value="/dev/ttyS1"
+        //                     key="/dev/ttyS1"
+        //                 >COM1</Option>
+        //             ]
+        //         } else {
+        //             console.log(4)
+        //             return [
+        //                 <Option
+        //                     value=""
+        //                     key="disabled"
+        //                 >disabled</Option>
+        //             ]
+        //         }
+        //     } else {
+        //         console.log(2333)
+        //         return [
+        //             <Option
+        //                 value="/dev/ttyS1"
+        //                 key="/dev/ttyS1"
+        //             >COM1</Option>,
+        //             <Option
+        //                 value="/dev/ttyS2"
+        //                 key="/dev/ttyS2"
+        //             >COM2</Option>
+        //         ]
+        //     }
+        // }
 
     };
     isValid = e => {
@@ -496,7 +569,6 @@ class ModbusPane extends Component {
         let reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
         if (!reg.test(value)) {
             this.setState({checkIp: true})
-            return false
         } else {
             this.setState({checkIp: false})
         }
@@ -613,6 +685,7 @@ class ModbusPane extends Component {
                                     {
                                         this.transformOption()
                                     }
+
                                 </Select>
                             </Form.Item>
                             <Form.Item label="波特率:">
@@ -682,8 +755,8 @@ class ModbusPane extends Component {
                                 <Input
                                     disabled={disabled}
                                     defaultValue={socket_opt.host}
-                                    onChange={(value)=>{
-                                        this.setSetting('socket_opt', value, 'host')
+                                    onChange={(e)=>{
+                                        this.setSetting('socket_opt', e.target.value, 'host')
                                     }}
                                     onBlur={(this.isValid)}
                                 />
@@ -700,15 +773,19 @@ class ModbusPane extends Component {
                                     max={65535}
                                     defaultValue={socket_opt.port}
                                     onChange={(val)=>{
-                                        this.setSetting('loop_gap', val)
+                                        this.setSetting('socket_opt', val, 'port')
                                     }}
                                 />
                             </Form.Item>
                             <Form.Item label="Nodelay:">
                                 <Checkbox
                                     disabled={disabled}
-                                    defaultChecked
+                                    checked={socket_opt.nodelay}
+                                    onChange={(val)=>{
+                                        this.setSetting('socket_opt', val.target.checked, 'nodelay')
+                                    }}
                                 />
+
                             </Form.Item>
                         </Form>
                         </div>
@@ -789,6 +866,7 @@ class ModbusPane extends Component {
                     <Checkbox
                         disabled={disabled}
                         checked={dev_sn_prefix}
+                        defaultChecked
                         onChange={(e)=>{
                             this.setSetting('dev_sn_prefix', e.target.checked)
                         }}
