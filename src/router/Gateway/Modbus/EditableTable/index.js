@@ -300,6 +300,7 @@ class EditableTable extends React.Component {
                     pagination={false}
                 />
                 <Button
+                    style={{marginTop: '10px'}}
                     onClick={this.handleAdd}
                     disabled={this.props.disable}
                     type="primary"
