@@ -286,7 +286,7 @@ class ModbusPane extends Component {
     stopChannel =()=>{
         const { mqtt } = this.state;
         mqtt.unsubscribe('/log')
-        mqtt.disconnect('/log')
+        mqtt.disconnect()
         clearInterval(this.t1)
         const data = {
             duration: 0,
@@ -328,7 +328,9 @@ class ModbusPane extends Component {
                             this.stopChannel()
                         })
                     } else {
-                        this.setState({result: false, ShowResult: true, number: 99})
+                        this.setState({result: false, ShowResult: true, number: 99}, ()=>{
+                            this.stopChannel()
+                        })
                     }
                 })
             } else {
@@ -889,66 +891,123 @@ class ModbusPane extends Component {
                         <Modal
                             title={!this.state.isShow ? '新增通道进度' : '查看日志'}
                             visible={this.state.pressVisible}
-                            footer={
-                                isShow
-                                ? <Button
-                                    key="buy"
-                                    onClick={()=>{
-                                        this.setState({pressVisible: false})
-                                    }}
-                                  >关闭窗口</Button>
-                                : null}
+                            footer={null}
                             closable={false}
                         >
-                            {
-                                isShow
-                                ? <div style={{maxHeight: '300px', overflowY: 'auto'}}>
-                                <ReactList
-                                    pageSize={1}
-                                    ref="content"
-                                    axis="y"
-                                    type="simple"
-                                    length={mqtt.log_channel.Data.length}
-                                    itemRenderer={(key)=>{
-                                        return (<div key={key}>
-                                            <div className="tableHeaders">
-                                                <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
-                                                {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
-                                                {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
-                                                {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
-                                                <div>{mqtt.log_channel.Data[key].content}</div>
-                                            </div>
-                                        </div>)
-                                    }}
-                                />
-                            </div>
-                            : <div>
+                            {<div>
                                 {
                                     this.state.ShowResult
                                     ? this.state.result && this.state.number === 100
-                                    ? <Result
-                                        status="success"
-                                        title="新增Modbus通道成功！"
-                                        subTitle=""
-                                        extra={[
-                                        <Button
-                                            type="primary"
-                                            key="console"
-                                            onClick={()=>{
-                                                this.setState({isShow: true})
-                                            }}
-                                        >
-                                            查看日志
-                                        </Button>,
-                                        <Button
-                                            key="buy"
-                                            onClick={()=>{
-                                                this.setState({pressVisible: false})
-                                            }}
-                                        >关闭窗口</Button>
-                                        ]}
-                                      />
-                                    : <Result
+                                    ? <div>
+                                        <Result
+                                            status="success"
+                                            title="新增Modbus通道成功！"
+                                            subTitle=""
+                                            extra={[
+                                            <Button
+                                                type="primary"
+                                                key="console"
+                                                onClick={()=>{
+                                                    this.setState({isShow: !this.state.isShow})
+                                                }}
+                                            >
+                                                {
+                                                    isShow
+                                                    ? '关闭日志'
+                                                    : '查看日志'
+                                                }
+                                            </Button>,
+                                            <Button
+                                                key="buy"
+                                                onClick={()=>{
+                                                    this.setState({pressVisible: false})
+                                                }}
+                                            >关闭窗口</Button>
+                                            ]}
+                                        />
+                                        {
+                                            isShow
+                                            ? <div style={{maxHeight: '300px', overflowY: 'auto'}}>
+                                                <ReactList
+                                                    pageSize={1}
+                                                    ref="content"
+                                                    axis="y"
+                                                    type="simple"
+                                                    length={mqtt.log_channel.Data.length}
+                                                    itemRenderer={(key)=>{
+                                                        if (mqtt.log_channel.Data[key].content.indexOf('modbus_') !== -1) {
+                                                            return (<div key={key}>
+                                                                <div className="tableHeaders">
+                                                                    <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
+                                                                    {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
+                                                                    {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
+                                                                    {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
+                                                                    <div>{mqtt.log_channel.Data[key].content}</div>
+                                                                </div>
+                                                            </div>)
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            : ''
+                                        }
+                                    </div>
+                                    : <div>
+                                        <Result
+                                            status="warning"
+                                            title="新增Modbus通道失败！"
+                                            extra={
+                                            <Button
+                                                type="primary"
+                                                key="console"
+                                                onClick={()=>{
+                                                    this.setState({isShow: !this.state.isShow})
+                                                }}
+                                            >
+                                                {
+                                                    isShow
+                                                    ? '关闭日志'
+                                                    : '查看日志'
+                                                }
+                                            </Button>,
+                                            <Button
+                                                key="buy"
+                                                onClick={()=>{
+                                                    this.setState({pressVisible: false})
+                                                }}
+                                            >关闭窗口</Button>
+                                            }
+                                        />
+                                        {
+                                            isShow
+                                            ? <div style={{maxHeight: '300px', overflowY: 'auto'}}>
+                                                <ReactList
+                                                    pageSize={1}
+                                                    ref="content"
+                                                    axis="y"
+                                                    type="simple"
+                                                    length={mqtt.log_channel.Data.length}
+                                                    itemRenderer={(key)=>{
+                                                        if (mqtt.log_channel.Data[key].content.indexOf('modbus_') !== -1) {
+                                                            return (<div key={key}>
+                                                                <div className="tableHeaders">
+                                                                    <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
+                                                                    {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
+                                                                    {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
+                                                                    {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
+                                                                    <div>{mqtt.log_channel.Data[key].content}</div>
+                                                                </div>
+                                                            </div>)
+                                                        }
+                                                    }}
+                                                />
+                                            </div>
+                                            : ''
+                                        }
+                                    </div>
+                                    : this.state.number === 99
+                                    ? <div>
+                                    <Result
                                         status="warning"
                                         title="新增Modbus通道失败！"
                                         extra={
@@ -956,13 +1015,50 @@ class ModbusPane extends Component {
                                             type="primary"
                                             key="console"
                                             onClick={()=>{
-                                                this.setState({isShow: true})
+                                                this.setState({isShow: !this.state.isShow})
                                             }}
                                         >
-                                            查看日志
-                                        </Button>
+                                            {
+                                                isShow
+                                                ? '关闭日志'
+                                                : '查看日志'
+                                            }
+                                        </Button>,
+                                        <Button
+                                            key="buy"
+                                            onClick={()=>{
+                                                this.setState({pressVisible: false})
+                                            }}
+                                        >关闭窗口</Button>
                                         }
-                                      />
+                                    />
+                                    {
+                                        isShow
+                                        ? <div style={{maxHeight: '300px', overflowY: 'auto'}}>
+                                            <ReactList
+                                                pageSize={1}
+                                                ref="content"
+                                                axis="y"
+                                                type="simple"
+                                                length={mqtt.log_channel.Data.length}
+                                                itemRenderer={(key)=>{
+                                                    if (mqtt.log_channel.Data[key].content.indexOf('modbus_') !== -1) {
+                                                        return (<div key={key}>
+                                                            <div className="tableHeaders">
+                                                                <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
+                                                                {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
+                                                                {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
+                                                                {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
+                                                                <div>{mqtt.log_channel.Data[key].content}</div>
+                                                            </div>
+                                                        </div>)
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+                                        : ''
+                                    }
+                                </div>
                                     : <Progress
                                         style={{
                                             marginLeft: '50%',
