@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import { inject, observer} from 'mobx-react';
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Affix} from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal} from 'antd';
 // import Slide from 'react-slick'
 import http from '../../../../utils/Server';
 import EditableTable from  '../EditableTable'
@@ -501,48 +501,42 @@ class ModbusPane extends Component {
         // }
         return (
             <div className="ModbusPane">
-                <div style={{display: 'flex'}}>
-                    <Affix offsetTop={100}>
-                                <Button
-                                    style={{marginLeft: '10pxs', marginRight: '20px'}}
-                                    type="primary"
-                                    onClick={this.toggleDisable}
-                                >
-                                    {!this.state.disabled ? '保存' : '编辑'}
+                <div className="ModbusPaneAffix">
+                        <Button
+                            style={{marginLeft: '10pxs', marginRight: '20px'}}
+                            type="primary"
+                            onClick={this.toggleDisable}
+                        >
+                            {!this.state.disabled ? '保存' : '编辑'}
+                        </Button>
+                        <Popconfirm
+                            title="确定要删除应用Modbus吗?"
+                            onConfirm={this.removeModbus}
+                            onCancel={cancel}
+                            okText="删除"
+                            cancelText="取消"
+                        >
+                            <Button
+                                style={{marginLeft: '10pxs'}}
+                                type="danger"
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginLeft: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                                    取消编辑
                                 </Button>
-                            </Affix>
-                            <Affix offsetTop={100}>
-                                <Popconfirm
-                                    title="确定要删除应用Modbus吗?"
-                                    onConfirm={this.removeModbus}
-                                    onCancel={cancel}
-                                    okText="删除"
-                                    cancelText="取消"
-                                >
-                                    <Button
-                                        style={{marginLeft: '10pxs'}}
-                                        type="danger"
-                                    >
-                                        删除
-                                    </Button>
-                                </Popconfirm>
-                            </Affix>
-                            {
-                                !disabled
-                                ? <Affix offsetTop={100}>
-                                    <Button
-                                        style={{
-                                            marginLeft: '20px'
-                                        }}
-                                        onClick={()=>{
-                                            this.setState({disabled: true})
-                                        }}
-                                    >
-                                        取消编辑
-                                    </Button>
-                                </Affix>
-                                : ''
-                            }
+                            : ''
+                        }
                         </div>
                 <Form layout="inline">
                     <Divider  orientation="left">应用配置信息</Divider>
@@ -775,6 +769,43 @@ class ModbusPane extends Component {
                         }}
                     />
                 </div>
+                <div style={{display: 'flex'}}>
+                        <Button
+                            style={{marginLeft: '10pxs', marginRight: '20px'}}
+                            type="primary"
+                            onClick={this.toggleDisable}
+                        >
+                            {!this.state.disabled ? '保存' : '编辑'}
+                        </Button>
+                        <Popconfirm
+                            title="确定要删除应用Modbus吗?"
+                            onConfirm={this.removeModbus}
+                            onCancel={cancel}
+                            okText="删除"
+                            cancelText="取消"
+                        >
+                            <Button
+                                style={{marginLeft: '10pxs'}}
+                                type="danger"
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginLeft: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                                    取消编辑
+                                </Button>
+                            : ''
+                        }
+                        </div>
             </div>
         );
     }
