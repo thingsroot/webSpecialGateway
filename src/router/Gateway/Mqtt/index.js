@@ -517,7 +517,7 @@ class Mqtt extends Component {
         return (
             <div className="parents-mqtt">
                 {
-                    this.state.app_list.length === 0
+                    !this.state.loading && this.state.app_list.length === 0
                     ? <Button
                         onClick={this.add}
                       >

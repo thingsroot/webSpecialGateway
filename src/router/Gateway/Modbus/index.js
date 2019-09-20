@@ -187,7 +187,7 @@ class Modbus extends Component {
         return (
             <div>
                 {
-                    this.state.panes.length === 0
+                    !this.state.loading && this.state.panes.length === 0
                     ? <Button
                         onClick={this.add}
                       >
