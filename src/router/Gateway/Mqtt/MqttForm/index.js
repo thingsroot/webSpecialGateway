@@ -577,6 +577,16 @@ class MqttForm extends React.Component {
             }
         })
     }
+    funDownload (content, filename) {
+        const eleLink = document.createElement('a');
+        eleLink.download = filename;
+        eleLink.style.display = 'none';
+        const blob = new Blob([content]);
+        eleLink.href = URL.createObjectURL(blob);
+        document.body.appendChild(eleLink);
+        eleLink.click();
+        document.body.removeChild(eleLink);
+    }
     render () {
         // const {getFieldDecorator} = this.props.form;
         const { fileList, fileList1, fileList2, disabled, mqtt, options} = this.state;
@@ -745,6 +755,17 @@ class MqttForm extends React.Component {
                                         <Icon type="upload"/> 点击上传
                                     </Button>
                                 </Upload>
+                                {
+                                    this.state.mqtt.tls_cert
+                                    ? <Button
+                                        onClick={()=>{
+                                            this.funDownload(this.state.mqtt.tls_cert, 'CA证书')
+                                        }}
+                                      >
+                                        <Icon type="download" />点击下载
+                                    </Button>
+                                    : ''
+                                }
                             </Form.Item>
                         </Col>
                         <Col span={2}>

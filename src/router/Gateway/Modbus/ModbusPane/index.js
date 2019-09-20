@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import { inject, observer} from 'mobx-react';
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal} from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Affix} from 'antd';
 // import Slide from 'react-slick'
 import http from '../../../../utils/Server';
 import EditableTable from  '../EditableTable'
@@ -53,6 +53,7 @@ class ModbusPane extends Component {
                         </Button> */}
                             <Button
                                 onClick={()=>{
+                                    console.log(record)
                                     this.onViewTemplate(record.name, record.latest_version)
                                 }}
                             > 查看 </Button>
@@ -168,7 +169,7 @@ class ModbusPane extends Component {
                                 <Button
                                     disabled={this.state.disabled}
                                     onClick={()=>{
-                                        this.onViewTemplate(record.name, record.latest_version)
+                                        this.onViewTemplate(record.id, record.latest_version)
                                     }}
                                 > 查看 </Button>&nbsp;&nbsp;
                                 {
@@ -243,7 +244,45 @@ class ModbusPane extends Component {
         }
 
     };
+    installapp = () => {
+        const data = {
+            app: 'APP00000025',
+            conf: {
+                apdu_type: this.state.apdu_type,
+                channel_type: this.state.channel_type,
+                dev_sn_prefix: true,
+                devs: this.state.devs,
+                loop_gap: this.state.loop_gap,
+                serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
+                socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
+                tpls: this.state.tpls
+            },
+            gateway: this.props.match.params.sn,
+            id: 'app_install/' + this.props.match.params.sn + '/' + this.props.pane.inst_name + '/APP00000259/' + new Date() * 1,
+            inst: this.props.pane.inst_name,
+            version: this.props.pane.version
+        }
+        http.post('/api/gateways_applications_install', data).then(res=>{
+            if (res.ok) {
+                let title = '安装应用' + data.inst + '请求'
+                message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                    this.props.fetch()
+                    // this.setState({
+                    //     modalKey: 0
+                    // })
+                })
+            } else {
+                message.error(res.error)
+            }
+        })
+    }
     AppConf = () => {
+        if (this.props.pane.status === 'Not installed') {
+            console.log('未安装应用，')
+            this.installapp()
+            return false;
+        }
         const data = {
             conf: {
                 apdu_type: this.state.apdu_type,
@@ -343,6 +382,7 @@ class ModbusPane extends Component {
     };
     //查看模板
     onViewTemplate = (conf, version) => {
+        console.log(conf)
         if (version !== undefined && version !== 0) {
             window.open(`/template/APP00000025/${conf}/${version}`, '_blank')
         } else {
@@ -394,46 +434,50 @@ class ModbusPane extends Component {
         // }
         return (
             <div className="ModbusPane">
-                {/* <Carousel
-                    style={{width: 500}}
-                    ref="Carousel"
-                    afterChange={onChange}
-                    initialSlide={this.props.modalKey}
-                > */}
+                <div style={{display: 'flex'}}>
+                    <Affix offsetTop={100}>
+                                <Button
+                                    style={{marginLeft: '10pxs', marginRight: '20px'}}
+                                    type="primary"
+                                    onClick={this.toggleDisable}
+                                >
+                                    {!this.state.disabled ? '保存' : '编辑'}
+                                </Button>
+                            </Affix>
+                            <Affix offsetTop={100}>
+                                <Popconfirm
+                                    title="确定要删除应用Modbus吗?"
+                                    onConfirm={this.removeModbus}
+                                    onCancel={cancel}
+                                    okText="删除"
+                                    cancelText="取消"
+                                >
+                                    <Button
+                                        style={{marginLeft: '10pxs'}}
+                                        type="danger"
+                                    >
+                                        删除
+                                    </Button>
+                                </Popconfirm>
+                            </Affix>
+                            {
+                                !disabled
+                                ? <Affix offsetTop={100}>
+                                    <Button
+                                        style={{
+                                            marginLeft: '20px'
+                                        }}
+                                        onClick={()=>{
+                                            this.setState({disabled: true})
+                                        }}
+                                    >
+                                        取消编辑
+                                    </Button>
+                                </Affix>
+                                : ''
+                            }
+                        </div>
                 <Form layout="inline">
-                    <Button
-                        style={{ marginLeft: '10px'}}
-                        type="primary"
-                        onClick={this.toggleDisable}
-                    >
-                        {!this.state.disabled ? '保存' : '编辑'}
-                    </Button>
-                    &nbsp;&nbsp;
-                    {
-                        !disabled
-                        ? <Button
-                            onClick={()=>{
-                                this.setState({
-                                    disabled: true
-                                })
-                            }}
-                          >
-                            取消编辑
-                        </Button>
-                        : ''
-                    }
-                    &nbsp;&nbsp;
-                    <Popconfirm
-                        title="确定要删除应用Modbus吗?"
-                        onConfirm={this.removeModbus}
-                        onCancel={cancel}
-                        okText="确定"
-                        cancelText="取消"
-                    >
-                        <Button
-                            type="danger"
-                        >删除</Button>
-                    </Popconfirm>
                     <Divider  orientation="left">应用配置信息</Divider>
                     <Form.Item label="采集间隔:">
                         <InputNumber
@@ -535,18 +579,6 @@ class ModbusPane extends Component {
                                     <Option value="7">7</Option>
                                 </Select>
                             </Form.Item>
-                            <Form.Item label="流控:">
-                                <Select
-                                    disabled={disabled}
-                                    defaultValue={serial_opt.flow_control}
-                                    onChange={(value)=>{
-                                        this.setSetting('serial_opt', value, 'flow_control')
-                                    }}
-                                >
-                                    <Option value="OFF">OFF</Option>
-                                    <Option value="ON">ON</Option>
-                                </Select>
-                            </Form.Item>
                             <Form.Item label="校验:">
                                 <Select
                                     disabled={disabled}
@@ -594,7 +626,6 @@ class ModbusPane extends Component {
                         </Form>
                         </div>
                 }
-
                 <Divider orientation="left">设备模板选择</Divider>
                 <Table
                     columns={this.state.tplsCloumns}
@@ -660,6 +691,7 @@ class ModbusPane extends Component {
                 </Modal>
                 <Divider orientation="left">设备列表</Divider>
                     <EditableTable
+                        key="1"
                         disable={disabled}
                         getdevs={this.getDevs}
                         templateList={this.state.templateList}
@@ -675,40 +707,6 @@ class ModbusPane extends Component {
                         }}
                     />
                 </div>
-                {/* </Carousel> */}
-                <Button
-                    style={{ marginTop: '10px'}}
-                    type="primary"
-                    onClick={this.toggleDisable}
-                >
-                    {!this.state.disabled ? '保存' : '编辑'}
-                </Button>
-                &nbsp;&nbsp;
-                {
-                    !disabled
-                        ? <Button
-                            onClick={()=>{
-                                this.setState({
-                                    disabled: true
-                                })
-                            }}
-                          >
-                            取消编辑
-                        </Button>
-                        : ''
-                }
-                &nbsp;&nbsp;
-                <Popconfirm
-                    title="确定要删除应用Modbus吗?"
-                    onConfirm={this.removeModbus}
-                    onCancel={cancel}
-                    okText="确定"
-                    cancelText="取消"
-                >
-                    <Button
-                        type="danger"
-                    >删除</Button>
-                </Popconfirm>
             </div>
         );
     }

@@ -90,7 +90,7 @@ class EditableCell extends React.Component {
                     onPressEnter={this.save}
                     onBlur={this.save}
                     disabled={this.props.disabled}
-                    autocomplete="off"
+                    autoComplete="off"
                 />
             )
         }
@@ -100,7 +100,7 @@ class EditableCell extends React.Component {
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
-                    defaultValue=""
+                    // defaultValue=""
                     disabled={this.props.disabled}
                     style={{ width: 120 }}
                 >
@@ -109,7 +109,7 @@ class EditableCell extends React.Component {
                         ? this.props.list.map((item, key) => {
                             return (
                                 <Option
-                                    value={item.name}
+                                    value={item.id}
                                     key={key}
                                 >{item.name}</Option>
                             )
@@ -172,7 +172,7 @@ class EditableTable extends React.Component {
                 editable: true
             },
             {
-                title: 'operation',
+                title: '操作',
                 dataIndex: 'operation',
                 render: (text, record) =>
                     this.state.dataSource.length >= 1 ? (
@@ -202,9 +202,9 @@ class EditableTable extends React.Component {
     componentDidMount () {
         if (this.props.devs && this.props.devs.length > 0) {
             const arr = [];
-            this.props.devs.map(item=>{
+            this.props.devs.map((item, key)=>{
                 const obj = {
-                    key: item.key,
+                    key: key,
                     number: item.sn,
                     template: item.tpl,
                     address: item.unit,
@@ -225,7 +225,7 @@ class EditableTable extends React.Component {
     handleAdd = () => {
         const {count, dataSource} = this.state;
         const newData = {
-            key: count,
+            key: dataSource.length + 1,
             template: '选择模板',
             number: 0,
             address: 0,
@@ -290,6 +290,7 @@ class EditableTable extends React.Component {
         return (
             <div className="editableTable">
                 <Table
+                    rowKey="key"
                     components={components}
                     rowClassName={() => 'editable-row'}
                     bordered
