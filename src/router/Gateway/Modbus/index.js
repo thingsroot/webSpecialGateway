@@ -192,6 +192,7 @@ class Modbus extends Component {
                                         <ModbusPane
                                             key={key}
                                             pane={pane}
+                                            panes={this.state.panes}
                                             fetch={this.fetch}
                                             setActiveKey={this.setActiveKey}
                                         />

@@ -76,6 +76,7 @@ class EditableCell extends React.Component {
                 <InputNumber
                     min={0}
                     max={255}
+                    key={dataIndex}
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
@@ -196,7 +197,7 @@ class EditableTable extends React.Component {
                 //     device: '设备名称'
                 // }
             ],
-            count: '0'
+            count: 0
         };
     }
     componentDidMount () {

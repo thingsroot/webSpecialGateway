@@ -82,15 +82,16 @@ class ModbusPane extends Component {
                         > 添加 </Button>
                     </span>) : (
                         <span>
-                        <Button
-                            onClick={()=>{
-                                this.onViewTemplate(record.name)
-                            }}
-                        > 查看 </Button>
-                    </span>)
+                            <Button
+                                onClick={()=>{
+                                    this.onViewTemplate(record.name)
+                                }}
+                            > 查看</Button>
+                        </span>
+                    )
                 )
             }
-        ]
+        ];
         this. state = {
             // conf: {
             tpls: [],
@@ -99,7 +100,7 @@ class ModbusPane extends Component {
             apdu_type: 'TCP',
             channel_type: 'serial',
             serial_opt: {
-                port: '/dev/ttyS1',
+                port: '',
                 baudrate: 9600,
                 stop_bits: 1,
                 data_bits: 8,
@@ -197,10 +198,17 @@ class ModbusPane extends Component {
             ],
             disabled: true,
             templateList: [],
-            addTempLists
+            addTempLists,
+            totalPanes: []
         }
-    }
 
+    }
+    UNSAFE_componentWillMount () {
+        this.props.panes.length ? this.props.panes.map((pane, key)=> {
+            key;
+            this.transformOption(pane.conf)
+        }) : null
+}
     componentDidMount () {
         const { conf } = this.props.pane;
         this.setState({
@@ -411,8 +419,9 @@ class ModbusPane extends Component {
     getDevs = (devs) => {
         const arr = [];
         if (devs && devs.length > 0){
-            devs.map(item=>{
+            devs.map((item, index)=>{
                 const obj = {
+                    index: index,
                     key: item.key,
                     unit: item.address,
                     name: item.device,   // 应用所属实例
@@ -425,8 +434,66 @@ class ModbusPane extends Component {
         } else {
             this.setState({devs: []})
         }
+    };
+    transformOption = (conf) => {
+        console.log(conf)
+        if (conf) {
+            if (conf.serial_opt) {
+                if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
+                    console.log(1)
+                    return [
+                        <Option
+                            value="/dev/ttyS1"
+                            key="/dev/ttyS1"
+                            disabled
+                        >COM1</Option>,
+                        <Option
+                            value="/dev/ttyS2"
+                            key="/dev/ttyS2"
+                        >COM2</Option>
+                    ]
+
+                } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
+                    console.log(2)
+                    return [
+                        <Option
+                            value="/dev/ttyS2"
+                            key="/dev/ttyS2"
+                            disabled
+                        >COM2</Option>,
+                        <Option
+                            value="/dev/ttyS1"
+                            key="/dev/ttyS1"
+                        >COM1</Option>
+                    ]
+                } else {
+                    console.log(4)
+                    return [
+                        <Option
+                            value=""
+                            key="disabled"
+                        >disabled</Option>
+                    ]
+                }
+            } else {
+                return [
+                    <Option
+                        value="/dev/ttyS1"
+                        key="/dev/ttyS1"
+                    >COM1</Option>,
+                    <Option
+                        value="/dev/ttyS2"
+                        key="/dev/ttyS2"
+                    >COM2</Option>
+                ]
+            }
+        }
+
     }
+
     render (){
+        const conf = this.props.pane.conf
+
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
         devs, tpls;
         // const Mt10 = {
@@ -513,7 +580,7 @@ class ModbusPane extends Component {
                             }}
                         >
                             <Option value="serial">串口</Option>
-                            <Option value="TCP">Internet</Option>
+                            <Option value="TCP">以太网</Option>
                         </Select>
                     </Form.Item>
                 </Form>
@@ -525,13 +592,14 @@ class ModbusPane extends Component {
                             <Form.Item label="端口：">
                                 <Select
                                     disabled={disabled}
-                                    defaultValue={serial_opt.port}
+                                    defaultValue={conf.serial_opt ? (conf.serial_opt.port === '/dev/ttyS1' ? 'COM1' : 'COM2' ) : ''}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'port')
                                     }}
                                 >
-                                    <Option value="/dev/ttyS1">COM1</Option>
-                                    <Option value="/dev/ttyS2">COM2</Option>
+                                    {
+                                        this.transformOption()
+                                    }
                                 </Select>
                             </Form.Item>
                             <Form.Item label="波特率:">
@@ -595,7 +663,7 @@ class ModbusPane extends Component {
                         </Form>
                         </div>
                         : <div>
-                            <Divider  orientation="left">Internet</Divider>
+                            <Divider  orientation="left">以太网</Divider>
                             <Form layout="inline">
                             <Form.Item label="IP地址:">
                                 <Input
