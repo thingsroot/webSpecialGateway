@@ -8,6 +8,7 @@ import EditableTable from  '../EditableTable'
 import './style.scss';
 import GatewayMQTT from '../../../../utils/GatewayMQTT';
 import ReactList from 'react-list';
+import { isArray } from 'util';
 const { Option } = Select;
 function cancel () {
     message.info('取消删除应用');
@@ -217,8 +218,8 @@ class ModbusPane extends Component {
             channel_type: conf.channel_type,
             dev_sn_prefix: conf.dev_sn_prefix,
             loop_gap: conf.loop_gap,
-            tpls: conf.tpls,
-            templateList: conf.tpls,
+            tpls: isArray(conf.tpls) ? conf.tpls : [],
+            templateList: isArray(conf.tpls) ? conf.tpls : [],
             devs: conf.devs
         })
         if (conf.serial_opt) {
@@ -467,6 +468,10 @@ class ModbusPane extends Component {
     //添加模板
     onAddTemplate = (config)=>{
         const list = this.state.templateList;
+        if (list.find(item => item.id === config.id) !== undefined) {
+            message.info('已存在相同模板，请勿重复添加！')
+            return false;
+        }
         const obj = {
             id: config.id,
             desc: config.description,
@@ -819,7 +824,7 @@ class ModbusPane extends Component {
                         </Button>
                     </div>
                     <Table
-                        rowKey="key"
+                        rowKey="name"
                         dataSource={this.state.appTemplateList}
                         columns={this.state.addTempLists}
                         pagination={false}
