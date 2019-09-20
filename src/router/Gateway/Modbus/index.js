@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Tabs, message, Table, Empty} from 'antd';
+import {Tabs, message, Table, Empty, Button} from 'antd';
 import { inject, observer} from 'mobx-react';
 import {withRouter} from 'react-router-dom';
 import http from '../../../utils/Server';
@@ -186,6 +186,15 @@ class Modbus extends Component {
     render () {
         return (
             <div>
+                {
+                    this.state.panes.length === 0
+                    ? <Button
+                        onClick={this.add}
+                      >
+                        新增Modbus通道
+                    </Button>
+                    : ''
+                }
                     {
                     !this.state.loading
                         ? this.state.panes && this.state.panes.length > 0

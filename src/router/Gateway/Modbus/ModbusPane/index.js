@@ -46,16 +46,8 @@ class ModbusPane extends Component {
                 render: (record) => (
                     record.latest_version !== undefined && record.latest_version !== 0 ? (
                         <span>
-                        {/* <Button>
-                            <Link to={`/template/${record.app}/${record.name}/${record.latest_version}`}> 查看 </Link>
-                        </Button> */}
-                            {/* <span style={{padding: '0 2px'}}> </span>
-                        <Button>
-                            <Link to={`/template/${record.app}/${record.name}/${record.latest_version}/clone`}> 克隆 </Link>
-                        </Button> */}
                             <Button
                                 onClick={()=>{
-                                    console.log(record)
                                     this.onViewTemplate(record.name, record.latest_version)
                                 }}
                             > 查看 </Button>
@@ -245,14 +237,9 @@ class ModbusPane extends Component {
             })
         }
     }
-    // UNSAFE_componentWillReceiveProps (nextProps) {
-    //     console.log(this.refs.Carousel)
-    //     if (nextProps.modalKey !== this.props.modalKey) {
-    //         console.log(nextProps, this)
-    //         this.refs.Carousel.goTo(nextProps.modalKey)
-    //     }
-
-    // }
+    componentWillUnmount () {
+        this.t1 && clearInterval(this.t1)
+    }
     setSetting = (type, val, name) =>{
         if (type === 'serial_opt') {
             this.setState({
@@ -298,6 +285,7 @@ class ModbusPane extends Component {
     stopChannel =()=>{
         const { mqtt } = this.state;
         mqtt.unsubscribe('/log')
+        mqtt.disconnect('/log')
         clearInterval(this.t1)
         const data = {
             duration: 0,
@@ -329,7 +317,6 @@ class ModbusPane extends Component {
                 // let title = '安装应用' + data.inst + '请求'
                 // message.info(title + '等待网关响应!')
                 this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
-                    console.log(action)
                     this.props.fetch()
                     if (action) {
                         this.setState({
@@ -353,7 +340,6 @@ class ModbusPane extends Component {
     }
     AppConf = () => {
         if (this.props.pane.status === 'Not installed') {
-            console.log('未安装应用，')
             this.startChannel()
             this.setState({
                 pressVisible: true
@@ -468,7 +454,6 @@ class ModbusPane extends Component {
     };
     //查看模板
     onViewTemplate = (conf, version) => {
-        console.log(conf)
         if (version !== undefined && version !== 0) {
             window.open(`/template/APP00000025/${conf}/${version}`, '_blank')
         } else {
@@ -514,11 +499,9 @@ class ModbusPane extends Component {
         }
     };
     transformOption = (conf) => {
-        console.log(conf)
         if (conf) {
             if (conf.serial_opt) {
                 if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
-                    console.log(1)
                     return [
                         <Option
                             value="/dev/ttyS1"
@@ -532,7 +515,6 @@ class ModbusPane extends Component {
                     ]
 
                 } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
-                    console.log(2)
                     return [
                         <Option
                             value="/dev/ttyS2"
@@ -545,7 +527,6 @@ class ModbusPane extends Component {
                         >COM1</Option>
                     ]
                 } else {
-                    console.log(4)
                     return [
                         <Option
                             value=""
@@ -964,7 +945,7 @@ class ModbusPane extends Component {
                                       />
                                     : <Result
                                         status="warning"
-                                        title="There are some problems with your operation."
+                                        title="新增Modbus通道失败！"
                                         extra={
                                         <Button
                                             type="primary"

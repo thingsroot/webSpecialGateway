@@ -516,6 +516,15 @@ class Mqtt extends Component {
     render () {
         return (
             <div className="parents-mqtt">
+                {
+                    this.state.app_list.length === 0
+                    ? <Button
+                        onClick={this.add}
+                      >
+                        新增Modbus通道
+                    </Button>
+                    : ''
+                }
                 <div style={{marginBottom: '16px'}}>
                 </div>
                     {
