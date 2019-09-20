@@ -299,6 +299,7 @@ class EditableTable extends React.Component {
                     columns={columns}
                 />
                 <Button
+                    style={{marginTop: '10px'}}
                     onClick={this.handleAdd}
                     disabled={this.props.disable}
                     type="primary"

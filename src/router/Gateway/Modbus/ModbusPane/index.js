@@ -199,7 +199,8 @@ class ModbusPane extends Component {
             disabled: true,
             templateList: [],
             addTempLists,
-            totalPanes: []
+            totalPanes: [],
+            checkIp: false
         }
 
     }
@@ -321,7 +322,13 @@ class ModbusPane extends Component {
     toggleDisable = () => {
         this.setState({disabled: !this.state.disabled}, ()=>{
             if (this.state.disabled) {
-                this.AppConf()
+                if (!this.state.checkIp) {
+                   this.AppConf()
+                }
+                if (this.state.checkIp) {
+                    message.info('请输入有效ip地址再保存')
+
+                }
             }
         })
     };
@@ -489,6 +496,16 @@ class ModbusPane extends Component {
             }
         }
 
+    };
+    isValid = e => {
+        let value = e.target.value;
+        let reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
+        if (!reg.test(value)) {
+            this.setState({checkIp: true})
+            return false
+        } else {
+            this.setState({checkIp: false})
+        }
     }
 
     render (){
@@ -672,7 +689,13 @@ class ModbusPane extends Component {
                                     onChange={(value)=>{
                                         this.setSetting('socket_opt', value, 'host')
                                     }}
+                                    onBlur={(this.isValid)}
                                 />
+                                {
+                                    this.state.checkIp
+                                        ? <span style={{position: 'absolute', left: '20px', top: '15px', fontSize: '12px', color: 'red'}}>请输入有效ip地址</span>
+                                        : null
+                                }
                             </Form.Item>
                             <Form.Item label="端口:">
                                 <InputNumber
