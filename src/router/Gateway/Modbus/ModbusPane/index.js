@@ -322,13 +322,7 @@ class ModbusPane extends Component {
     toggleDisable = () => {
         this.setState({disabled: !this.state.disabled}, ()=>{
             if (this.state.disabled) {
-                if (!this.state.checkIp) {
                    this.AppConf()
-                }
-                if (this.state.checkIp) {
-                    message.info('请输入有效ip地址再保存')
-
-                }
             }
         })
     };
@@ -521,6 +515,7 @@ class ModbusPane extends Component {
                 <div style={{display: 'flex'}}>
                     <Affix offsetTop={100}>
                                 <Button
+                                    disabled={this.state.checkIp}
                                     style={{marginLeft: '10pxs', marginRight: '20px'}}
                                     type="primary"
                                     onClick={this.toggleDisable}
@@ -548,6 +543,7 @@ class ModbusPane extends Component {
                                 !disabled
                                 ? <Affix offsetTop={100}>
                                     <Button
+                                        disabled={this.state.checkIp}
                                         style={{
                                             marginLeft: '20px'
                                         }}
