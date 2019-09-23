@@ -10,111 +10,12 @@ import {
     InputNumber, message,
     Popconfirm,
     Row,
-    // Table,
-    Affix,
     Upload
 } from 'antd';
 import { inject, observer} from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import http from '../../../../utils/Server';
 import AddDevList from './Transfer';
-// const EditableContext = React.createContext();
-
-// const EditableRow = ({form, index, ...props}) => (
-//     <EditableContext.Provider
-//         value={form}
-//         index={index}
-//     >
-//         <tr {...props} />
-//     </EditableContext.Provider>
-// );
-// const EditableFormRow = Form.create()(EditableRow);
-// function cancel () {
-//     message.error('取消卸载应用');
-//   }
-//
-// @withRouter
-// class EditableCell extends React.Component {
-//     state = {
-//         editing: true
-//     };
-
-//     toggleEdit = () => {
-//         const editing = !this.state.editing;
-//         this.setState({editing}, () => {
-//             if (editing) {
-//                 this.input.focus();
-//             }
-//         });
-//     };
-
-//     save = e => {
-//         const {record, handleSave} = this.props;
-//         this.form.validateFields((error, values) => {
-//             if (error && error[e.currentTarget.id]) {
-//                 return;
-//             }
-//             this.toggleEdit();
-//             handleSave({...record, ...values});
-//         });
-//     };
-
-//     renderCell = form => {
-//         this.form = form;
-//         const {children, dataIndex, record, title} = this.props;
-//         const {editing} = this.state;
-//         return editing ? (
-//             <Form.Item style={{margin: 0}}>
-//                 {form.getFieldDecorator(dataIndex, {
-//                     rules: [
-//                         {
-//                             required: true,
-//                             message: `${title} 必填项.`
-//                         }
-//                     ],
-//                     initialValue: record[dataIndex]
-//                 })(<Input
-//                     ref={node => (this.input = node)}
-//                     onPressEnter={this.save}
-//                     onBlur={this.save}
-//                     autoComplete="off"
-//                    />)}
-//             </Form.Item>
-//         ) : (
-//             <div
-//                 className="editable-cell-value-wrap"
-//                 style={{paddingRight: 24}}
-//                 onClick={this.toggleEdit}
-//             >
-//                 {children}
-//             </div>
-//         );
-//     };
-
-
-//     render () {
-//         const {
-//             editable,
-//             dataIndex,
-//             title,
-//             record,
-//             index,
-//             handleSave,
-//             children,
-//             ...restProps
-//         } = this.props;
-//         dataIndex, title, record, index, handleSave
-//         return (
-//             <td {...restProps}>
-//                 {editable ? (
-//                     <EditableContext.Consumer>{this.renderCell}</EditableContext.Consumer>
-//                 ) : (
-//                     children
-//                 )}
-//             </td>
-//         );
-//     }
-// }
 @withRouter
 @inject('store')
 @observer
@@ -295,27 +196,27 @@ class MqttForm extends React.Component {
             dataSource: dataSource.filter(item => item.key !== key)
         })
     };
-    handleAdd = () => {
-        const {count, dataSource} = this.state;
-        const newDate = {
-            key: count,
-            name: ' '
-        };
-        this.setState({
-            dataSource: [...dataSource, newDate],
-            count: count + 1
-        })
-    };
-    handleSave = row => {
-        const newDate = [...this.state.dataSource]
-        const index = newDate.findIndex(item => row.key === item.key);
-        const item = newDate[index];
-        newDate.splice(index, 1, {
-            ...item,
-            ...row
-        });
-        this.setState({dataSource: newDate})
-    }
+    // handleAdd = () => {
+    //     const {count, dataSource} = this.state;
+    //     const newDate = {
+    //         key: count,
+    //         name: ' '
+    //     };
+    //     this.setState({
+    //         dataSource: [...dataSource, newDate],
+    //         count: count + 1
+    //     })
+    // };
+    // handleSave = row => {
+    //     const newDate = [...this.state.dataSource]
+    //     const index = newDate.findIndex(item => row.key === item.key);
+    //     const item = newDate[index];
+    //     newDate.splice(index, 1, {
+    //         ...item,
+    //         ...row
+    //     });
+    //     this.setState({dataSource: newDate})
+    // }
     remove = targetKey => {
         let {activeKey} = this.state;
         let lastIndex;
@@ -337,18 +238,14 @@ class MqttForm extends React.Component {
     seniorChange = () => {
         this.setState({seniorIndeterminate: !this.state.seniorIndeterminate})
     };
-    changeGroup = (checkedValues) => {
-        this.setSetting('mqttForm', [...checkedValues], 'groupList' )
-    };
+    // changeGroup = (checkedValues) => {
+    //     this.setSetting('mqttForm', [...checkedValues], 'groupList' )
+    // };
 
     moreChange () {
         if (this.state.seniorIndeterminate) {
             return (
                         <Form.Item>
-                            {/* <Checkbox.Group
-                                style={{width: '100%'}}
-                                onChange={this.changeGroup}
-                            > */}
                                 <Row className="highSenior">
                                     <Col span={24}>
                                         <Checkbox
@@ -377,7 +274,6 @@ class MqttForm extends React.Component {
                                     </Col>
                                     <Col span={24}>
                                         <Checkbox
-                                            // value="禁止设备输出"
                                             checked={this.state.options_ex.disable_output}
                                             disabled={this.state.disabled}
                                             onChange={(e)=>{
@@ -427,7 +323,6 @@ class MqttForm extends React.Component {
                                         >禁止压缩（调试使用）：</Checkbox>
                                     </Col>
                                 </Row>
-                            {/* </Checkbox.Group> */}
                         </Form.Item>
             )
         }
@@ -488,24 +383,7 @@ class MqttForm extends React.Component {
                 version: this.props.app_info.versionLatest,
                 conf: {
                     mqtt: this.state.mqtt,
-                    // {
-                    //     server: serial_opt.address,
-                    //     port: serial_opt.port,
-                    //     username: serial_opt.user,
-                    //     password: serial_opt.password,
-                    //     client_id: serial_opt.userId,
-                    //     enable_tls: serial_opt.tls,
-                    //     tls_cert: serial_opt.contentText,
-                    //     client_cert: serial_opt.contentClient,
-                    //     client_key: serial_opt.contentClientPw
-                    // },
                     options: this.state.options,
-                    // {
-                    //     period: serial_opt.cycle,
-                    //     ttl: serial_opt.maxDate,
-                    //     data_upload_dpp: serial_opt.maxQuantity,
-                    //     enable_data_cache: serial_opt.openLazy
-                    // },
                     devs: arr,
                     has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
                     options_ex: this.state.options_ex
@@ -565,29 +443,7 @@ class MqttForm extends React.Component {
         document.body.removeChild(eleLink);
     }
     render () {
-        // const {getFieldDecorator} = this.props.form;
         const { fileList, fileList1, fileList2, disabled, mqtt, options} = this.state;
-        // const components = {
-        //     body: {
-        //         row: EditableFormRow,
-        //         cell: EditableCell
-        //     }
-        // };
-        // const columns = this.columns.map(col => {
-        //     if (!col.editable) {
-        //         return col
-        //     }
-        //     return {
-        //         ...col,
-        //         onCell: record => ({
-        //             record,
-        //             editable: col.editable,
-        //             dataIndex: col.dataIndex,
-        //             title: col.title,
-        //             handleSave: this.handleSave
-        //         })
-        //     }
-        // })
         return (
             <Form
                 className="login-form login-form-mqtt"
@@ -595,7 +451,6 @@ class MqttForm extends React.Component {
                 <Row gutter={24}>
                     <Col span={24}>
                         <div style={{display: 'flex'}}>
-                        <Affix offsetTop={100}>
                             <Button
                                 style={{marginLeft: '10pxs', marginRight: '20px'}}
                                 type="primary"
@@ -603,8 +458,6 @@ class MqttForm extends React.Component {
                             >
                                 {!this.state.disabled ? '保存' : '编辑'}
                             </Button>
-                        </Affix>
-                        <Affix offsetTop={100}>
                             <Popconfirm
                                 title="确定要删除应用吗?"
                                 onConfirm={this.removeApp}
@@ -619,21 +472,18 @@ class MqttForm extends React.Component {
                                     删除
                                 </Button>
                             </Popconfirm>
-                        </Affix>
                         {
                             !disabled
-                            ? <Affix offsetTop={100}>
-                                <Button
-                                    style={{
-                                        marginLeft: '20px'
-                                    }}
-                                    onClick={()=>{
-                                        this.setState({disabled: true})
-                                    }}
-                                >
+                            ? <Button
+                                style={{
+                                    marginLeft: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
                                     取消编辑
                                 </Button>
-                              </Affix>
                             : ''
                         }
                         </div>
@@ -824,6 +674,14 @@ class MqttForm extends React.Component {
                            />
                         </Form.Item>
                     </Col>
+                    <Divider>需要上传的设备列表</Divider>
+                    <Col span={24}>
+                        <AddDevList
+                            devs={this.props.pane.conf.devs}
+                            setdevs={this.setDevs}
+                            disabled={this.state.disabled}
+                        />
+                    </Col>
                     <Divider>高级选项</Divider>
                     <Col span={4}>
                         <Form.Item>
@@ -840,35 +698,44 @@ class MqttForm extends React.Component {
                             {this.moreChange()}
                         </Form.Item>
                     </Col>
-                    <Divider>需要上传的设备列表</Divider>
-                    <Col span={24}>
-                        {/* <Form.Item label="需要上传的设备列表">
-                            <div>
-                                <Button
-                                    onClick={this.handleAdd}
-                                    type="primary"
-                                    style={{marginBottom: 16}}
-                                    disabled={disabled}
-                                >
-                                    Add
-                                </Button>
-                                <Table
-                                    components={components}
-                                    rowClassName={() => 'editable-row'}
-                                    bordered
-                                    dataSource={dataSource}
-                                    columns={columns}
-                                />
-                            </div>
-                        </Form.Item> */}
-                        <AddDevList
-                            devs={this.props.pane.conf.devs}
-                            setdevs={this.setDevs}
-                            disabled={this.state.disabled}
-                        />
-                    </Col>
-
                 </Row>
+                <div style={{display: 'flex', marginTop: '20px'}}>
+                            <Button
+                                style={{marginLeft: '10pxs', marginRight: '20px'}}
+                                type="primary"
+                                onClick={this.toggleDisable}
+                            >
+                                {!this.state.disabled ? '保存' : '编辑'}
+                            </Button>
+                            <Popconfirm
+                                title="确定要删除应用吗?"
+                                onConfirm={this.removeApp}
+                                // onCancel={cancel}
+                                okText="删除"
+                                cancelText="取消"
+                            >
+                                <Button
+                                    style={{marginLeft: '10pxs'}}
+                                    type="danger"
+                                >
+                                    删除
+                                </Button>
+                            </Popconfirm>
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginLeft: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                                    取消编辑
+                                </Button>
+                            : ''
+                        }
+                        </div>
             </Form>
         )
     }

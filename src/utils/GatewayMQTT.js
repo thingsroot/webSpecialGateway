@@ -517,6 +517,7 @@ class GatewayMQTT {
             onFailure: error
         }
         const topic_real = sn + topic;
+        console.log(topic_real)
         if (this.client && this.connected) {
             this.client.subscribe(topic_real, 1)
             if (topic === '/log') {
@@ -537,6 +538,7 @@ class GatewayMQTT {
         this.client = mqtt.connect(url, options)
         this.client.on('connect', ()=>{
             message.success('连接服务器成功')
+            console.log(topic, 'topic, url', url)
             this.connected = true
             this.client.subscribe(topic_real, 1)
             if (topic === '/log') {

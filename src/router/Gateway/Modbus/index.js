@@ -123,7 +123,7 @@ class Modbus extends Component {
                     devs: [],
                     loop_gap: '1000',
                     // serial_opt: {
-                    //     port: '/dev/ttyS1',
+                    //     port: '--请选择--',
                     //     baudrate: '9600',
                     //     stop_bits: '1',
                     //     data_bits: '8',
@@ -147,6 +147,19 @@ class Modbus extends Component {
     }
     setActiveKey = (key)=>{
         this.setState({activeKey: key})
+    }
+    removeNotInstall = (record) =>{
+        const app_list = this.state.panes;
+        app_list.map((item, key) => {
+            if (item.inst_name === record) {
+                app_list.splice(key, 1)
+            }
+        })
+
+        this.setState({
+            panes: app_list,
+            activeKey: '0'
+        })
     }
     fetch = () => {
         http.get('/api/applications_read?app=APP00000025').then(res=>{
@@ -191,21 +204,25 @@ class Modbus extends Component {
                                     onEdit={this.onEdit}
                                   >
                             {
-                                this.state.panes.map((pane, key) => (
-                                    <TabPane
-                                        tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
-                                        key={key}
-                                        closable={false}
-                                    >
-                                        <ModbusPane
+                                this.state.panes.map((pane, key) => {
+                                    const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
+                                    return (
+                                        <TabPane
+                                            tab={title}
                                             key={key}
-                                            pane={pane}
-                                            panes={this.state.panes}
-                                            fetch={this.fetch}
-                                            setActiveKey={this.setActiveKey}
-                                        />
-                                    </TabPane>
-                                ))
+                                            closable={false}
+                                        >
+                                            <ModbusPane
+                                                removenotinstall={this.removeNotInstall}
+                                                key={key}
+                                                pane={pane}
+                                                panes={this.state.panes}
+                                                fetch={this.fetch}
+                                                setActiveKey={this.setActiveKey}
+                                            />
+                                        </TabPane>
+                                    )
+                                })
                             }
                             </Tabs>
                             : <Empty/>

@@ -1,11 +1,13 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import { inject, observer} from 'mobx-react';
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Affix} from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Progress, Result} from 'antd';
 // import Slide from 'react-slick'
 import http from '../../../../utils/Server';
 import EditableTable from  '../EditableTable'
 import './style.scss';
+import GatewayMQTT from '../../../../utils/GatewayMQTT';
+import ReactList from 'react-list';
 const { Option } = Select;
 function cancel () {
     message.info('取消删除应用');
@@ -95,13 +97,19 @@ class ModbusPane extends Component {
         ];
         this. state = {
             // conf: {
+            mqtt: new GatewayMQTT(),
+            number: 0,
+            isShow: false,
+            result: true,
+            ShowResult: false,
+            pressVisible: false,
             tpls: [],
             devs: [],
             loop_gap: 1000,
             apdu_type: 'TCP',
             channel_type: 'TCP',
             serial_opt: {
-                port: '',
+                port: '--请选择--',
                 baudrate: 9600,
                 stop_bits: 1,
                 data_bits: 8,
@@ -201,19 +209,28 @@ class ModbusPane extends Component {
             templateList: [],
             addTempLists,
             totalPanes: [],
-            checkIp: false
+            checkIp: false,
+            communication: false
         }
 
     }
     UNSAFE_componentWillMount () {
-        // this.props.panes.length ? this.props.panes.map((pane, key)=> {
-        //     key;
-        //     this.transformOption(pane.conf)
-        // }) : null
-
-
+        if (this.props.panes.length) {
+            let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
+            let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
+            if (s1 && s2) {
+                this.setState({
+                    communication: true
+                })
+            } else {
+                this.setState({
+                    communication: false
+                })
+            }
+        }
+    }
+    componentDidMount () {
         const { conf } = this.props.pane;
-        console.log(conf)
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
@@ -233,9 +250,12 @@ class ModbusPane extends Component {
                 socket_opt: conf.socket_opt
             })
         }
-}
-    componentDidMount () {
-
+        if (this.props.pane.status === 'Not installed') {
+            this.setState({
+                disabled: false
+            })
+        }
+        // this.checkOption()
     }
     // UNSAFE_componentWillReceiveProps (nextProps) {
     //     console.log(this.refs.Carousel)
@@ -245,8 +265,45 @@ class ModbusPane extends Component {
     //     }
 
     // }
+    checkOption () {
+        if (this.props.panes.length) {
+            console.log(this.props.panes)
+                    let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
+                    let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
+                    let option = '';
+                    switch (true) {
+                        case s1 && s2 :
+                            console.log(1);
+                            option = this.optionDisabled();
+                            break;
+                        case !s1 && !s2:
+                            console.log(2);
+                            option = this.optionTotal();
+                            break;
+                        case s1:
+                            console.log(3);
+                            option = this.optionS2();
+                            break;
+                        case s2:
+                            console.log(4);
+                            option = this.optionS1();
+                            break;
+                        default:
+                            console.log(5);
+                    }
+                    return option
+        }
+    }
+    optionS1 = () => (<Option value="/dev/ttyS1" key="/dev/ttyS1">COM1</Option>);
+    optionS2 = () => (<Option value="/dev/ttyS2" key="/dev/ttyS2">COM2</Option>);
+    optionDisabled = () => (<Option value="disabled" key="disabled" disabled>不可选</Option>);
+    optionTotal =() => {
+        return [
+            <Option value="/dev/ttyS1" key="/dev/ttyS1">COM1</Option>,
+            <Option value="/dev/ttyS2" key="/dev/ttyS2">COM2</Option>
+        ]
+    };
     setSetting = (type, val, name) =>{
-        console.log(type, val, name)
         if (type === 'serial_opt') {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
@@ -266,6 +323,46 @@ class ModbusPane extends Component {
         }
 
     };
+    addaccout = () =>{
+        const number = this.state.number;
+        if (number <= 89) {
+            this.setState({
+                number: number + 8
+            }, () => {
+                setTimeout(() => {
+                    this.addaccout()
+                }, 200);
+            })
+        }
+    }
+    tick (time){
+        const { mqtt } = this.state;
+        mqtt.tick(time)
+
+        const data = {
+            duration: time || 60,
+            name: this.props.match.params.sn,
+            id: `sys_enable_log/${this.props.match.params.sn}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_enable_log', data)
+    }
+    startChannel =()=>{
+        const mqtt = this.state.mqtt;
+        this.tick(60)
+        this.t1 = setInterval(()=>this.tick(60), 59000);
+        mqtt.connect(this.props.match.params.sn, '/log')
+    }
+    stopChannel =()=>{
+        const { mqtt } = this.state;
+        mqtt.unsubscribe('/log')
+        clearInterval(this.t1)
+        const data = {
+            duration: 0,
+            name: this.props.match.params.sn,
+            id: `sys_enable_log/${this.props.match.params.sn}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_enable_log', data)
+    }
     installapp = () => {
         const data = {
             app: 'APP00000025',
@@ -286,23 +383,43 @@ class ModbusPane extends Component {
         }
         http.post('/api/gateways_applications_install', data).then(res=>{
             if (res.ok) {
-                let title = '安装应用' + data.inst + '请求'
-                message.info(title + '等待网关响应!')
-                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                // let title = '安装应用' + data.inst + '请求'
+                // message.info(title + '等待网关响应!')
+                this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
+                    console.log(action)
                     this.props.fetch()
-                    // this.setState({
-                    //     modalKey: 0
-                    // })
+                    if (action) {
+                        this.setState({
+                            number: 100,
+                            result: true,
+                            ShowResult: true
+                        }, ()=>{
+                            this.stopChannel()
+                        })
+                    } else {
+                        this.setState({result: false, ShowResult: true, number: 99})
+                    }
                 })
             } else {
                 message.error(res.error)
+                this.setState({
+                    number: 99
+                })
             }
         })
     }
     AppConf = () => {
         if (this.props.pane.status === 'Not installed') {
             console.log('未安装应用，')
-            this.installapp()
+            this.startChannel()
+            this.setState({
+                pressVisible: true
+            }, ()=>{
+                this.addaccout()
+            })
+            setTimeout(() => {
+                this.installapp()
+            }, 3000);
             return false;
         }
         const data = {
@@ -340,6 +457,10 @@ class ModbusPane extends Component {
         })
     };
     removeModbus = () =>{
+        if (this.props.pane.status === 'Not installed') {
+            this.props.removenotinstall(this.props.pane.inst_name)
+            return false
+        }
         const data = {
             gateway: this.props.match.params.sn,
             inst: this.props.pane.inst_name,
@@ -417,18 +538,23 @@ class ModbusPane extends Component {
     };
     //添加模板
     onAddTemplate = (config)=>{
+        console.log(config)
         const list = this.state.templateList;
-        const obj = {
-            id: config.id,
-            desc: config.description,
-            name: config.name,
-            ver: config.ver,
-            key: list.length + 1
-        }
-        list.push(obj)
-        this.setState({
-            templateList: list
-        })
+        let check = this.state.templateList.some(item => item.id === config.id);
+            if (!check) {
+                const obj = {
+                    id: config.id,
+                    desc: config.description,
+                    name: config.name,
+                    ver: config.ver,
+                    key: list.length + 1
+                }
+                list.push(obj)
+                this.setState({
+                    templateList: list
+                })
+            }
+
     };
     getDevs = (devs) => {
         const arr = [];
@@ -449,185 +575,61 @@ class ModbusPane extends Component {
             this.setState({devs: []})
         }
     };
-    transformOption = () => {
-        console.log(this.parentList)
-        if (this.state.channel_type === 'serial') {
-            this.parentList.length ? this.parentList.map((pane, index) => {
-                console.log(pane, index)
-                let conf = pane.conf
-                if (conf) {
-                    console.log('success')
-                    if (conf.serial_opt) {
-                        if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
-                            console.log(1)
-                            return [
-                                <Option
-                                    value="/dev/ttyS1"
-                                    key="/dev/ttyS1"
-                                    disabled
-                                >COM1</Option>,
-                                <Option
-                                    value="/dev/ttyS2"
-                                    key="/dev/ttyS2"
-                                >COM2</Option>
-                            ]
-                        } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
-                            console.log(2)
-                            return [
-                                <Option
-                                    value="/dev/ttyS2"
-                                    key="/dev/ttyS2"
-                                    disabled
-                                >COM2</Option>,
-                                <Option
-                                    value="/dev/ttyS1"
-                                    key="/dev/ttyS1"
-                                >COM1</Option>
-                            ]
-                        } else {
-                            console.log(4)
-                            return [
-                                <Option
-                                    value=""
-                                    key="disabled"
-                                >disabled</Option>
-                            ]
-                        }
-                    } else {
-                        console.log(2333)
-                        return [
-                            <Option
-                                value="/dev/ttyS1"
-                                key="/dev/ttyS1"
-                            >COM1</Option>,
-                            <Option
-                                value="/dev/ttyS2"
-                                key="/dev/ttyS2"
-                            >COM2</Option>
-                        ]
-                    }
-                }
-            }) : null
-           }
-
-        // if (conf) {
-        //     console.log('success')
-        //     if (conf.serial_opt) {
-        //         if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
-        //             console.log(1)
-        //             return [
-        //                 <Option
-        //                     value="/dev/ttyS1"
-        //                     key="/dev/ttyS1"
-        //                     disabled
-        //                 >COM1</Option>,
-        //                 <Option
-        //                     value="/dev/ttyS2"
-        //                     key="/dev/ttyS2"
-        //                 >COM2</Option>
-        //             ]
-        //         } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
-        //             console.log(2)
-        //             return [
-        //                 <Option
-        //                     value="/dev/ttyS2"
-        //                     key="/dev/ttyS2"
-        //                     disabled
-        //                 >COM2</Option>,
-        //                 <Option
-        //                     value="/dev/ttyS1"
-        //                     key="/dev/ttyS1"
-        //                 >COM1</Option>
-        //             ]
-        //         } else {
-        //             console.log(4)
-        //             return [
-        //                 <Option
-        //                     value=""
-        //                     key="disabled"
-        //                 >disabled</Option>
-        //             ]
-        //         }
-        //     } else {
-        //         console.log(2333)
-        //         return [
-        //             <Option
-        //                 value="/dev/ttyS1"
-        //                 key="/dev/ttyS1"
-        //             >COM1</Option>,
-        //             <Option
-        //                 value="/dev/ttyS2"
-        //                 key="/dev/ttyS2"
-        //             >COM2</Option>
-        //         ]
-        //     }
-        // }
-
-    };
     isValid = e => {
         let value = e.target.value;
         let reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
         if (!reg.test(value)) {
             this.setState({checkIp: true})
+            return false
         } else {
             this.setState({checkIp: false})
         }
-    }
-
+    };
     render (){
         const conf = this.props.pane.conf
-
-        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix} = this.state;
+        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow} = this.state;
         devs, tpls;
         // const Mt10 = {
         //     marginTop: '10px'
         // }
         return (
             <div className="ModbusPane">
-                <div style={{display: 'flex'}}>
-                    <Affix offsetTop={100}>
-                                <Button
-                                    disabled={this.state.checkIp}
-                                    style={{marginLeft: '10pxs', marginRight: '20px'}}
-                                    type="primary"
-                                    onClick={this.toggleDisable}
-                                >
-                                    {!this.state.disabled ? '保存' : '编辑'}
+                <div className="ModbusPaneAffix">
+                        <Button
+                            style={{marginLeft: '10pxs', marginRight: '20px'}}
+                            type="primary"
+                            onClick={this.toggleDisable}
+                        >
+                            {!this.state.disabled ? '保存' : '编辑'}
+                        </Button>
+                        <Popconfirm
+                            title="确定要删除应用Modbus吗?"
+                            onConfirm={this.removeModbus}
+                            onCancel={cancel}
+                            okText="删除"
+                            cancelText="取消"
+                        >
+                            <Button
+                                style={{marginLeft: '10pxs'}}
+                                type="danger"
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginLeft: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                                    取消编辑
                                 </Button>
-                            </Affix>
-                            <Affix offsetTop={100}>
-                                <Popconfirm
-                                    title="确定要删除应用Modbus吗?"
-                                    onConfirm={this.removeModbus}
-                                    onCancel={cancel}
-                                    okText="删除"
-                                    cancelText="取消"
-                                >
-                                    <Button
-                                        style={{marginLeft: '10pxs'}}
-                                        type="danger"
-                                    >
-                                        删除
-                                    </Button>
-                                </Popconfirm>
-                            </Affix>
-                            {
-                                !disabled
-                                ? <Affix offsetTop={100}>
-                                    <Button
-                                        disabled={this.state.checkIp}
-                                        style={{
-                                            marginLeft: '20px'
-                                        }}
-                                        onClick={()=>{
-                                            this.setState({disabled: true})
-                                        }}
-                                    >
-                                        取消编辑
-                                    </Button>
-                                </Affix>
-                                : ''
-                            }
+                            : ''
+                        }
                         </div>
                 <Form layout="inline">
                     <Divider  orientation="left">应用配置信息</Divider>
@@ -659,12 +661,15 @@ class ModbusPane extends Component {
                     <Form.Item label="通讯类型:">
                         <Select
                             disabled={disabled}
-                            defaultValue={channel_type}
+                            value={channel_type}
                             onChange={(val)=>{
                                 this.setSetting('channel_type', val)
                             }}
                         >
-                            <Option value="serial">串口</Option>
+                            <Option
+                                value="serial"
+                                disabled={this.state.communication}
+                            >串口</Option>
                             <Option value="TCP">以太网</Option>
                         </Select>
                     </Form.Item>
@@ -677,13 +682,13 @@ class ModbusPane extends Component {
                             <Form.Item label="端口：">
                                 <Select
                                     disabled={disabled}
-                                    defaultValue={conf.serial_opt ? (conf.serial_opt.port === '/dev/ttyS1' ? 'COM1' : 'COM2' ) : ''}
+                                    defaultValue={conf.serial_opt ? (conf.serial_opt.port === '/dev/ttyS1' ? 'COM1' : 'COM2' ) : serial_opt.port}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'port')
                                     }}
                                 >
                                     {
-                                        this.transformOption()
+                                        this.checkOption()
                                     }
 
                                 </Select>
@@ -872,6 +877,136 @@ class ModbusPane extends Component {
                         }}
                     />
                 </div>
+                <div style={{display: 'flex', marginTop: '20px'}}>
+                        <Button
+                            style={{marginLeft: '10pxs', marginRight: '20px'}}
+                            type="primary"
+                            onClick={this.toggleDisable}
+                        >
+                            {!this.state.disabled ? '保存' : '编辑'}
+                        </Button>
+                        <Popconfirm
+                            title="确定要删除应用Modbus吗?"
+                            onConfirm={this.removeModbus}
+                            onCancel={cancel}
+                            okText="删除"
+                            cancelText="取消"
+                        >
+                            <Button
+                                style={{marginLeft: '10pxs'}}
+                                type="danger"
+                            >
+                                删除
+                            </Button>
+                        </Popconfirm>
+                        {
+                            !disabled
+                            ? <Button
+                                style={{
+                                    marginLeft: '20px'
+                                }}
+                                onClick={()=>{
+                                    this.setState({disabled: true})
+                                }}
+                              >
+                                    取消编辑
+                                </Button>
+                            : ''
+                        }
+                        </div>
+                        <Modal
+                            title={!this.state.isShow ? '新增通道进度' : '查看日志'}
+                            visible={this.state.pressVisible}
+                            footer={
+                                isShow
+                                ? <Button
+                                    key="buy"
+                                    onClick={()=>{
+                                        this.setState({pressVisible: false})
+                                    }}
+                                  >关闭窗口</Button>
+                                : null}
+                            closable={false}
+                        >
+                            {
+                                isShow
+                                ? <div style={{maxHeight: '300px', overflowY: 'auto'}}>
+                                <ReactList
+                                    pageSize={1}
+                                    ref="content"
+                                    axis="y"
+                                    type="simple"
+                                    length={mqtt.log_channel.Data.length}
+                                    itemRenderer={(key)=>{
+                                        return (<div key={key}>
+                                            <div className="tableHeaders">
+                                                <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
+                                                {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
+                                                {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
+                                                {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
+                                                <div>{mqtt.log_channel.Data[key].content}</div>
+                                            </div>
+                                        </div>)
+                                    }}
+                                />
+                            </div>
+                            : <div>
+                                {
+                                    this.state.ShowResult
+                                    ? this.state.result && this.state.number === 100
+                                    ? <Result
+                                        status="success"
+                                        title="新增Modbus通道成功！"
+                                        subTitle=""
+                                        extra={[
+                                        <Button
+                                            type="primary"
+                                            key="console"
+                                            onClick={()=>{
+                                                this.setState({isShow: true})
+                                            }}
+                                        >
+                                            查看日志
+                                        </Button>,
+                                        <Button
+                                            key="buy"
+                                            onClick={()=>{
+                                                this.setState({pressVisible: false})
+                                            }}
+                                        >关闭窗口</Button>
+                                        ]}
+                                      />
+                                    : <Result
+                                        status="warning"
+                                        title="There are some problems with your operation."
+                                        extra={
+                                        <Button
+                                            type="primary"
+                                            key="console"
+                                            onClick={()=>{
+                                                this.setState({isShow: true})
+                                            }}
+                                        >
+                                            查看日志
+                                        </Button>
+                                        }
+                                      />
+                                    : <Progress
+                                        style={{
+                                            marginLeft: '50%',
+                                            transform: 'translate(-50%, 0)'
+                                        }}
+                                        type="circle"
+                                        strokeColor={{
+                                            '0%': '#108ee9',
+                                            '100%': '#87d068'
+                                        }}
+                                        percent={this.state.number}
+                                      />
+                                }
+                            </div>
+                            }
+                </Modal>
             </div>
         );
     }
