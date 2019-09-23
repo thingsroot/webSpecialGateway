@@ -294,13 +294,32 @@ class ModbusPane extends Component {
                     return option
         }
     }
-    optionS1 = () => (<Option value="/dev/ttyS1" key="/dev/ttyS1">COM1</Option>);
-    optionS2 = () => (<Option value="/dev/ttyS2" key="/dev/ttyS2">COM2</Option>);
-    optionDisabled = () => (<Option value="disabled" key="disabled" disabled>不可选</Option>);
+    optionS1 = () => (
+        <Option
+            value="/dev/ttyS1"
+            key="/dev/ttyS1"
+        >COM1</Option>);
+    optionS2 = () => (
+        <Option
+            value="/dev/ttyS2"
+            key="/dev/ttyS2"
+        >COM2</Option>);
+    optionDisabled = () => (
+        <Option
+            value="disabled"
+            key="disabled"
+            disabled
+        >不可选</Option>);
     optionTotal =() => {
         return [
-            <Option value="/dev/ttyS1" key="/dev/ttyS1">COM1</Option>,
-            <Option value="/dev/ttyS2" key="/dev/ttyS2">COM2</Option>
+            <Option
+                value="/dev/ttyS1"
+                key="/dev/ttyS1"
+            >COM1</Option>,
+            <Option
+                value="/dev/ttyS2"
+                key="/dev/ttyS2"
+            >COM2</Option>
         ]
     };
     setSetting = (type, val, name) =>{
