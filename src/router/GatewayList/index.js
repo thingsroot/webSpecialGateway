@@ -137,22 +137,33 @@ class MyGates extends Component {
             <Menu>
                 <Menu.Item>
                     <Link to={{
-                            pathname: `/gateway/${record.sn}/mqtt`,
-                            state: record
-                        }}
-                    >
-                        MQTT通道
-                    </Link>
-              </Menu.Item>
-                <Menu.Item>
-                    <Link to={{
                             pathname: `/gateway/${record.sn}/modbus`,
                             state: record
                         }}
                     >
-                            Modbus通道
+                            Modbus配置
                     </Link>
                 </Menu.Item>
+                <Menu.Item>
+                    <Link to={{
+                            pathname: `/gateway/${record.sn}/mqtt`,
+                            state: record
+                        }}
+                    >
+                        MQTT配置
+                    </Link>
+              </Menu.Item>
+              <Menu.Item key="1">
+                                <span
+                                    disabled={record.is_shared}
+                                    onClick={()=>{
+                                        this.setState({
+                                            record,
+                                            visibleEdit: true
+                                        })
+                                    }}
+                                >网关属性</span>
+                                </Menu.Item>
               <Menu.Divider />
                 <Menu.Item key="4">
                     <Popconfirm

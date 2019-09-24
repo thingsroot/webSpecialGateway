@@ -24,11 +24,11 @@ class LeftNav extends Component {
                 href: '/devices'
             }, {
                 icon: 'appstore',
-                text: 'Modbus设置',
+                text: 'Modbus配置',
                 href: '/modbus'
             }, {
                 icon: 'setting',
-                text: 'MQTT设置',
+                text: 'MQTT配置',
                 href: '/mqtt'
             }
         ],

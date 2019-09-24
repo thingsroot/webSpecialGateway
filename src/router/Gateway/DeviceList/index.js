@@ -301,7 +301,7 @@ class DevicesList extends Component {
                         }
                         return className;
                     }}
-                    expandedRowRender={this.state.uploadOneShort || gatewayInfo.data.data_upload ? Collapses : function (){}}
+                    expandedRowRender={this.state.uploadOneShort || gatewayInfo.data.data_upload ? Collapses : null}
                     expandRowByClick
                     pagination={false}
                 />

@@ -3,6 +3,7 @@ import {Dropdown, Button, Menu, Icon, message} from 'antd';
 import http from '../../../utils/Server';
 import { inject, observer} from 'mobx-react';
 import { withRouter } from 'react-router-dom';
+const style = { backgroundColor: '#2db7f5', color: '#fff', border: '1px solid #2db7f5' }
   @inject('store')
   @observer
   @withRouter
@@ -38,8 +39,9 @@ class Btn extends Component {
                     <div className="upgradeBtn">
                         <span>固件升级</span>
                         <Button
-                            type="primary"
+                            // type="primary"
                             disabled={this.state.firmwareBtnFlag}
+                            style={this.state.firmwareBtnFlag ? {} : style}
                             onClick={()=>{
                                 this.upgradeApp('freeioe')
                             }}
@@ -52,6 +54,7 @@ class Btn extends Component {
                         <Button
                             type="primary"
                             disabled={this.state.ModbusBtnFlag}
+                            style={this.state.ModbusBtnFlag ? {} : style}
                             onClick={()=>{
                                 this.upgradeApp('modbus')
                             }}
@@ -64,6 +67,7 @@ class Btn extends Component {
                         <Button
                             type="primary"
                             disabled={this.state.MqttBtnFlag}
+                            style={this.state.MqttBtnFlag ? {} : style}
                             onClick={()=>{
                                 this.upgradeApp('mqtt')
                             }}
@@ -217,9 +221,9 @@ class Btn extends Component {
                     disabled={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag}
                 >
                         <Button
-                            type="primary"
+                            // type="primary"
                             className="ant-dropdown-link"
-                            style={{width: 200}}
+                            style={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag ? {width: 200} : {...style, width: 200}}
                         >
                             {
                                 !firmwareBtnFlag || !MqttBtnFlag || !ModbusBtnFlag

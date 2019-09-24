@@ -155,6 +155,7 @@
     "eslint-plugin-import": "2.14.0",
     "eslint-plugin-jsx-a11y": "6.1.2",
     "eslint-plugin-react": "7.12.4",
+    "jszip": "^3.2.2",
     "less-loader": "^4.1.0",
     "react-list": "^0.8.11",
     "sass-loader": "7.1.0",

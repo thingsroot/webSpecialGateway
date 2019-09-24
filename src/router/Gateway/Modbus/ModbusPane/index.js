@@ -786,6 +786,7 @@ class ModbusPane extends Component {
                 <Modal
                     className="templateList"
                     title="选择模板"
+                    maskClosable={false}
                     visible={this.state.showTemplateSelection}
                     onOk={this.handleCancelAddTempList}
                     onCancel={this.handleCancelAddTempList}
