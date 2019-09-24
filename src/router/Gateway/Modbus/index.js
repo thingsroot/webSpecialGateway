@@ -172,7 +172,7 @@ class Modbus extends Component {
                 const app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
-                        if (item.inst_name.toLowerCase().indexOf('modbus') !== -1) {
+                        if (item.inst_name.toLowerCase().indexOf('modbus_') !== -1) {
                             app_list.push(item)
                         }
                     })

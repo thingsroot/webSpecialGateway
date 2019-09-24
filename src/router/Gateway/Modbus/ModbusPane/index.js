@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {withRouter} from 'react-router-dom';
 import { inject, observer} from 'mobx-react';
-import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Progress, Result} from 'antd';
+import {Select, Table, Button, InputNumber, Checkbox, Form, Divider, Input, message, Popconfirm, Modal, Progress, Result, Tooltip} from 'antd';
 // import Slide from 'react-slick'
 import http from '../../../../utils/Server';
 import EditableTable from  '../EditableTable'
@@ -9,6 +9,7 @@ import './style.scss';
 import GatewayMQTT from '../../../../utils/GatewayMQTT';
 import ReactList from 'react-list';
 import { isArray } from 'util';
+import { _getCookie } from '../../../../utils/Session';
 const { Option } = Select;
 function cancel () {
     message.info('取消删除应用');
@@ -22,15 +23,25 @@ class ModbusPane extends Component {
         const addTempLists = [
             {
                 title: '名称',
-                width: '20%',
+                width: '15%',
                 dataIndex: 'conf_name',
                 key: 'conf_name',
                 render: text => <span>{text}</span>
             }, {
                 title: '描述',
-                width: '30%',
+                width: '20%',
                 dataIndex: 'description',
                 key: 'description'
+            }, {
+                title: '模板所有者',
+                width: '15%',
+                dataIndex: 'owner_id',
+                key: 'owner_id',
+                render: (record)=>(
+                    <Tooltip title={record}>
+                        <span>{record}</span>
+                    </Tooltip>
+                )
             }, {
                 title: '模板ID',
                 width: '15%',
@@ -200,6 +211,7 @@ class ModbusPane extends Component {
             disabled: true,
             templateList: [],
             addTempLists,
+            TheBackupappTemplateList: [],
             totalPanes: [],
             checkIp: false,
             communication: false
@@ -506,39 +518,42 @@ class ModbusPane extends Component {
         })
     };
     refreshTemplateList = () => {
-      this.setState({appTemplateList: []})
+        const owner = this.props.pane.data.owner;
+        this.setState({appTemplateList: []})
         http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025').then(res=> {
             let list = this.state.appTemplateList;
             res.data && res.data.length > 0 && res.data.map((tp)=>{
-                if (undefined === list.find(item => item.name === tp.name) &&
-                    tp.latest_version !== undefined && tp.latest_version !== 0 ) {
+                if (undefined === list.find(item => item.name === tp.name) && tp.latest_version !== undefined && tp.latest_version !== 0 ) {
                     list.push(tp)
                 }
             });
+            list.sort(function (b, a) {
+                const id = _getCookie('user_id')
+                const order = [owner, id];
+                return order.indexOf(a.owner_id) - order.indexOf(b.owner_id)
+            })
             this.setState({
-                appTemplateList: list
+                appTemplateList: list,
+                TheBackupappTemplateList: list
             });
         });
-        http.get('/api/user_configurations_list?conf_type=Template&app=APP00000025')
-            .then(res=>{
-                if (res.ok) {
-                    let list = this.state.appTemplateList;
-                    res.data && res.data.length > 0 && res.data.map((tp)=>{
-                        if (undefined === list.find(item => item.name === tp.name) ) {
-                            list.push(tp)
-                        }
-                    });
-                    this.setState({
-                        appTemplateList: list
-                    });
-                }
-            });
     };
     onCreateNewTemplate = () => {
         window.open('/appdetails/APP00000025/new_template', '_blank')
     }
-    search = () => {
-
+    search = (value) => {
+        console.log(value)
+        if (value) {
+            const newList = this.state.appTemplateList.filter(item=>item.name.toLocaleLowerCase().indexOf(value) !== -1 || item.description.indexOf(value) !== -1 || item.conf_name.toLocaleLowerCase().indexOf(value) !== -1)
+            console.log(newList)
+            this.setState({
+                appTemplateList: newList
+            })
+        } else {
+            this.setState({
+                appTemplateList: this.state.TheBackupappTemplateList
+            })
+        }
     };
     //查看模板
     onViewTemplate = (conf, version) => {
@@ -893,7 +908,7 @@ class ModbusPane extends Component {
                         style={{
                             display: 'flex',
                             position: 'absolute',
-                            right: 300,
+                            left: '110px',
                             top: 10,
                             zIndex: 999,
                             lineHeight: '30px'
@@ -909,19 +924,25 @@ class ModbusPane extends Component {
                         </Button>
                         <span style={{padding: '0 20px'}}> </span>
                         <Input.Search
-                            placeholder="网关名称、描述、序列号"
-                            onChange={this.search}
+                            placeholder="网关名称、描述、模板ID"
+                            onChange={(e)=>{
+                                this.search(e.target.value.toLocaleLowerCase())
+                            }}
                             style={{ width: 200 }}
                         />
                         <span style={{padding: '0 2px'}}> </span>
-                        <Button
+                        {/* <Button
                             type="primary"
                             onClick={this.onCreateNewTemplate}
                         >
                             创建新模板
-                        </Button>
+                        </Button> */}
                     </div>
+                    {
+                        console.log(this.state.appTemplateList)
+                    }
                     <Table
+                        style={{wordBreak: 'break-all'}}
                         rowKey="name"
                         dataSource={this.state.appTemplateList}
                         columns={this.state.addTempLists}

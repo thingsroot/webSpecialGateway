@@ -220,7 +220,7 @@ class Mqtt extends Component {
                 const app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
-                        if (item.inst_name.toLowerCase().indexOf('mqtt') !== -1) {
+                        if (item.inst_name.toLowerCase().indexOf('mqtt_') !== -1) {
                             app_list.push(item)
                         }
                     })
@@ -526,8 +526,14 @@ class Mqtt extends Component {
         })
     }
     installMqtt = () => {
+        const regIp =  /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]))$/;
+        const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
         if (!this.state.serial_opt.contentText) {
             message.info('请先上传CA证书！')
+            return false;
+        }
+        if (!regIp.test(this.state.serial_opt.address) && !reg.test(this.state.serial_opt.address)) {
+            message.info('MQTT地址不合法，请重新输入！')
             return false;
         }
         const { serial_opt } = this.state;
@@ -627,7 +633,7 @@ class Mqtt extends Component {
                     {
                         this.state.app_list.map((pane, key) => (
                             <TabPane
-                                tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
+                                tab={pane.inst_name.indexOf('mqtt_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
                                 key={key}
                                 closable={false}
                             >

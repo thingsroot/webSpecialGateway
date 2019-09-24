@@ -324,6 +324,12 @@ class MqttForm extends React.Component {
         })
     }
     toggleDisable = () => {
+        const regIp =  /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]))$/;
+        const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
+        if (regIp.test(this.state.mqtt.server) === false && reg.test(this.state.mqtt.server) === false && !this.state.disabled) {
+            message.info('MQTT地址不合法，请重新输入！')
+            return false;
+        }
         if (!this.state.disabled && this.props.pane.status === 'Not installed') {
             this.installMqtt()
             return false;
