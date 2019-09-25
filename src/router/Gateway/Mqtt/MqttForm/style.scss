@@ -1,0 +1,32 @@
+.mqttpagelist{
+    display: flex;
+    .ant-col{
+        padding-left: 0!important;
+    }
+    p{
+        padding: 5px;
+    }
+    .mqttwrapper{
+        display: flex;
+        
+    }
+}
+.mqttwrapper{
+    margin-left: 15px;
+    .flex{
+        display: flex;
+        padding: 5px!important;
+        span{
+            line-height: 30px;
+        }
+    }
+}
+
+.marle20{
+    margin-left: 18px;
+    padding: 5px 0;
+}
+.login-form-mqtt{
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 14px;
+}

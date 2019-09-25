@@ -4,7 +4,7 @@ import MqttPane from './MqttForm';
 import {
     Tabs,
     Button,
-    // Modal,
+    Modal,
     Form,
     Row,
     Col,
@@ -23,6 +23,7 @@ import {
 import './index.css';
 import { inject, observer} from 'mobx-react';
 const {Panel} = Collapse;
+const { confirm } = Modal;
 const coustomPanelStyle = {
     background: '#f7f7f7',
     borderRadius: 4,
@@ -95,18 +96,114 @@ class Mqtt extends Component {
     }
     componentDidMount () {
         this.fetch()
+        this.upgradeFreeioe()
         // this.t1 = setInterval(() => {
         //     this.fetch()
         // }, 10000);
+        this.t1 = setInterval(() => {
+            this.upgradeFreeioe()
+        }, 3000);
     }
     UNSAFE_componentWillReceiveProps (nextProps) {
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
             this.fetch(nextProps.match.params.sn)
             this.setState({loading: true})
+            clearInterval(this.t1)
+            this.t1 = setInterval(() => {
+                this.upgradeFreeioe()
+            }, 3000);
         }
     }
     componentWillUnmount (){
         clearInterval(this.t1)
+    }
+    onGatewayUpgrade (version, skynet_version) {
+        if (version === undefined && skynet_version === undefined) {
+            message.error('错误的升级请求')
+            return
+        }
+
+        const { gatewayInfo } = this.props.store;
+        this.setState({upgrading: true})
+        const data = {
+            name: gatewayInfo.sn,
+            no_ack: 1,
+            id: `sys_upgrade/${gatewayInfo.sn}/${new Date() * 1}`
+        }
+        if (version !== undefined) {
+            data.version = version
+        }
+        if (skynet_version !== undefined) {
+            data.skynet_version = skynet_version
+        }
+        http.post('/api/gateways_upgrade', data).then(res=>{
+            if (res.ok) {
+                this.props.store.action.pushAction(res.data, '网关固件升级', '', data, 30000,  (result)=> {
+                    if (result.ok){
+                        this.setState({showUpgrade: false})
+                    } else {
+                        this.setState({upgrading: false})
+                    }
+                })
+            } else {
+                message.error('网关固件升级失败！ 错误:' + res.error)
+                this.confirm()
+                this.setState({upgrading: false})
+            }
+        }).catch((err)=>{
+            message.error('网关固件升级失败！ 错误:' + err)
+            this.confirm()
+            this.setState({upgrading: false})
+        })
+    }
+    showConfirm = () => {
+        const $this = this;
+        confirm({
+          title: '该网关设备系统版本过低，请升级。',
+          content: '是否升级？如不升级将无法使用MQTT配置！',
+          okText: '升级',
+          cancelText: '取消',
+          onOk () {
+                $this.getVersionlatest().then(data=>{
+                    $this.onGatewayUpgrade(data.freeioe_version, data.skynet_version)
+                })
+          },
+          onCancel () {
+              $this.props.history.push(`/gateway/${$this.props.match.params.sn}/devices`)
+          }
+        });
+      }
+    getVersionlatest = () =>{
+        return new Promise((resolve, reject)=>{
+            const {gatewayInfo} = this.props.store;
+            const data = {
+
+            }
+            http.get('/api/applications_versions_latest?app=freeioe&beta=' + (gatewayInfo.data.enable_beta ? 1 : 0)).then(res=>{
+                if (res.ok) {
+                    data.freeioe_version = res.data;
+                    http.get('/api/applications_versions_latest?app=bin/openwrt/18.06/x86_64/skynet&beta=' + (gatewayInfo.data.enable_beta ? 1 : 0)).then(response=>{
+                        if (response.ok) {
+                            data.skynet_version = response.data;
+                            resolve(data)
+                        } else {
+                            reject('skyneterror')
+                        }
+                    })
+                }
+            })
+        })
+    }
+    upgradeFreeioe = () => {
+        const { version } = this.props.store.gatewayInfo.data;
+        if (version !== 0 && version < 1273) {
+            clearInterval(this.t1)
+            console.log('需要升级Freeioe')
+            this.showConfirm()
+        }
+        if (version !== 0 && version >= 1273) {
+            clearInterval(this.t1)
+        }
     }
     setActiveKey = (key)=>{
         this.setState({activeKey: key})
@@ -123,7 +220,7 @@ class Mqtt extends Component {
                 const app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
-                        if (item.inst_name.toLowerCase().indexOf('mqtt') !== -1) {
+                        if (item.inst_name.toLowerCase().indexOf('mqtt_') !== -1) {
                             app_list.push(item)
                         }
                     })
@@ -400,8 +497,7 @@ class Mqtt extends Component {
                 },
                 options: {
                     data_upload_dpp: 1024,
-                    period: 60,
-                    ttl: 300
+                    period: 60
                 },
                 dev: [],
                 options_ex: {
@@ -430,8 +526,14 @@ class Mqtt extends Component {
         })
     }
     installMqtt = () => {
+        const regIp =  /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]))$/;
+        const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
         if (!this.state.serial_opt.contentText) {
             message.info('请先上传CA证书！')
+            return false;
+        }
+        if (!regIp.test(this.state.serial_opt.address) && !reg.test(this.state.serial_opt.address)) {
+            message.info('MQTT地址不合法，请重新输入！')
             return false;
         }
         const { serial_opt } = this.state;
@@ -531,7 +633,7 @@ class Mqtt extends Component {
                     {
                         this.state.app_list.map((pane, key) => (
                             <TabPane
-                                tab={pane.inst_name.indexOf('_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
+                                tab={pane.inst_name.indexOf('mqtt_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
                                 key={key}
                                 closable={false}
                             >

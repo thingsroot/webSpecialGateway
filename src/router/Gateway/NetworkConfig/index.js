@@ -313,6 +313,7 @@ class NetworkConfig extends Component {
                                         }
                                         <div className="modal_">
                                         <Modal
+                                            maskClosable={false}
                                             title="修改br-lan IP地址与子网掩码"
                                             visible={this.state.visible}
                                             onOk={this.handleOk}
@@ -363,7 +364,7 @@ class NetworkConfig extends Component {
                     })
                 }
                 </Card>
-                <div style={{marginTop: 20}}>
+                <div className="DNSinfo">
                     <Card loading={loading}>
                         <h2>| 默认网关&DNS</h2>
                         <div style={{lineHeight: '30px', marginTop: '20px', marginLeft: '30px'}}>

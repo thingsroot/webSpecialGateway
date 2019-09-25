@@ -10,12 +10,17 @@ import {
     InputNumber, message,
     Popconfirm,
     Row,
+    Select,
     Upload
 } from 'antd';
 import { inject, observer} from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 import http from '../../../../utils/Server';
 import AddDevList from './Transfer';
+import Zip from 'jszip';
+import * as saveAs from 'jszip/vendor/FileSaver';
+import './style.scss';
+const { Option } = Select;
 @withRouter
 @inject('store')
 @observer
@@ -46,7 +51,9 @@ class MqttForm extends React.Component {
         this.state = {
             userMessage: '',
             seniorIndeterminate: false, //高级选项
+            CustomAuthentication: false, //自定义认证
             visible: false,
+            WhetherTheCA: 'true',
             dataSource: [],
             count: 0,
             fileList: [],
@@ -90,6 +97,14 @@ class MqttForm extends React.Component {
                 mqtt: conf.mqtt,
                 has_options_ex: conf.has_options_ex === 'yes'
             })
+            if (conf.mqtt.client_cert || conf.mqtt.client_key) {
+                this.setState({
+                    WhetherTheCA: 'false'
+                })
+            }
+            if (conf.mqtt.username || conf.mqtt.password || conf.mqtt.client_id) {
+                this.setState({CustomAuthentication: true})
+            }
             if (conf.has_options_ex === 'yes') {
                 this.setState({
                     seniorIndeterminate: true
@@ -196,27 +211,6 @@ class MqttForm extends React.Component {
             dataSource: dataSource.filter(item => item.key !== key)
         })
     };
-    // handleAdd = () => {
-    //     const {count, dataSource} = this.state;
-    //     const newDate = {
-    //         key: count,
-    //         name: ' '
-    //     };
-    //     this.setState({
-    //         dataSource: [...dataSource, newDate],
-    //         count: count + 1
-    //     })
-    // };
-    // handleSave = row => {
-    //     const newDate = [...this.state.dataSource]
-    //     const index = newDate.findIndex(item => row.key === item.key);
-    //     const item = newDate[index];
-    //     newDate.splice(index, 1, {
-    //         ...item,
-    //         ...row
-    //     });
-    //     this.setState({dataSource: newDate})
-    // }
     remove = targetKey => {
         let {activeKey} = this.state;
         let lastIndex;
@@ -238,9 +232,6 @@ class MqttForm extends React.Component {
     seniorChange = () => {
         this.setState({seniorIndeterminate: !this.state.seniorIndeterminate})
     };
-    // changeGroup = (checkedValues) => {
-    //     this.setSetting('mqttForm', [...checkedValues], 'groupList' )
-    // };
 
     moreChange () {
         if (this.state.seniorIndeterminate) {
@@ -333,6 +324,12 @@ class MqttForm extends React.Component {
         })
     }
     toggleDisable = () => {
+        const regIp =  /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]))$/;
+        const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
+        if (regIp.test(this.state.mqtt.server) === false && reg.test(this.state.mqtt.server) === false && !this.state.disabled) {
+            message.info('MQTT地址不合法，请重新输入！')
+            return false;
+        }
         if (!this.state.disabled && this.props.pane.status === 'Not installed') {
             this.installMqtt()
             return false;
@@ -399,9 +396,6 @@ class MqttForm extends React.Component {
                     message.info(title + '等待网关响应!')
                     this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
                         this.props.fetch()
-                        // this.setState({
-                        //     modalKey: 0
-                        // })
                         this.setState({
                             disabled: true
                         })
@@ -432,18 +426,19 @@ class MqttForm extends React.Component {
             }
         })
     }
-    funDownload (content, filename) {
-        const eleLink = document.createElement('a');
-        eleLink.download = filename;
-        eleLink.style.display = 'none';
-        const blob = new Blob([content]);
-        eleLink.href = URL.createObjectURL(blob);
-        document.body.appendChild(eleLink);
-        eleLink.click();
-        document.body.removeChild(eleLink);
+    funDownload = () => {
+        const zip = new Zip();
+        const {tls_cert, client_cert, client_key} = this.props.pane.conf.mqtt;
+        tls_cert && zip.file('CA证书.txt', tls_cert);
+        client_cert && zip.file('Client证书.txt', client_cert);
+        client_key && zip.file('Client秘钥.txt', client_key);
+        zip.generateAsync({type: 'blob'})
+            .then(function (content) {
+                saveAs(content, '证书.zip');
+});
     }
     render () {
-        const { fileList, fileList1, fileList2, disabled, mqtt, options} = this.state;
+        const { fileList, fileList1, fileList2, disabled, mqtt, options, CustomAuthentication} = this.state;
         return (
             <Form
                 className="login-form login-form-mqtt"
@@ -487,174 +482,243 @@ class MqttForm extends React.Component {
                             : ''
                         }
                         </div>
-                        <Divider>服务器信息</Divider>
+                        <Divider orientation="left">服务器信息</Divider>
                     </Col>
-                    <Col span={4}>
-                        <Form.Item label="MQTT地址：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.server ? mqtt.server : ''}
-                                    onChange={(e) => {
-                                    this.setSetting('mqtt', e.target.value, 'server')
-                                }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={2}>
-                        <Form.Item label="MQTT端口：">
-                                <Input
-                                    allowClear={!disabled}
-                                    autoComplete="off"
-                                    disabled={disabled}
-                                    value={mqtt && mqtt.port ? mqtt.port : ''}
-                                    onChange={(e) => {
-                                        this.setSetting('mqtt', e.target.value, 'port')
-                                    }}
-                                />
-                        </Form.Item>
-                    </Col>
-                    <Col span={2}>
-                        <Form.Item label="使用TLS：">
-                            <Checkbox
+                    <div className="mqttwrapper">
+                        <div className="flex">
+                            <span>MQTT地址：</span>
+                            <Input
+                                style={{width: 200}}
+                                allowClear={!disabled}
+                                autoComplete="off"
                                 disabled={disabled}
-                                checked={this.state.mqtt.enable_tls}
+                                value={mqtt && mqtt.server ? mqtt.server : ''}
                                 onChange={(e) => {
-                                    this.setSetting('mqtt', e.target.checked, 'enable_tls')
+                                this.setSetting('mqtt', e.target.value, 'server')
+                            }}
+                            />
+                        </div>
+                        <div className="flex">
+                            <span>MQTT端口：</span>
+                            <Input
+                                style={{width: 200}}
+                                allowClear={!disabled}
+                                autoComplete="off"
+                                disabled={disabled}
+                                value={mqtt && mqtt.port ? mqtt.port : ''}
+                                onChange={(e) => {
+                                    this.setSetting('mqtt', e.target.value, 'port')
                                 }}
                             />
-                        </Form.Item>
-                    </Col>
-                    <div>
+                        </div>
+                        <div style={{padding: '8px 3px'}}>
+                            <span>
+                                使用自定义认证方式:
+                            </span>
+                            <Checkbox
+                                disabled={disabled}
+                                checked={CustomAuthentication}
+                                onChange={(e)=>{
+                                    this.setState({CustomAuthentication: e.target.checked})
+                                }}
+                            />
+                        </div>
+                        {
+                            CustomAuthentication
+                            ? <div>
+                                <div className="flex">
+                                    <span>
+                                        MQTT用户：
+                                    </span>
+                                    <Input
+                                        style={{  width: 200 }}
+                                        allowClear={!disabled}
+                                        autoComplete="off"
+                                        disabled={disabled}
+                                        value={mqtt && mqtt.username ? mqtt.username : ''}
+                                        onChange={(e) => {
+                                            this.setSetting('mqtt', e.target.value, 'username')
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex">
+                                    <span>
+                                        MQTT密码：
+                                    </span>
+                                    <Input
+                                        style={{  width: 200 }}
+                                        allowClear={!disabled}
+                                        autoComplete="off"
+                                        disabled={disabled}
+                                        value={mqtt && mqtt.password ? mqtt.password : ''}
+                                        onChange={(e) => {
+                                            this.setSetting('mqtt', e.target.value, 'password')
+                                        }}
+                                    />
+                                </div>
+                                <div className="flex">
+                                    <span>
+                                        客户端ID：&nbsp;&nbsp;&nbsp;
+                                    </span>
+                                    <Input
+                                        allowClear={!disabled}
+                                        style={{  width: 200 }}
+                                        autoComplete="off"
+                                        disabled={disabled}
+                                        value={mqtt && mqtt.client_id ? mqtt.client_id : ''}
+                                        onChange={(e) => {
+                                            this.setSetting('mqtt', e.target.value, 'client_id')
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                            : ''
+                        }
+                    </div>
+                    <div className="marle20"
+                        style={{
+                            padding: '5px, 1px'
+                        }}
+                    >
+                        <span>
+                            使用SSL/TLS：
+                        </span>
+                        <Checkbox
+                            disabled={disabled}
+                            checked={this.state.mqtt.enable_tls}
+                            onChange={(e) => {
+                                this.setSetting('mqtt', e.target.checked, 'enable_tls')
+                            }}
+                        />
+                    </div>
+                    <div className="marle20">
                         {
                             this.state.mqtt.enable_tls
                             ? <div>
-                                <Col span={2}>
-                                    <Form.Item label="MQTT用户">
-                                            <Input
-                                                allowClear={!disabled}
-                                                autoComplete="off"
-                                                disabled={disabled}
-                                                value={mqtt && mqtt.username ? mqtt.username : ''}
-                                                onChange={(e) => {
-                                                    this.setSetting('mqtt', e.target.value, 'username')
-                                                }}
-                                            />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={2}>
-                                    <Form.Item label="MQTT密码">
-                                            <Input
-                                                allowClear={!disabled}
-                                                autoComplete="off"
-                                                disabled={disabled}
-                                                value={mqtt && mqtt.password ? mqtt.password : ''}
-                                                onChange={(e) => {
-                                                    this.setSetting('mqtt', e.target.value, 'password')
-                                                }}
-                                            />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={3}>
-                                    <Form.Item label="客户端ID">
-                                            <Input
-                                                allowClear={!disabled}
-                                                autoComplete="off"
-                                                disabled={disabled}
-                                                value={mqtt && mqtt.client_id ? mqtt.client_id : ''}
-                                                onChange={(e) => {
-                                                    this.setSetting('mqtt', e.target.value, 'client_id')
-                                                }}
-                                            />
-                                    </Form.Item>
-                                </Col>
-                                <Col span={2}>
-                            <Form.Item label="CA证书：">
-                                <Upload
-                                    action=""
-                                    name="file1"
-                                    beforeUpload={this.getTextInfo}
-                                    fileList={fileList}
-                                    onChange={this.handleListChange}
+                                <div className="mqttpagelist">
+                                    <div style={{ padding: '5px 0'}}>
+                                        <span>
+                                            SSL/TLS类型：
+                                        </span>
+                                        <Select
+                                            disabled={disabled}
+                                            value={this.state.WhetherTheCA}
+                                            style={{ width: 200 }}
+                                            onChange={(val)=>{
+                                                this.setState({
+                                                    WhetherTheCA: val
+                                                })
+                                            }}
+                                        >
+                                            <Option value="true">CA证书</Option>
+                                            <Option value="false">自签名证书</Option>
+                                        </Select>
+                                    </div>
+                                    <div style={{ lineHeight: '40px', marginLeft: '50px'}}>
+                                        <span>
+                                            非安全SSL/TLS：
+                                        </span>
+                                        <Checkbox
+                                            disabled={disabled}
+                                            checked={mqtt.tls_insecure}
+                                            onChange={(e)=>{
+                                                this.setSetting('mqtt', e.target.checked, 'tls_insecure')
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <Col
+                                    span={6}
+                                    style={{paddingLeft: 0}}
                                 >
-                                    <Button disabled={disabled}>
-                                        <Icon type="upload"/> 点击上传
-                                    </Button>
-                                </Upload>
+                            <div>
+                                <div style={{padding: '5px 0'}}>
+                                    <span>
+                                        CA证书：
+                                    </span>
+                                    <Upload
+                                        action=""
+                                        name="file1"
+                                        beforeUpload={this.getTextInfo}
+                                        fileList={fileList}
+                                        onChange={this.handleListChange}
+                                    >
+                                        <Button disabled={disabled}>
+                                            <Icon type="upload"/> 点击上传
+                                        </Button>
+                                    </Upload>
+                                </div>
                                 {
-                                    this.state.mqtt.tls_cert
+                                    this.state.mqtt.tls_cert && this.state.disabled
                                     ? <Button
-                                        onClick={()=>{
-                                            this.funDownload(this.state.mqtt.tls_cert, 'CA证书')
-                                        }}
+                                        onClick={this.funDownload}
                                       >
                                         <Icon type="download" />点击下载
                                     </Button>
                                     : ''
                                 }
-                            </Form.Item>
+                            </div>
                         </Col>
-                        <Col span={2}>
-                            <Form.Item label="Client证书：">
-                                <Upload
-                                    action=""
-                                    name="file2"
-                                    beforeUpload={this.getTextInfo1}
-                                    fileList={fileList1}
-                                    onChange={this.handleListChange1}
-                                >
-                                    <Button disabled={disabled}>
-                                        <Icon type="upload"/> 点击上传
-                                    </Button>
-                                </Upload>
-                            </Form.Item>
-                        </Col>
-                        <Col span={2}>
-                            <Form.Item label="Client密钥：">
-                                <Upload
-                                    action=""
-                                    beforeUpload={this.getTextInfo2}
-                                    name="file3"
-                                    fileList={fileList2}
-                                    onChange={this.handleListChange2}
-                                >
-                                    <Button disabled={disabled}>
-                                        <Icon type="upload"/> 点击上传
-                                    </Button>
-                                </Upload>
-                            </Form.Item>
-                        </Col>
+                        {
+                            this.state.WhetherTheCA === 'false'
+                            ? <div>
+                                <Col span={6}>
+                                    <span>Client证书：</span>
+                                    <Upload
+                                        action=""
+                                        name="file2"
+                                        beforeUpload={this.getTextInfo1}
+                                        fileList={fileList1}
+                                        onChange={this.handleListChange1}
+                                    >
+                                        <Button disabled={disabled}>
+                                            <Icon type="upload"/> 点击上传
+                                        </Button>
+                                    </Upload>
+                                </Col>
+                                <Col span={6}>
+                                        <span>Client密钥：</span>
+                                        <Upload
+                                            action=""
+                                            beforeUpload={this.getTextInfo2}
+                                            name="file3"
+                                            fileList={fileList2}
+                                            onChange={this.handleListChange2}
+                                        >
+                                            <Button disabled={disabled}>
+                                                <Icon type="upload"/> 点击上传
+                                            </Button>
+                                        </Upload>
+                                </Col>
+                            </div>
+                            : ''
+                        }
                             </div>
                             : ''
                         }
                     </div>
-                    <Divider>数据传输选项</Divider>
-                    <Col span={4}>
+                    <Divider
+                        orientation="left"
+                        style={{ paddingTop: '15px'}}
+                    >数据传输选项</Divider>
+                    <Col span={3}>
                         <Form.Item label="上送周期(秒)：">
                             <InputNumber
                                 value={options && options.period ? options.period : ''}
                                 disabled={disabled}
+                                min={1}
+                                max={3600}
                                 onChange={(e) => {
                                     this.setSetting('options', e, 'period')
                                 }}
                             />
                         </Form.Item>
                     </Col>
-                    <Col span={4}>
-                        <Form.Item label="最大数据间隔(秒)：">
-                            <InputNumber
-                                value={options && options.ttl ? options.ttl : ''}
-                                disabled={disabled}
-                                onChange={(value) => {
-                                    this.setSetting('options', value, 'ttl')
-                                }}
-                            />
-                        </Form.Item>
-                    </Col>
-                    <Col span={4}>
+                    <Col span={3}>
                         <Form.Item label="最大打包数量：">
                             <InputNumber
+                                min={10}
+                                max={4096}
                                 value={options && options.data_upload_dpp ? options.data_upload_dpp : ''}
                                 disabled={disabled}
                                 onChange={(value) => {
@@ -663,7 +727,7 @@ class MqttForm extends React.Component {
                             />
                         </Form.Item>
                     </Col>
-                    <Col span={4}>
+                    <Col span={3}>
                         <Form.Item label="开启短线缓存：">
                            <Checkbox
                                disabled={disabled}
@@ -674,15 +738,7 @@ class MqttForm extends React.Component {
                            />
                         </Form.Item>
                     </Col>
-                    <Divider>需要上传的设备列表</Divider>
-                    <Col span={24}>
-                        <AddDevList
-                            devs={this.props.pane.conf.devs}
-                            setdevs={this.setDevs}
-                            disabled={this.state.disabled}
-                        />
-                    </Col>
-                    <Divider>高级选项</Divider>
+                    <Divider orientation="left">高级选项</Divider>
                     <Col span={4}>
                         <Form.Item>
                             <span>高级选项：</span>
@@ -697,6 +753,14 @@ class MqttForm extends React.Component {
                         <Form.Item>
                             {this.moreChange()}
                         </Form.Item>
+                    </Col>
+                    <Divider orientation="left">需要上传的设备列表</Divider>
+                    <Col span={24}>
+                        <AddDevList
+                            devs={this.props.pane.conf.devs}
+                            setdevs={this.setDevs}
+                            disabled={this.state.disabled}
+                        />
                     </Col>
                 </Row>
                 <div style={{display: 'flex', marginTop: '20px'}}>
