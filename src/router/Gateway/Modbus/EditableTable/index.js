@@ -56,6 +56,9 @@ class EditableCell extends React.Component {
                         {
                             pattern: /^[0-9a-zA-Z_]+$/,
                             message: `${title}请输入正确内容`
+                        },
+                        {
+                            validator: this.checkUnName()
                         }
                     ],
                     initialValue: record[dataIndex]
@@ -71,6 +74,35 @@ class EditableCell extends React.Component {
             </div>
         );
     };
+    checkUnName () {
+        return (rule, value, callback)=> {
+            console.log(rule.field, value, callback)
+            if (rule.field === 'address') {
+                if (this.address(value)) {
+                    callback('重复')
+                } else {
+                    callback()
+                }
+            }
+            if (rule.field === 'device') {
+                if (this.device(value)) {
+                    callback('重复')
+                } else {
+                    callback()
+                }
+            }
+            if (rule.field === 'number') {
+                if (this.number(value)) {
+                    callback('重复')
+                } else {
+                    callback()
+                }
+            }
+        }
+    }
+    address = value =>this.props.datasource.some(item=>item.address === value)
+    device = value =>this.props.datasource.some(item=>item.device === value)
+    number = value =>this.props.datasource.some(item=>item.number === value)
     getInput = ()=> {
         const {dataIndex} = this.props;
         if (dataIndex === 'address') {
@@ -233,7 +265,7 @@ class EditableTable extends React.Component {
             const {count, dataSource} = this.state;
             const newData = {
                 key: dataSource.length + 1,
-                template: this.props.templateList[0].name,
+                template: this.props.templateList[0].id,
                 number: count + 1,
                 address: count + 1,
                 device: `device${count + 1}`
