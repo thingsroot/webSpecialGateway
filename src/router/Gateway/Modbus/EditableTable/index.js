@@ -18,7 +18,8 @@ const EditableFormRow = Form.create()(EditableRow);
 @observer
 class EditableCell extends React.Component {
     state = {
-        editing: false
+        editing: false,
+        parentDisabled: false
     }
     toggleEdit = () => {
         const editing = !this.state.editing;
@@ -30,28 +31,41 @@ class EditableCell extends React.Component {
     };
 
     save = e => {
-        const value = e.target.value;
-        const {record, handleSave, datasource, dataIndex} = this.props;
-        let detection = false;
-        datasource.map(item=>{
-            console.log(item[dataIndex], value, record)
-            if (item[dataIndex] === value && item.key !== record.key) {
-                detection = true;
+        e;
+        const {record, handleSave} = this.props;
+        console.log(record, handleSave)
+        console.log(this.state.parentDisabled, 'parent') //false 重复
+        this.form.validateFields((error, values) => {
+            // if (error && error[e.currentTarget.id]) {
+            if (error) {
+                return;
             }
-        })
-        console.log(detection)
-        if (!detection) {
-            this.form.validateFields((error, values) => {
-                if (error && error[e.currentTarget.id]) {
-                    return;
-                }
-                this.toggleEdit();
-                handleSave({...record, ...values});
-            });
-        } else {
-            message.info('设备值不能重复，请重新输入')
-        }
-        
+            this.toggleEdit();
+            handleSave({...record, ...values});
+        });
+        // const value = e.target.value;
+        // const {record, handleSave, datasource, dataIndex} = this.props;
+        // let detection = false;
+        // // this.props.toFatherValue(this.state.parentDisabled)
+        // console.log(this.state.parentDisabled, 'parent')
+        // datasource.map(item=>{
+        //     console.log(item[dataIndex], value, record)
+        //     if (item[dataIndex] === value && item.key !== record.key) {
+        //         detection = true;
+        //     }
+        // })
+        // console.log(detection)
+        // if (!detection) {
+        //     this.form.validateFields((error, values) => {
+        //         if (error && error[e.currentTarget.id]) {
+        //             return;
+        //         }
+        //         this.toggleEdit();
+        //         handleSave({...record, ...values});
+        //     });
+        // } else {
+        //     message.info('设备值不能重复，请重新输入')
+        // }
     };
 
     renderCell = form => {
@@ -89,9 +103,10 @@ class EditableCell extends React.Component {
     };
     checkUnName () {
         return (rule, value, callback)=> {
-            console.log(rule.field, value, callback)
+            rule, value;
             if (rule.field === 'address') {
                 if (this.address(value)) {
+                    this.setState({parentDisabled: true})
                     callback('重复')
                 } else {
                     callback()
@@ -99,6 +114,7 @@ class EditableCell extends React.Component {
             }
             if (rule.field === 'device') {
                 if (this.device(value)) {
+                    this.setState({parentDisabled: true})
                     callback('重复')
                 } else {
                     callback()
@@ -106,6 +122,7 @@ class EditableCell extends React.Component {
             }
             if (rule.field === 'number') {
                 if (this.number(value)) {
+                    this.setState({parentDisabled: true})
                     callback('重复')
                 } else {
                     callback()
@@ -125,8 +142,8 @@ class EditableCell extends React.Component {
                         max={247}
                         key={dataIndex}
                         ref={node => (this.input = node)}
-                        onPressEnter={this.save}
-                        onBlur={this.save}
+                        // onPressEnter={this.save}
+                        onChange={this.save}
                         disabled={this.props.disabled}
                     />
             )
@@ -135,8 +152,8 @@ class EditableCell extends React.Component {
             return (
                 <Input
                     ref={node => (this.input = node)}
-                    onPressEnter={this.save}
-                    onBlur={this.save}
+                    // onPressEnter={this.save}
+                    onChange={this.save}
                     disabled={this.props.disabled}
                     autoComplete="off"
                 />
@@ -146,8 +163,8 @@ class EditableCell extends React.Component {
             return (
                 <Select
                     ref={node => (this.input = node)}
-                    onPressEnter={this.save}
-                    onBlur={this.save}
+                    // onPressEnter={this.save}
+                    onChange={this.save}
                     initialValue=""
                     disabled={this.props.disabled}
                     style={{ width: 120 }}
@@ -279,8 +296,7 @@ class EditableTable extends React.Component {
         console.log(name, arr)
         let list = [];
         list = arr.filter(item=> item.device === name);
-
-        let num = Number(name.split('device')[1]) + 1 + Math.floor(Math.random() * 10);
+        let num = Number(name.split('device')[1]) + 1 + Math.floor(Math.random() * 100);
         // console.log(name.split('device'))
         if (list.length > 0) {
             name = 'device' + num;
@@ -296,9 +312,9 @@ class EditableTable extends React.Component {
             console.log(device)
             const newData = {
                 key: dataSource.length + 1,
-                template: this.props.templateList[0].id,
-                number: count + 1,
-                address: count + 1,
+                template: this.props.templateList[0].name,
+                number: parseInt(Math.random() * 147),
+                address: parseInt(Math.random() * 100),
                 device
             };
             this.setState({
@@ -340,6 +356,7 @@ class EditableTable extends React.Component {
                             datasource={dataSource}
                             disabled={disabled}
                             {...restProps}
+                            // toFatherValue={this.getChildValue}
                         />
                     )
                 }
