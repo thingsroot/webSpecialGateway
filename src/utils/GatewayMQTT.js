@@ -537,7 +537,9 @@ class GatewayMQTT {
         const url = flag ? 'ws://127.0.0.1:7884/mqtt' : 'wss://cloud.thingsroot.com/ws';
         this.client = mqtt.connect(url, options)
         this.client.on('connect', ()=>{
-            message.success('连接服务器成功')
+            if (window.location.href.indexOf('modbus') === -1) {
+                message.success('连接服务器成功')
+            }
             console.log(topic, 'topic, url', url)
             this.connected = true
             this.client.subscribe(topic_real, 1)

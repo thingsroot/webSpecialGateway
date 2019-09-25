@@ -114,7 +114,7 @@ class EditableCell extends React.Component {
                                     <Option
                                         value={item.id}
                                         key={key}
-                                    >{item.id}</Option>
+                                    >{item.name}</Option>
                                 )
                             })
                             : ''
@@ -230,12 +230,10 @@ class EditableTable extends React.Component {
 
     handleAdd = () => {
         if (this.props.templateList.length) {
-            console.log(this.props.templateList)
-            let list = this.props.templateList.map(item=>Object.values(item))
             const {count, dataSource} = this.state;
             const newData = {
                 key: dataSource.length + 1,
-                template: list[0][4],
+                template: this.props.templateList[0].name,
                 number: count + 1,
                 address: count + 1,
                 device: `device${count + 1}`
@@ -250,7 +248,6 @@ class EditableTable extends React.Component {
             message.info('请先选择模板，再添加设备列表')
             return false
         }
-        console.log(this.state.dataSource, 'dataSource')
     };
 
     handleSave = row => {

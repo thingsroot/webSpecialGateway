@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Tabs, message, Table, Empty} from 'antd';
+import {Tabs, message, Table, Result, Button, Icon} from 'antd';
 import { inject, observer} from 'mobx-react';
 import {withRouter} from 'react-router-dom';
 import http from '../../../utils/Server';
@@ -114,36 +114,38 @@ class Modbus extends Component {
                     }
                 }
             });
-            const data = {
-                inst_name: inst ? inst : 'modbus_' + (this.state.panes.length + 1),
-                status: 'Not installed',
-                conf: {
-                    apdu_type: 'TCP',
-                    channel_type: 'TCP',
-                    devs: [],
-                    loop_gap: '1000',
-                    // serial_opt: {
-                    //     port: '--请选择--',
-                    //     baudrate: '9600',
-                    //     stop_bits: '1',
-                    //     data_bits: '8',
-                    //     flow_control: 'OFF',
-                    //     parity: 'None'
-                    // },
-                    socket_opt: {
-                        host: '127.0.0.1',
-                        port: 502,
-                        nodelay: true
-                    },
-                    tpls: []
-                },
-                version: this.state.app_info.versionLatest
-            }
-            applist.push(data)
-            this.setState({
-                panes: applist
-            })
+        } else {
+            inst = 'modbus_1'
         }
+        const data = {
+            inst_name: inst ? inst : 'modbus_' + (this.state.panes.length + 1),
+            status: 'Not installed',
+            conf: {
+                apdu_type: 'TCP',
+                channel_type: 'TCP',
+                devs: [],
+                loop_gap: '1000',
+                // serial_opt: {
+                //     port: '--请选择--',
+                //     baudrate: '9600',
+                //     stop_bits: '1',
+                //     data_bits: '8',
+                //     flow_control: 'OFF',
+                //     parity: 'None'
+                // },
+                socket_opt: {
+                    host: '127.0.0.1',
+                    port: 502,
+                    nodelay: true
+                },
+                tpls: []
+            },
+            version: this.state.app_info.versionLatest
+        }
+        applist.push(data)
+        this.setState({
+            panes: applist
+        })
     }
     setActiveKey = (key)=>{
         this.setState({activeKey: key})
@@ -225,7 +227,21 @@ class Modbus extends Component {
                                 })
                             }
                             </Tabs>
-                            : <Empty/>
+                            : <Result
+                                icon={
+                                    <Icon
+                                        type="smile"
+                                        theme="twoTone"
+                                    />
+                                }
+                                title="您的设备不存在Modbus通道，请添加!"
+                                extra={
+                                    <Button
+                                        type="primary"
+                                        onClick={this.add}
+                                    >新增Modbus通道</Button>
+                                }
+                              />
                         : <Table loading/>
                     }
             </div>

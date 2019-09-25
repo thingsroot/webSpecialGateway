@@ -18,7 +18,7 @@ import {
     message,
     // InputNumber,
     Table,
-    Empty
+    Result
 } from 'antd';
 import './index.css';
 import { inject, observer} from 'mobx-react';
@@ -648,7 +648,21 @@ class Mqtt extends Component {
                         ))
                     }
                       </Tabs>
-                    : <Empty/>
+                    : <Result
+                        icon={
+                            <Icon
+                                type="smile"
+                                theme="twoTone"
+                            />
+                        }
+                        title="您的设备不存在MQTT通道，请添加!"
+                        extra={
+                            <Button
+                                type="primary"
+                                onClick={this.add}
+                            >新增MQTT通道</Button>
+                        }
+                      />
                     : <Table loading/>
                     }
             </div>
