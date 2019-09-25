@@ -890,7 +890,7 @@ class ModbusPane extends Component {
                         </Button> */}
                         <Button
                             style={{
-                                marginLeft: '518px'
+                                marginLeft: '538px'
                             }}
                             type="primary"
                             onClick={()=>{
