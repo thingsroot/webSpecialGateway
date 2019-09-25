@@ -524,18 +524,18 @@ class ModbusPane extends Component {
         http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025').then(res=> {
             let list = this.state.appTemplateList;
             res.data && res.data.length > 0 && res.data.map((tp)=>{
-                console.log(tp)
                 if (undefined === list.find(item => item.name === tp.name) &&
                     tp.latest_version !== undefined && tp.latest_version !== 0 ) {
-                if (undefined === list.find(item => item.name === tp.name) && tp.latest_version !== undefined && tp.latest_version !== 0 ) {
-                    list.push(tp)
+                    if (undefined === list.find(item => item.name === tp.name) && tp.latest_version !== undefined && tp.latest_version !== 0) {
+                        list.push(tp)
+                    }
                 }
             });
             list.sort(function (b, a) {
                 const id = _getCookie('user_id')
                 const order = [owner, id];
                 return order.indexOf(a.owner_id) - order.indexOf(b.owner_id)
-            })
+            });
             this.setState({
                 appTemplateList: list,
                 TheBackupappTemplateList: list
@@ -558,7 +558,7 @@ class ModbusPane extends Component {
                 appTemplateList: this.state.TheBackupappTemplateList
             })
         }
-    };
+    }
     //查看模板
     onViewTemplate = (conf, version) => {
         if (version !== undefined && version !== 0) {
