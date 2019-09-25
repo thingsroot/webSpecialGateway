@@ -30,15 +30,28 @@ class EditableCell extends React.Component {
     };
 
     save = e => {
-        const {record, handleSave} = this.props;
-        console.log(record, handleSave)
-        this.form.validateFields((error, values) => {
-            if (error && error[e.currentTarget.id]) {
-                return;
+        const value = e.target.value;
+        const {record, handleSave, datasource, dataIndex} = this.props;
+        let detection = false;
+        datasource.map(item=>{
+            console.log(item[dataIndex], value, record)
+            if (item[dataIndex] === value && item.key !== record.key) {
+                detection = true;
             }
-            this.toggleEdit();
-            handleSave({...record, ...values});
-        });
+        })
+        console.log(detection)
+        if (!detection) {
+            this.form.validateFields((error, values) => {
+                if (error && error[e.currentTarget.id]) {
+                    return;
+                }
+                this.toggleEdit();
+                handleSave({...record, ...values});
+            });
+        } else {
+            message.info('设备值不能重复，请重新输入')
+        }
+        
     };
 
     renderCell = form => {
@@ -213,13 +226,15 @@ class EditableTable extends React.Component {
                 render: (text, record) =>
                     this.state.dataSource.length >= 1 ? (
                         <Popconfirm
-                            title="Sure to delete?"
+                            title="确定要删除吗?"
+                            okText="确定"
+                            cancelText="取消"
                             onConfirm={() => this.handleDelete(record.key)}
                         >
                             <Button
                                 type="danger"
                                 disabled={this.props.disable}
-                            >Delete</Button>
+                            >删除</Button>
                         </Popconfirm>
                     ) : null
             }
@@ -259,16 +274,32 @@ class EditableTable extends React.Component {
             this.props.getdevs(this.state.dataSource)
         });
     };
+    ForeachName = (names, arr) => {
+        let name = names
+        console.log(name, arr)
+        let list = [];
+        list = arr.filter(item=> item.device === name);
 
+        let num = Number(name.split('device')[1]) + 1 + Math.floor(Math.random() * 10);
+        // console.log(name.split('device'))
+        if (list.length > 0) {
+            name = 'device' + num;
+                return name;
+        } else {
+            return name;
+        }
+    }
     handleAdd = () => {
+        const {count, dataSource} = this.state;
         if (this.props.templateList.length) {
-            const {count, dataSource} = this.state;
+            const device = this.ForeachName(`device${count + 1}`, dataSource);
+            console.log(device)
             const newData = {
                 key: dataSource.length + 1,
                 template: this.props.templateList[0].id,
                 number: count + 1,
                 address: count + 1,
-                device: `device${count + 1}`
+                device
             };
             this.setState({
                 dataSource: [...dataSource, newData],

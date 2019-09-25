@@ -188,7 +188,9 @@ class ModbusPane extends Component {
                                 {
                                     this.state.templateList.length >= 1 ? (
                                         <Popconfirm
-                                            title="Sure to delete ?"
+                                            title="确定要删除吗 ?"
+                                            okText="确定"
+                                            cancelText="删除"
                                             onConfirm={() => {
                                                 const list = this.state.templateList.filter(item => record.key !== item.key);
                                                 this.setState({
@@ -199,7 +201,7 @@ class ModbusPane extends Component {
                                             <Button
                                                 type="danger"
                                                 disabled={this.state.disabled}
-                                            >delete</Button>
+                                            >删除</Button>
                                         </Popconfirm>
                                     ) : null
                                 }
@@ -216,7 +218,8 @@ class ModbusPane extends Component {
             checkIp: false,
             communication: false,
             filter_text: '',
-            origTemplate: []
+            origTemplate: [],
+            loading: false
         }
 
     }
@@ -528,28 +531,33 @@ class ModbusPane extends Component {
         })
     };
     refreshTemplateList = () => {
-        const owner = this.props.pane.data.owner;
-        this.setState({appTemplateList: []})
-        http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025').then(res=> {
-            let list = this.state.appTemplateList;
-            res.data && res.data.length > 0 && res.data.map((tp)=>{
-                if (undefined === list.find(item => item.name === tp.name) &&
-                    tp.latest_version !== undefined && tp.latest_version !== 0 ) {
-                    if (undefined === list.find(item => item.name === tp.name) && tp.latest_version !== undefined && tp.latest_version !== 0) {
-                        list.push(tp)
+        this.setState({
+            loading: true
+        }, ()=>{
+            const owner = this.props.pane.data ? this.props.pane.data : 'dirk.chang@symid.com';
+            this.setState({appTemplateList: []})
+            http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025').then(res=> {
+                let list = this.state.appTemplateList;
+                res.data && res.data.length > 0 && res.data.map((tp)=>{
+                    if (undefined === list.find(item => item.name === tp.name) &&
+                        tp.latest_version !== undefined && tp.latest_version !== 0 ) {
+                        if (undefined === list.find(item => item.name === tp.name) && tp.latest_version !== undefined && tp.latest_version !== 0) {
+                            list.push(tp)
+                        }
                     }
-                }
+                });
+                list.sort(function (b, a) {
+                    const id = _getCookie('user_id')
+                    const order = [owner, id];
+                    return order.indexOf(a.owner_id) - order.indexOf(b.owner_id)
+                });
+                this.setState({
+                    appTemplateList: list,
+                    TheBackupappTemplateList: list,
+                    loading: false
+                });
             });
-            list.sort(function (b, a) {
-                const id = _getCookie('user_id')
-                const order = [owner, id];
-                return order.indexOf(a.owner_id) - order.indexOf(b.owner_id)
-            });
-            this.setState({
-                appTemplateList: list,
-                TheBackupappTemplateList: list
-            });
-        });
+        })
     };
     onCreateNewTemplate = () => {
         window.open('/appdetails/APP00000025/new_template', '_blank')
@@ -632,7 +640,7 @@ class ModbusPane extends Component {
     render (){
         const conf = this.props.pane.conf
 
-        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow} = this.state;
+        const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow, loading} = this.state;
         devs, tpls;
         // const Mt10 = {
         //     marginTop: '10px'
@@ -855,7 +863,7 @@ class ModbusPane extends Component {
                 </Button>
                 <Modal
                     className="templateList"
-                    title="选择模板"
+                    title={<h3>选择模板</h3>}
                     maskClosable={false}
                     visible={this.state.showTemplateSelection}
                     onOk={this.handleCancelAddTempList}
@@ -874,14 +882,6 @@ class ModbusPane extends Component {
                             lineHeight: '30px'
                         }}
                     >
-                        <Button
-                            onClick={()=>{
-                                // this.props.refreshTemplateList()
-                                this.refreshTemplateList()
-                            }}
-                        >
-                            刷新
-                        </Button>
                         <span style={{padding: '0 20px'}}> </span>
                         <Input.Search
                             placeholder="网关名称、描述、模板ID"
@@ -897,6 +897,18 @@ class ModbusPane extends Component {
                         >
                             创建新模板
                         </Button> */}
+                        <Button
+                            style={{
+                                marginLeft: '538px'
+                            }}
+                            type="primary"
+                            onClick={()=>{
+                                // this.props.refreshTemplateList()
+                                this.refreshTemplateList()
+                            }}
+                        >
+                            刷新
+                        </Button>
                     </div>
                     <Table
                         style={{wordBreak: 'break-all'}}
@@ -905,6 +917,7 @@ class ModbusPane extends Component {
                         columns={this.state.addTempLists}
                         pagination={false}
                         scroll={{ y: 240 }}
+                        loading={loading}
                     />
                 </Modal>
                 <Divider orientation="left">设备列表</Divider>
