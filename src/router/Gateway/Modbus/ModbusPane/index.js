@@ -148,8 +148,8 @@ class ModbusPane extends Component {
                 },
                 {
                     title: '描述',
-                    dataIndex: 'description',
-                    key: 'description'
+                    dataIndex: 'desc',
+                    key: 'desc'
                 },
                 {
                     title: '模板ID',
@@ -202,7 +202,9 @@ class ModbusPane extends Component {
             addTempLists,
             totalPanes: [],
             checkIp: false,
-            communication: false
+            communication: false,
+            filter_text: '',
+            origTemplate: []
         }
 
     }
@@ -262,25 +264,24 @@ class ModbusPane extends Component {
     }
     checkOption () {
         if (this.props.panes.length) {
-            console.log(this.props.panes)
                     let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
                     let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
                     let option = '';
                     switch (true) {
                         case s1 && s2 :
-                            console.log(1);
+                            // console.log(1);
                             option = this.optionDisabled();
                             break;
                         case !s1 && !s2:
-                            console.log(2);
+                            // console.log(2);
                             option = this.optionTotal();
                             break;
                         case s1:
-                            console.log(3);
+                            // console.log(3);
                             option = this.optionS2();
                             break;
                         case s2:
-                            console.log(4);
+                            // console.log(4);
                             option = this.optionS1();
                             break;
                         default:
@@ -510,13 +511,15 @@ class ModbusPane extends Component {
         http.get('/api/store_configurations_list?conf_type=Template&app=APP00000025').then(res=> {
             let list = this.state.appTemplateList;
             res.data && res.data.length > 0 && res.data.map((tp)=>{
+                console.log(tp)
                 if (undefined === list.find(item => item.name === tp.name) &&
                     tp.latest_version !== undefined && tp.latest_version !== 0 ) {
                     list.push(tp)
                 }
             });
             this.setState({
-                appTemplateList: list
+                appTemplateList: list,
+                origTemplate: list
             });
         });
         http.get('/api/user_configurations_list?conf_type=Template&app=APP00000025')
@@ -524,12 +527,14 @@ class ModbusPane extends Component {
                 if (res.ok) {
                     let list = this.state.appTemplateList;
                     res.data && res.data.length > 0 && res.data.map((tp)=>{
-                        if (undefined === list.find(item => item.name === tp.name) ) {
+                        if (undefined === list.find(item => item.name === tp.name)  &&
+                            tp.latest_version !== undefined && tp.latest_version !== 0) {
                             list.push(tp)
                         }
                     });
                     this.setState({
-                        appTemplateList: list
+                        appTemplateList: list,
+                        origTemplate: list
                     });
                 }
             });
@@ -537,9 +542,6 @@ class ModbusPane extends Component {
     onCreateNewTemplate = () => {
         window.open('/appdetails/APP00000025/new_template', '_blank')
     }
-    search = () => {
-
-    };
     //查看模板
     onViewTemplate = (conf, version) => {
         if (version !== undefined && version !== 0) {
@@ -554,7 +556,6 @@ class ModbusPane extends Component {
     };
     //添加模板
     onAddTemplate = (config)=>{
-        console.log(config)
         const list = this.state.templateList;
         let check = this.state.templateList.some(item => item.id === config.id);
         if (check) {
@@ -572,7 +573,6 @@ class ModbusPane extends Component {
                     templateList: list
                 })
             }
-
     };
     getDevs = (devs) => {
         const arr = [];
@@ -593,57 +593,6 @@ class ModbusPane extends Component {
             this.setState({devs: []})
         }
     };
-    transformOption = (conf) => {
-        if (conf) {
-            if (conf.serial_opt) {
-                if (conf.serial_opt.port === '/dev/ttyS1' && conf.serial_opt.port !== '/dev/ttyS2') {
-                    return [
-                        <Option
-                            value="/dev/ttyS1"
-                            key="/dev/ttyS1"
-                            disabled
-                        >COM1</Option>,
-                        <Option
-                            value="/dev/ttyS2"
-                            key="/dev/ttyS2"
-                        >COM2</Option>
-                    ]
-
-                } else if (conf.serial_opt.port === '/dev/ttyS2' && conf.serial_opt.port !== '/dev/ttyS1') {
-                    return [
-                        <Option
-                            value="/dev/ttyS2"
-                            key="/dev/ttyS2"
-                            disabled
-                        >COM2</Option>,
-                        <Option
-                            value="/dev/ttyS1"
-                            key="/dev/ttyS1"
-                        >COM1</Option>
-                    ]
-                } else {
-                    return [
-                        <Option
-                            value=""
-                            key="disabled"
-                        >disabled</Option>
-                    ]
-                }
-            } else {
-                return [
-                    <Option
-                        value="/dev/ttyS1"
-                        key="/dev/ttyS1"
-                    >COM1</Option>,
-                    <Option
-                        value="/dev/ttyS2"
-                        key="/dev/ttyS2"
-                    >COM2</Option>
-                ]
-            }
-        }
-
-    };
     isValid = e => {
         let value = e.target.value;
         let reg = /^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/
@@ -654,6 +603,22 @@ class ModbusPane extends Component {
             this.setState({checkIp: false})
         }
     };
+    changeFilter = (text) => {
+        let list = this.state.origTemplate
+        if (text === undefined || text === '' || list === undefined) {
+            this.setState({appTemplateLis: list})
+        }
+        let newText = text.toLowerCase();
+        let arr = []
+        list.map(item=> {
+            console.log(item)
+            if (item.conf_name.toLowerCase().indexOf(newText) !== -1 ||
+            item.description.toLowerCase().indexOf(newText) !== -1) {
+                arr.push(item)
+            }
+        });
+            this.setState({appTemplateList: arr})
+    }
     render (){
         const conf = this.props.pane.conf
 
@@ -892,8 +857,8 @@ class ModbusPane extends Component {
                         style={{
                             display: 'flex',
                             position: 'absolute',
-                            right: 300,
                             top: 10,
+                            left: '110px',
                             zIndex: 999,
                             lineHeight: '30px'
                         }}
@@ -909,16 +874,18 @@ class ModbusPane extends Component {
                         <span style={{padding: '0 20px'}}> </span>
                         <Input.Search
                             placeholder="网关名称、描述、序列号"
-                            onChange={this.search}
+                            onChange={e => {
+                                this.changeFilter(e.target.value)
+                            }}
                             style={{ width: 200 }}
                         />
                         <span style={{padding: '0 2px'}}> </span>
-                        <Button
-                            type="primary"
-                            onClick={this.onCreateNewTemplate}
-                        >
-                            创建新模板
-                        </Button>
+                        {/*<Button*/}
+                        {/*    type="primary"*/}
+                        {/*    onClick={this.onCreateNewTemplate}*/}
+                        {/*>*/}
+                        {/*    创建新模板*/}
+                        {/*</Button>*/}
                     </div>
                     <Table
                         rowKey="name"

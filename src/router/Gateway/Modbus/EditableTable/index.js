@@ -1,10 +1,9 @@
 import React from 'react'
-import {Table, Input, Button, Popconfirm, Form, InputNumber, Select} from 'antd';
+import {Table, Input, Button, Popconfirm, Form, InputNumber, Select, message} from 'antd';
 import { inject, observer} from 'mobx-react';
 const EditableContext = React.createContext();
 const { Option } = Select;
 import './index.scss'
-
 const EditableRow = ({form, index, ...props}) => (
     <EditableContext.Provider
         value={form}
@@ -12,16 +11,15 @@ const EditableRow = ({form, index, ...props}) => (
     >
         <tr {...props} />
     </EditableContext.Provider>
-);
 
+);
 const EditableFormRow = Form.create()(EditableRow);
 @inject('store')
 @observer
 class EditableCell extends React.Component {
     state = {
         editing: false
-    };
-
+    }
     toggleEdit = () => {
         const editing = !this.state.editing;
         this.setState({editing}, () => {
@@ -33,6 +31,7 @@ class EditableCell extends React.Component {
 
     save = e => {
         const {record, handleSave} = this.props;
+        console.log(record, handleSave)
         this.form.validateFields((error, values) => {
             if (error && error[e.currentTarget.id]) {
                 return;
@@ -53,6 +52,10 @@ class EditableCell extends React.Component {
                         {
                             required: true,
                             message: `${title} is required.`
+                        },
+                        {
+                            pattern: /^[0-9a-zA-Z_]+$/,
+                            message: `${title}请输入正确内容`
                         }
                     ],
                     initialValue: record[dataIndex]
@@ -69,20 +72,19 @@ class EditableCell extends React.Component {
         );
     };
     getInput = ()=> {
-        console.log(this.props)
         const {dataIndex} = this.props;
         if (dataIndex === 'address') {
-           return (
-                <InputNumber
-                    min={0}
-                    max={255}
-                    key={dataIndex}
-                    ref={node => (this.input = node)}
-                    onPressEnter={this.save}
-                    onBlur={this.save}
-                    disabled={this.props.disabled}
-                />
-           )
+            return (
+                    <InputNumber
+                        min={0}
+                        max={247}
+                        key={dataIndex}
+                        ref={node => (this.input = node)}
+                        onPressEnter={this.save}
+                        onBlur={this.save}
+                        disabled={this.props.disabled}
+                    />
+            )
         }
         if (dataIndex === 'device' || dataIndex === 'number') {
             return (
@@ -101,27 +103,28 @@ class EditableCell extends React.Component {
                     ref={node => (this.input = node)}
                     onPressEnter={this.save}
                     onBlur={this.save}
-                    // defaultValue=""
+                    initialValue=""
                     disabled={this.props.disabled}
                     style={{ width: 120 }}
                 >
                     {
                         this.props.list && this.props.list.length > 0
-                        ? this.props.list.map((item, key) => {
-                            return (
-                                <Option
-                                    value={item.id}
-                                    key={key}
-                                >{item.name}</Option>
-                            )
-                        })
-                        : ''
+                            ? this.props.list.map((item, key) => {
+                                return (
+                                    <Option
+                                        value={item.id}
+                                        key={key}
+                                    >{item.id}</Option>
+                                )
+                            })
+                            : ''
                     }
                 </Select>
             )
         }
 
-    }
+    };
+
     render () {
         const {
             editable,
@@ -177,10 +180,12 @@ class EditableTable extends React.Component {
                 dataIndex: 'operation',
                 render: (text, record) =>
                     this.state.dataSource.length >= 1 ? (
-                        <Popconfirm title="Sure to delete?"
+                        <Popconfirm
+                            title="Sure to delete?"
                             onConfirm={() => this.handleDelete(record.key)}
                         >
-                            <Button type="danger"
+                            <Button
+                                type="danger"
                                 disabled={this.props.disable}
                             >Delete</Button>
                         </Popconfirm>
@@ -224,20 +229,28 @@ class EditableTable extends React.Component {
     };
 
     handleAdd = () => {
-        const {count, dataSource} = this.state;
-        const newData = {
-            key: dataSource.length + 1,
-            template: '选择模板',
-            number: 0,
-            address: 0,
-            device: '设备名称'
-        };
-        this.setState({
-            dataSource: [...dataSource, newData],
-            count: count + 1
-        }, ()=>{
-            this.props.getdevs(this.state.dataSource)
-        });
+        if (this.props.templateList.length) {
+            console.log(this.props.templateList)
+            let list = this.props.templateList.map(item=>Object.values(item))
+            const {count, dataSource} = this.state;
+            const newData = {
+                key: dataSource.length + 1,
+                template: list[0][4],
+                number: count + 1,
+                address: count + 1,
+                device: `device${count + 1}`
+            };
+            this.setState({
+                dataSource: [...dataSource, newData],
+                count: count + 1
+            }, ()=>{
+                this.props.getdevs(this.state.dataSource)
+            });
+        } else {
+            message.info('请先选择模板，再添加设备列表')
+            return false
+        }
+        console.log(this.state.dataSource, 'dataSource')
     };
 
     handleSave = row => {
@@ -264,6 +277,7 @@ class EditableTable extends React.Component {
                     return (
                         <EditableCell
                             list={list}
+                            datasource={dataSource}
                             disabled={disabled}
                             {...restProps}
                         />
