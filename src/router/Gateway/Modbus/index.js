@@ -45,7 +45,8 @@ class Modbus extends Component {
                 port: 499,
                 nodelay: true
             },
-            templateStore: []
+            templateStore: [],
+            currentPagePort: ''
         };
     }
     componentDidMount () {
@@ -99,6 +100,15 @@ class Modbus extends Component {
     onChange = activeKey => {
         console.log(activeKey)
         this.setState({ activeKey });
+        if (this.state.panes[activeKey].conf.serial_opt) {
+            console.log(this.state.panes[activeKey].conf.serial_opt.port === '/dev/ttyS1')
+            if (this.state.panes[activeKey].conf.serial_opt.port === '/dev/ttyS1') {
+                this.setState({currentPagePort: 'ttyS1'})
+            } else {
+                this.setState({currentPagePort: 'ttyS1'})
+            }
+            console.log(this.state.currentPagePort)
+        }
     };
     onEdit = (targetKey, action) => {
         this[action](targetKey);
@@ -194,7 +204,7 @@ class Modbus extends Component {
         this.setState({
             panes: apps, loading: false
         })
-    }
+    };
     render () {
         return (
             <div>
@@ -218,12 +228,14 @@ class Modbus extends Component {
                                             closable={false}
                                         >
                                             <ModbusPane
+                                                title={title}
                                                 removenotinstall={this.removeNotInstall}
                                                 key={key}
                                                 pane={pane}
                                                 panes={this.state.panes}
                                                 fetch={this.fetch}
                                                 setActiveKey={this.setActiveKey}
+                                                currentPagePort={this.state.currentPagePort}
                                             />
                                         </TabPane>
                                     )

@@ -112,7 +112,7 @@ class ModbusPane extends Component {
             apdu_type: 'TCP',
             channel_type: 'TCP',
             serial_opt: {
-                port: '--请选择--',
+                port: this.currentPort || 'COM1',
                 baudrate: 9600,
                 stop_bits: 1,
                 data_bits: 8,
@@ -229,6 +229,19 @@ class ModbusPane extends Component {
             console.log(this.props.panes, 'panes')
             let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
             let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
+            let serial_opt = this.state.serial_opt
+            if (s1) {
+                console.log('s1')
+                serial_opt.port = 'COM2'
+                this.setState({serial_opt})
+            }
+            if (s1 && !s2) {
+                console.log('!s2')
+            }
+            if (s2) {
+                serial_opt.port = 'COM1'
+                this.setState({serial_opt})
+            }
             if (s1 && s2) {
                 this.setState({
                     communication: true
@@ -280,10 +293,12 @@ class ModbusPane extends Component {
         this.t1 && clearInterval(this.t1)
     }
     checkOption () {
+        console.log(this.state.serial_opt)
         if (this.props.panes.length) {
                     let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
                     let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
                     let option = '';
+                    console.log(this.props.currentPagePort, 'props')
                     switch (true) {
                         case s1 && s2 :
                             // console.log(1);
@@ -295,7 +310,7 @@ class ModbusPane extends Component {
                             break;
                         case s1:
                              console.log('s1 show');
-                             // if (!s2) {
+                             // if (this.props.currentPagePort === 'ttyS1' && !s2) {
                              //    option = this.optionTotal();
                              //     break;
                              // } else {
@@ -306,7 +321,7 @@ class ModbusPane extends Component {
                             break;
                         case s2:
                             console.log('s2 show');
-                            // if (!s1) {
+                            // if (this.props.currentPagePort === 'ttyS2' && !s1) {
                             //     option = this.optionTotal();
                             //     break;
                             // } else {
@@ -412,6 +427,16 @@ class ModbusPane extends Component {
     }
     installapp = () => {
         console.log(this.state.serial_opt.port)
+        if (this.state.serial_opt.port === 'COM1') {
+            let serial_opt = this.state.serial_opt;
+            serial_opt.port = '/dev/ttyS1'
+            this.setState({serial_opt})
+        }
+        if (this.state.serial_opt.port === 'COM2') {
+            let serial_opt = this.state.serial_opt;
+            serial_opt.port = '/dev/ttyS2'
+            this.setState({serial_opt})
+        }
             const data = {
                 app: 'APP00000025',
                 conf: {
@@ -459,50 +484,46 @@ class ModbusPane extends Component {
             })
     }
     AppConf = () => {
-        if (this.props.pane.status === 'Not installed') {
-            this.startChannel()
-            this.setState({
-                pressVisible: true
-            }, ()=>{
-                this.addaccout()
-            })
-            setTimeout(() => {
-                this.installapp()
-            }, 3000);
-            return false;
-        }
-        const data = {
-            conf: {
-                apdu_type: this.state.apdu_type,
-                channel_type: this.state.channel_type,
-                dev_sn_prefix: this.state.dev_sn_prefix,
-                devs: this.state.devs,
-                loop_gap: this.state.loop_gap,
-                serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
-                tpls: this.state.templateList
-            },
-            gateway: this.props.match.params.sn,
-            id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
-            inst: this.props.pane.inst_name
-        };
-        http.post('/api/gateways_applications_conf', data).then(res=>{
-            if (res.ok) {
-                let title = '配置应用' + data.inst + '请求'
-                message.info(title + '等待网关响应!')
-                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
-                    this.props.fetch()
+            if (this.props.pane.status === 'Not installed') {
+                this.startChannel()
+                this.setState({
+                    pressVisible: true
+                }, ()=>{
+                    this.addaccout()
                 })
-            } else {
-                message.error(res.error)
+                setTimeout(() => {
+                    this.installapp()
+                }, 3000);
+                return false;
             }
-        })
+            const data = {
+                conf: {
+                    apdu_type: this.state.apdu_type,
+                    channel_type: this.state.channel_type,
+                    dev_sn_prefix: this.state.dev_sn_prefix,
+                    devs: this.state.devs,
+                    loop_gap: this.state.loop_gap,
+                    serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
+                    socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
+                    tpls: this.state.templateList
+                },
+                gateway: this.props.match.params.sn,
+                id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
+                inst: this.props.pane.inst_name
+            };
+            http.post('/api/gateways_applications_conf', data).then(res=>{
+                if (res.ok) {
+                    let title = '配置应用' + data.inst + '请求'
+                    message.info(title + '等待网关响应!')
+                    this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                        this.props.fetch()
+                    })
+                } else {
+                    message.error(res.error)
+                }
+            })
     }
     toggleDisable = () => {
-        if (this.state.tpls.length === 0 || this.state.devs.length === 0) {
-            message.info('模板和设备列表不能为空，请重新选择！')
-            return false;
-        }
         this.setState({disabled: !this.state.disabled}, ()=>{
             if (this.state.disabled) {
                 this.AppConf();
@@ -650,7 +671,6 @@ class ModbusPane extends Component {
     };
     render (){
         const conf = this.props.pane.conf
-
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow, loading} = this.state;
         devs, tpls;
         // const Mt10 = {
@@ -750,6 +770,8 @@ class ModbusPane extends Component {
                                 <Select
                                     disabled={disabled}
                                     defaultValue={conf.serial_opt ? (conf.serial_opt.port === '/dev/ttyS1' ? 'COM1' : 'COM2' ) : serial_opt.port}
+                                    // defaultValue={conf.serial_opt ? conf.serial_opt.port : (conf.serial_opt.port === '/dev/ttyS1' ? 'COM2' : 'COM1')}
+
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'port')
                                     }}
@@ -759,12 +781,6 @@ class ModbusPane extends Component {
                                     }
 
                                 </Select>
-                                {
-                                    this.state.checkOption
-                                    ? <span style={{color: 'red', fontSize: '12px', marginLeft: '10px'}}>请选择端口</span>
-                                        : null
-
-                                }
                             </Form.Item>
                             <Form.Item label="波特率:">
                                 <Select
@@ -945,6 +961,7 @@ class ModbusPane extends Component {
                         key="1"
                         disable={disabled}
                         getdevs={this.getDevs}
+                        parentTitle={this.props.title}
                         templateList={this.state.templateList}
                         devs={this.props.pane.conf.devs}
                     />
