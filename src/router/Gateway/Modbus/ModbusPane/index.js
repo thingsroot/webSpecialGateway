@@ -292,13 +292,23 @@ class ModbusPane extends Component {
                             option = this.optionTotal();
                             break;
                         case s1:
-                            // console.log(3);
-                            option = this.optionS2();
-                            break;
+                             console.log('s1 show');
+                             if (!s2) {
+                                option = this.optionTotal();
+                                 break;
+                             } else {
+                               option = this.optionS2();
+                                 break;
+                             }
                         case s2:
-                            // console.log(4);
-                            option = this.optionS1();
-                            break;
+                            console.log('s2 show');
+                            if (!s1) {
+                                option = this.optionTotal();
+                                break;
+                            } else {
+                                option = this.optionS1();
+                                break;
+                            }
                         default:
                             console.log(5);
                     }
@@ -333,7 +343,6 @@ class ModbusPane extends Component {
             >COM2</Option>
         ]
     };
-
     setSetting = (type, val, name) =>{
         if (type === 'serial_opt') {
             this.setState({
@@ -489,7 +498,7 @@ class ModbusPane extends Component {
         }
         this.setState({disabled: !this.state.disabled}, ()=>{
             if (this.state.disabled) {
-                   this.AppConf()
+                this.AppConf();
             }
         })
     };
@@ -556,7 +565,7 @@ class ModbusPane extends Component {
     };
     onCreateNewTemplate = () => {
         window.open('/appdetails/APP00000025/new_template', '_blank')
-    }
+    };
     search = (value) => {
         console.log(value)
         if (value) {
