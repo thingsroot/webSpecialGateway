@@ -360,7 +360,7 @@ class MqttForm extends React.Component {
         this.setState({disabled: !this.state.disabled})
     };
     installMqtt = () => {
-        if (this.state.mqtt.enable_tls && !this.state.serial_opt.contentText) {
+        if (this.state.mqtt.enable_tls && !this.state.mqtt.tls_cert) {
             message.info('请先上传CA证书！')
             return false;
         }

@@ -483,6 +483,10 @@ class ModbusPane extends Component {
         })
     }
     toggleDisable = () => {
+        if (this.state.tpls.length === 0 || this.state.devs.length === 0) {
+            message.info('模板和设备列表不能为空，请重新选择！')
+            return false;
+        }
         this.setState({disabled: !this.state.disabled}, ()=>{
             if (this.state.disabled) {
                    this.AppConf()

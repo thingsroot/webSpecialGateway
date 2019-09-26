@@ -51,7 +51,6 @@ class EditableCell extends React.Component {
         } else {
             message.info('设备值不能重复，请重新输入')
         }
-        
     };
 
     renderCell = form => {

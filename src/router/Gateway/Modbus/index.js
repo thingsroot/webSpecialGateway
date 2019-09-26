@@ -144,7 +144,8 @@ class Modbus extends Component {
         }
         applist.push(data)
         this.setState({
-            panes: applist
+            panes: applist,
+            activeKey: applist.length - 1 + ''
         })
     }
     setActiveKey = (key)=>{
@@ -204,6 +205,7 @@ class Modbus extends Component {
                                     activeKey={this.state.activeKey}
                                     type="editable-card"
                                     onEdit={this.onEdit}
+                                    hideAdd={this.state.panes.length >= 8}
                                   >
                             {
                                 this.state.panes.map((pane, key) => {
