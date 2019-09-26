@@ -106,6 +106,7 @@ class Modbus extends Component {
     add = () => {
         let inst = undefined;
         const applist = this.state.panes;
+        console.log(applist, applist.length)
         if (applist && applist.length > 0 && applist.length < 8) {
             applist.map((item, key) =>{
                 if (item.inst_name.indexOf(key + 1) === -1) {
