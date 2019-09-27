@@ -33,21 +33,22 @@ class EditableCell extends React.Component {
     save = e => {
         e;
         const {record, handleSave} = this.props;
-        console.log(record, handleSave)
-        console.log(this.state.parentDisabled, 'parent') //false 重复
         this.form.validateFields((error, values) => {
+            console.log(error, values)
             // if (error && error[e.currentTarget.id]) {
             if (error) {
                 return;
             }
+
+            this.props.datasource.map(item=> {
+                console.log(item[this.props.dataIndex])
+            })
             this.toggleEdit();
             handleSave({...record, ...values});
         });
         // const value = e.target.value;
         // const {record, handleSave, datasource, dataIndex} = this.props;
         // let detection = false;
-        // // this.props.toFatherValue(this.state.parentDisabled)
-        // console.log(this.state.parentDisabled, 'parent')
         // datasource.map(item=>{
         //     console.log(item[dataIndex], value, record)
         //     if (item[dataIndex] === value && item.key !== record.key) {
@@ -80,10 +81,10 @@ class EditableCell extends React.Component {
                             required: true,
                             message: `${title} is required.`
                         },
-                        {
-                            pattern: /^[0-9a-zA-Z_]+$/,
-                            message: `${title}请输入正确内容`
-                        },
+                        // {
+                        //     pattern: /^[0-9a-zA-Z_]+$/,
+                        //     message: `${title}请输入正确内容`
+                        // },
                         {
                             validator: this.checkUnName()
                         }
@@ -105,17 +106,12 @@ class EditableCell extends React.Component {
         return (rule, value, callback)=> {
             rule, value;
             if (rule.field === 'address') {
-                if (this.address(value)) {
-                    this.setState({parentDisabled: true})
-                    callback('重复')
-                } else {
-                    callback()
-                }
+                callback()
             }
             if (rule.field === 'device') {
                 if (this.device(value)) {
                     this.setState({parentDisabled: true})
-                    callback('重复')
+                    callback('名称重复')
                 } else {
                     callback()
                 }
@@ -123,7 +119,7 @@ class EditableCell extends React.Component {
             if (rule.field === 'number') {
                 if (this.number(value)) {
                     this.setState({parentDisabled: true})
-                    callback('重复')
+                    callback('序列号重复')
                 } else {
                     callback()
                 }
@@ -142,8 +138,8 @@ class EditableCell extends React.Component {
                         max={247}
                         key={dataIndex}
                         ref={node => (this.input = node)}
-                        // onPressEnter={this.save}
-                        onChange={this.save}
+                        onPressEnter={this.save}
+                        onBlur={this.save}
                         disabled={this.props.disabled}
                     />
             )
@@ -152,8 +148,8 @@ class EditableCell extends React.Component {
             return (
                 <Input
                     ref={node => (this.input = node)}
-                    // onPressEnter={this.save}
-                    onChange={this.save}
+                    onPressEnter={this.save}
+                    onBlur={this.save}
                     disabled={this.props.disabled}
                     autoComplete="off"
                 />
@@ -163,8 +159,8 @@ class EditableCell extends React.Component {
             return (
                 <Select
                     ref={node => (this.input = node)}
-                    // onPressEnter={this.save}
-                    onChange={this.save}
+                    onPressEnter={this.save}
+                    onBlur={this.save}
                     initialValue=""
                     disabled={this.props.disabled}
                     style={{ width: 120 }}
@@ -196,9 +192,10 @@ class EditableCell extends React.Component {
             index,
             handleSave,
             children,
+            parentTitle,
             ...restProps
         } = this.props;
-        dataIndex, title, record, index, handleSave;
+        dataIndex, title, record, index, handleSave, parentTitle;
         return (
             <td {...restProps}>
                 {editable ? (
@@ -297,7 +294,6 @@ class EditableTable extends React.Component {
         let list = [];
         list = arr.filter(item=> item.device === name);
         let num = Number(name.split('device')[1]) + 1 + Math.floor(Math.random() * 100);
-        // console.log(name.split('device'))
         if (list.length > 0) {
             name = 'device' + num;
                 return name;
@@ -307,15 +303,19 @@ class EditableTable extends React.Component {
     }
     handleAdd = () => {
         const {count, dataSource} = this.state;
+        console.log(dataSource.length, Boolean(dataSource.length))
+        let address = dataSource.length && Math.max.apply(Math, dataSource.map(o=> o.address));
+        let incrementalAddress = address + 1
+        let title = this.props.parentTitle
+        // var limitTitle = title.split('(')
         if (this.props.templateList.length) {
-            const device = this.ForeachName(`device${count + 1}`, dataSource);
-            console.log(device)
+            // const device = this.ForeachName(`device${count + 1}`, dataSource);
             const newData = {
                 key: dataSource.length + 1,
                 template: this.props.templateList[0].name,
-                number: parseInt(Math.random() * 147),
-                address: parseInt(Math.random() * 100),
-                device
+                number: `${title}_${incrementalAddress}`,
+                address: address ? incrementalAddress : dataSource.length + 1,
+                device: `${title}.device${incrementalAddress}`
             };
             this.setState({
                 dataSource: [...dataSource, newData],
@@ -344,6 +344,7 @@ class EditableTable extends React.Component {
     render () {
         const list = this.props.templateList;
         const disabled = this.props.disable;
+        const parentTitle = this.props.title
         const {dataSource} = this.state;
         const components = {
             body: {
@@ -356,6 +357,7 @@ class EditableTable extends React.Component {
                             datasource={dataSource}
                             disabled={disabled}
                             {...restProps}
+                            parentTitle={parentTitle}
                             // toFatherValue={this.getChildValue}
                         />
                     )
