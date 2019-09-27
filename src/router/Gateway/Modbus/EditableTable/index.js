@@ -398,7 +398,7 @@ class EditableTable extends React.Component {
                     disabled={this.props.disable}
                     type="primary"
                 >
-                    添加设备列表
+                    添加设备
                 </Button>
             </div>
         );

@@ -301,11 +301,9 @@ class ModbusPane extends Component {
                     console.log(this.props.currentPagePort, 'props')
                     switch (true) {
                         case s1 && s2 :
-                            // console.log(1);
                             option = this.optionDisabled();
                             break;
                         case !s1 && !s2:
-                            // console.log(2);
                             option = this.optionTotal();
                             break;
                         case s1:
@@ -511,6 +509,7 @@ class ModbusPane extends Component {
                 id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
                 inst: this.props.pane.inst_name
             };
+        if (data.conf.devs.length) {
             http.post('/api/gateways_applications_conf', data).then(res=>{
                 if (res.ok) {
                     let title = '配置应用' + data.inst + '请求'
@@ -522,6 +521,10 @@ class ModbusPane extends Component {
                     message.error(res.error)
                 }
             })
+        } else {
+            message.error('设备列表不能为空');
+            return false
+        }
     }
     toggleDisable = () => {
         this.setState({disabled: !this.state.disabled}, ()=>{
