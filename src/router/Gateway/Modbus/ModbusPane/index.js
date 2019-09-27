@@ -11,6 +11,7 @@ import ReactList from 'react-list';
 import { isArray } from 'util';
 import { _getCookie } from '../../../../utils/Session';
 const { Option } = Select;
+const { confirm } = Modal;
 function cancel () {
     message.info('取消删除应用');
   }
@@ -672,6 +673,17 @@ class ModbusPane extends Component {
             this.setState({checkIp: false})
         }
     };
+    showConfirm =() => {
+        confirm({
+            title: '确定要删除应用Modbus吗?',
+            content: '',
+            onOk: ()=> {
+                this.removeModbus()
+            },
+            onCancel () {
+            }
+        })
+    }
     render (){
         const conf = this.props.pane.conf
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow, loading} = this.state;
@@ -690,21 +702,22 @@ class ModbusPane extends Component {
                         >
                             {!this.state.disabled ? '保存' : '编辑'}
                         </Button>
-                        <Popconfirm
-                            title="确定要删除应用Modbus吗?"
-                            onConfirm={this.removeModbus}
-                            onCancel={cancel}
-                            okText="删除"
-                            cancelText="取消"
-                        >
+                        {/*<Popconfirm*/}
+                        {/*    title="确定要删除应用Modbus吗?"*/}
+                        {/*    onConfirm={this.removeModbus}*/}
+                        {/*    onCancel={cancel}*/}
+                        {/*    okText="删除"*/}
+                        {/*    cancelText="取消"*/}
+                        {/*>*/}
                             <Button
                                 style={{marginLeft: '10pxs'}}
                                 type="danger"
                                 disabled={this.state.checkIp}
+                                onClick={this.showConfirm}
                             >
                                 删除
                             </Button>
-                        </Popconfirm>
+                        {/*</Popconfirm>*/}
                         {
                             !disabled
                             ? <Button
