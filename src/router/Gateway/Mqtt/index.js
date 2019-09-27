@@ -539,7 +539,8 @@ class Mqtt extends Component {
             conf: {
                 has_options_ex: 'no',
                 mqtt: {
-                    enable_tls: false
+                    enable_tls: false,
+                    port: 1883
                 },
                 options: {
                     data_upload_dpp: 1024,

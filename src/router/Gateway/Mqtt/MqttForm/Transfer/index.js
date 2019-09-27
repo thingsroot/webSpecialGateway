@@ -89,7 +89,7 @@ class App extends React.Component {
             onSelectChange={this.handleSelectChange}
             // onScroll={this.handleScroll}
             render={item => item.title}
-            listStyle={{width: '500px', height: '300px'}}
+            listStyle={{width: '48%', height: '300px'}}
             disabled={this.props.disabled}
             locale={{ itemsUnit: '项'}}
         />

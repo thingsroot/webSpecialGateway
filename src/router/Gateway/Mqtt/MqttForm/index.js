@@ -591,14 +591,17 @@ class MqttForm extends React.Component {
                             </div>
                             <div className="flex">
                                 <span>MQTT端口：</span>
-                                <Input
+                                <InputNumber
                                     style={{width: 200}}
                                     allowClear={!disabled}
+                                    min={1}
+                                    max={65535}
                                     autoComplete="off"
+                                    defaultValue={1883}
                                     disabled={disabled}
                                     value={mqtt && mqtt.port ? mqtt.port : ''}
-                                    onChange={(e) => {
-                                        this.setSetting('mqtt', e.target.value, 'port')
+                                    onChange={(value) => {
+                                        this.setSetting('mqtt', value, 'port')
                                     }}
                                 />
                             </div>
