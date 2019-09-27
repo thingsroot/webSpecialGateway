@@ -715,9 +715,10 @@ class ModbusPane extends Component {
             this.setState({checkIp: false})
         }
     };
+    showTitle = () => this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?'
     showConfirm =() => {
         confirm({
-            title: '确定要删除应用Modbus吗?',
+            title: this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?',
             content: '',
             onOk: ()=> {
                 this.removeModbus()
@@ -730,9 +731,6 @@ class ModbusPane extends Component {
         const conf = this.props.pane.conf
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow, loading} = this.state;
         devs, tpls;
-        // const Mt10 = {
-        //     marginTop: '10px'
-        // }
         return (
             <div className="ModbusPane">
                 <div className="ModbusPaneAffix">
