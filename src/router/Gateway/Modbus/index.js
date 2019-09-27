@@ -57,7 +57,7 @@ class Modbus extends Component {
             this.refreshTemplateList()
         })
         this.t1 = setInterval(() => {
-            this.fetch()
+            // this.fetch()
         }, 5000);
     }
     UNSAFE_componentWillReceiveProps (nextProps){
@@ -257,6 +257,8 @@ class Modbus extends Component {
                                 this.state.panes.map((pane, key) => {
                                     console.log(pane)
                                     const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
+                                    const titles = pane.inst_name.indexOf('_') !== -1 ?  pane.inst_name : pane.inst_name;
+                                    console.log(titles, 'titles')
                                     return (
                                         <TabPane
                                             tab={
@@ -283,6 +285,7 @@ class Modbus extends Component {
                                                     title={pane.inst_name}
                                                     removenotinstall={this.removeNotInstall}
                                                     key={key}
+                                                    titles={titles}
                                                     pane={pane}
                                                     panes={this.state.panes}
                                                     fetch={this.fetch}

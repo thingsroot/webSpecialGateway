@@ -248,7 +248,7 @@ class ModbusPane extends Component {
                 })
             } else {
                 this.setState({
-                    communication: false
+                    communicationFt: false
                 })
             }
         }
@@ -1106,7 +1106,7 @@ class ModbusPane extends Component {
                         key="1"
                         disable={disabled}
                         getdevs={this.getDevs}
-                        parentTitle={this.props.title}
+                        parentTitle={this.props.titles}
                         templateList={this.state.templateList}
                         devs={this.props.pane.conf.devs}
                     />
