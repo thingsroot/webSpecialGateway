@@ -11,6 +11,7 @@ import ReactList from 'react-list';
 import { isArray } from 'util';
 import { _getCookie } from '../../../../utils/Session';
 const { Option } = Select;
+const { confirm } = Modal;
 function cancel () {
     message.info('取消删除应用');
   }
@@ -106,14 +107,13 @@ class ModbusPane extends Component {
             result: true,
             ShowResult: false,
             pressVisible: false,
-            action: 'install',
             tpls: [],
             devs: [],
             loop_gap: 1000,
             apdu_type: 'TCP',
             channel_type: 'TCP',
             serial_opt: {
-                port: '--请选择--',
+                port: this.currentPort || 'COM1',
                 baudrate: 9600,
                 stop_bits: 1,
                 data_bits: 8,
@@ -220,14 +220,29 @@ class ModbusPane extends Component {
             communication: false,
             filter_text: '',
             origTemplate: [],
-            loading: false
+            loading: false,
+            checkOption: false
         }
 
     }
     UNSAFE_componentWillMount () {
         if (this.props.panes.length) {
+            console.log(this.props.panes, 'panes')
             let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
             let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
+            let serial_opt = this.state.serial_opt
+            if (s1) {
+                console.log('s1')
+                serial_opt.port = 'COM2'
+                this.setState({serial_opt})
+            }
+            if (s1 && !s2) {
+                console.log('!s2')
+            }
+            if (s2) {
+                serial_opt.port = 'COM1'
+                this.setState({serial_opt})
+            }
             if (s1 && s2) {
                 this.setState({
                     communication: true
@@ -279,37 +294,40 @@ class ModbusPane extends Component {
         this.t1 && clearInterval(this.t1)
     }
     checkOption () {
+        console.log(this.state.serial_opt)
         if (this.props.panes.length) {
                     let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
                     let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
                     let option = '';
                     switch (true) {
                         case s1 && s2 :
-                            // console.log(1);
                             option = this.optionDisabled();
                             break;
                         case !s1 && !s2:
-                            // console.log(2);
                             option = this.optionTotal();
                             break;
                         case s1:
                              console.log('s1 show');
-                             if (!s2) {
-                                option = this.optionTotal();
-                                 break;
-                             } else {
-                               option = this.optionS2();
-                                 break;
-                             }
+                             // if (this.props.currentPagePort === 'ttyS1' && !s2) {
+                             //    option = this.optionTotal();
+                             //     break;
+                             // } else {
+                             //   option = this.optionS2();
+                             //     break;
+                             // }
+                            option = this.optionS2();
+                            break;
                         case s2:
                             console.log('s2 show');
-                            if (!s1) {
-                                option = this.optionTotal();
-                                break;
-                            } else {
-                                option = this.optionS1();
-                                break;
-                            }
+                            // if (this.props.currentPagePort === 'ttyS2' && !s1) {
+                            //     option = this.optionTotal();
+                            //     break;
+                            // } else {
+                            //     option = this.optionS1();
+                            //     break;
+                            // }
+                            option = this.optionS1();
+                            break;
                         default:
                             console.log(5);
                     }
@@ -406,68 +424,79 @@ class ModbusPane extends Component {
         http.post('/api/gateways_enable_log', data)
     }
     installapp = () => {
-        const data = {
-            app: 'APP00000025',
-            conf: {
-                apdu_type: this.state.apdu_type,
-                channel_type: this.state.channel_type,
-                dev_sn_prefix: true,
-                devs: this.state.devs,
-                loop_gap: this.state.loop_gap,
-                serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
-                tpls: this.state.tpls
-            },
-            gateway: this.props.match.params.sn,
-            id: 'app_install/' + this.props.match.params.sn + '/' + this.props.pane.inst_name + '/APP00000259/' + new Date() * 1,
-            inst: this.props.pane.inst_name,
-            version: this.props.pane.version
+        console.log(this.state.serial_opt.port)
+        if (this.state.serial_opt.port === 'COM1') {
+            let serial_opt = this.state.serial_opt;
+            serial_opt.port = '/dev/ttyS1'
+            this.setState({serial_opt})
         }
-        http.post('/api/gateways_applications_install', data).then(res=>{
-            if (res.ok) {
-                // let title = '安装应用' + data.inst + '请求'
-                // message.info(title + '等待网关响应!')
-                this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
-                    console.log(action)
-                    this.props.fetch('success')
-                    if (action) {
-                        this.setState({
-                            number: 100,
-                            result: true,
-                            ShowResult: true
-                        }, ()=>{
-                            this.stopChannel()
-                        })
-                    } else {
-                        this.setState({result: false, ShowResult: true, number: 99}, ()=>{
-                            this.stopChannel()
-                        })
-                    }
-                })
-            } else {
-                message.error(res.error)
-                this.setState({
-                    number: 99
-                })
+        if (this.state.serial_opt.port === 'COM2') {
+            let serial_opt = this.state.serial_opt;
+            serial_opt.port = '/dev/ttyS2'
+            this.setState({serial_opt})
+        }
+            const data = {
+                app: 'APP00000025',
+                conf: {
+                    apdu_type: this.state.apdu_type,
+                    channel_type: this.state.channel_type,
+                    dev_sn_prefix: true,
+                    devs: this.state.devs,
+                    loop_gap: this.state.loop_gap,
+                    serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
+                    socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
+                    tpls: this.state.tpls
+                },
+                gateway: this.props.match.params.sn,
+                id: 'app_install/' + this.props.match.params.sn + '/' + this.props.pane.inst_name + '/APP00000259/' + new Date() * 1,
+                inst: this.props.pane.inst_name,
+                version: this.props.pane.version
             }
-        })
+            http.post('/api/gateways_applications_install', data).then(res=>{
+                if (res.ok) {
+                    // let title = '安装应用' + data.inst + '请求'
+                    // message.info(title + '等待网关响应!')
+                    this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
+                        console.log(action)
+                        this.props.fetch('success')
+                        if (action) {
+                            this.setState({
+                                number: 100,
+                                result: true,
+                                ShowResult: true
+                            }, ()=>{
+                                this.stopChannel()
+                            })
+                        } else {
+                            this.setState({result: false, ShowResult: true, number: 99}, ()=>{
+                                this.stopChannel()
+                            })
+                        }
+                    })
+                } else {
+                    message.error(res.error)
+                    this.setState({
+                        number: 99
+                    })
+                }
+            })
     }
     AppConf = (status) => {
-        if (this.props.pane.status === 'Not installed' && status === 'install') {
-            this.startChannel()
-            this.setState({
-                pressVisible: true,
-                number: 0,
-                result: false,
-                action: 'install'
-            }, ()=>{
-                this.addaccout()
-            })
-            setTimeout(() => {
-                this.installapp()
-            }, 3000);
-            return false;
-        }
+            if (this.props.pane.status === 'Not installed'  && status === 'install') {
+                this.startChannel()
+                this.setState({
+                    pressVisible: true,
+                    number: 0,
+                    result: false,
+                    action: 'install'
+                }, ()=>{
+                    this.addaccout()
+                })
+                setTimeout(() => {
+                    this.installapp()
+                }, 3000);
+                return false;
+            }
         if (status === 'remove') {
             this.setState({
                 pressVisible: true,
@@ -482,32 +511,37 @@ class ModbusPane extends Component {
             }, 2000);
             return false;
         }
-        const data = {
-            conf: {
-                apdu_type: this.state.apdu_type,
-                channel_type: this.state.channel_type,
-                dev_sn_prefix: this.state.dev_sn_prefix,
-                devs: this.state.devs,
-                loop_gap: this.state.loop_gap,
-                serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
-                tpls: this.state.templateList
-            },
-            gateway: this.props.match.params.sn,
-            id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
-            inst: this.props.pane.inst_name
-        };
-        http.post('/api/gateways_applications_conf', data).then(res=>{
-            if (res.ok) {
-                let title = '配置应用' + data.inst + '请求'
-                message.info(title + '等待网关响应!')
-                this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
-                    this.props.fetch()
-                })
-            } else {
-                message.error(res.error)
-            }
-        })
+            const data = {
+                conf: {
+                    apdu_type: this.state.apdu_type,
+                    channel_type: this.state.channel_type,
+                    dev_sn_prefix: this.state.dev_sn_prefix,
+                    devs: this.state.devs,
+                    loop_gap: this.state.loop_gap,
+                    serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
+                    socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
+                    tpls: this.state.templateList
+                },
+                gateway: this.props.match.params.sn,
+                id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
+                inst: this.props.pane.inst_name
+            };
+        if (data.conf.devs.length) {
+            http.post('/api/gateways_applications_conf', data).then(res=>{
+                if (res.ok) {
+                    let title = '配置应用' + data.inst + '请求'
+                    message.info(title + '等待网关响应!')
+                    this.props.store.action.pushAction(res.data, title, '', data, 10000,  ()=> {
+                        this.props.fetch()
+                    })
+                } else {
+                    message.error(res.error)
+                }
+            })
+        } else {
+            message.error('设备列表不能为空');
+            return false
+        }
     }
     toggleDisable = () => {
         if (this.state.tpls.length === 0 || this.state.devs.length === 0) {
@@ -681,20 +715,29 @@ class ModbusPane extends Component {
             this.setState({checkIp: false})
         }
     };
+    showTitle = () => this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?'
+    showConfirm =() => {
+        confirm({
+            title: this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?',
+            content: '',
+            onOk: ()=> {
+                this.removeModbus()
+            },
+            onCancel () {
+            }
+        })
+    }
     render (){
         const conf = this.props.pane.conf
-
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow, loading} = this.state;
         devs, tpls;
-        // const Mt10 = {
-        //     marginTop: '10px'
-        // }
         return (
             <div className="ModbusPane">
                 <div className="ModbusPaneAffix">
                         <Button
                             style={{marginLeft: '10pxs', marginRight: '20px'}}
                             type="primary"
+                            disabled={this.state.checkIp}
                             onClick={this.toggleDisable}
                         >
                             {
@@ -703,16 +746,19 @@ class ModbusPane extends Component {
                                 : !this.state.disabled ? '保存' : '编辑'
                             }
                         </Button>
-                        <Popconfirm
-                            title={this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?'}
-                            onConfirm={this.removeModbus}
-                            onCancel={cancel}
-                            okText="删除"
-                            cancelText="取消"
-                        >
+                        {/*<Popconfirm*/}
+                        {/* title={this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?'}
+*/}
+                        {/*    onConfirm={this.removeModbus}*/}
+                        {/*    onCancel={cancel}*/}
+                        {/*    okText="删除"*/}
+                        {/*    cancelText="取消"*/}
+                        {/*>*/}
                             <Button
                                 style={{marginLeft: '10pxs'}}
                                 type="danger"
+                                disabled={this.state.checkIp}
+                                onClick={this.showConfirm}
                             >
                                 {
                                     this.props.pane.status === 'Not installed'
@@ -720,7 +766,7 @@ class ModbusPane extends Component {
                                     : '删除'
                                 }
                             </Button>
-                        </Popconfirm>
+                        {/*</Popconfirm>*/}
                         {
                             !disabled && this.props.pane.status !== 'Not installed'
                             ? <Button
@@ -730,7 +776,8 @@ class ModbusPane extends Component {
                                 onClick={()=>{
                                     this.setState({disabled: true})
                                 }}
-                              >
+                                disabled={this.state.checkIp}
+                                >
                                     取消编辑
                                 </Button>
                             : ''
@@ -743,7 +790,7 @@ class ModbusPane extends Component {
                             disabled={disabled}
                             min={1}
                             max={10000}
-                            defaultValue={loop_gap}
+                            value={loop_gap}
                             onChange={(val)=>{
                                 this.setSetting('loop_gap', val)
                             }}
@@ -752,7 +799,7 @@ class ModbusPane extends Component {
                     </Form.Item>
                     <Form.Item label="协议类型:">
                         <Select
-                            defaultValue={apdu_type}
+                            value={apdu_type}
                             disabled={disabled}
                             onChange={(val)=>{
                                 this.setSetting('apdu_type', val)
@@ -801,7 +848,7 @@ class ModbusPane extends Component {
                             <Form.Item label="波特率:">
                                 <Select
                                     disabled={disabled}
-                                    defaultValue={serial_opt.baudrate}
+                                    value={serial_opt.baudrate}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'baudrate')
                                     }}
@@ -820,7 +867,7 @@ class ModbusPane extends Component {
                             <Form.Item label="停止位：">
                                 <Select
                                     disabled={disabled}
-                                    defaultValue={serial_opt.stop_bits}
+                                    value={serial_opt.stop_bits}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'stop_bits')
                                     }}
@@ -834,7 +881,7 @@ class ModbusPane extends Component {
                             <Form.Item label="数据位：">
                                 <Select
                                     disabled={disabled}
-                                    defaultValue={serial_opt.data_bits}
+                                    value={serial_opt.data_bits}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'data_bits')
                                     }}
@@ -846,7 +893,7 @@ class ModbusPane extends Component {
                             <Form.Item label="校验:">
                                 <Select
                                     disabled={disabled}
-                                    defaultValue={serial_opt.parity}
+                                    value={serial_opt.parity}
                                     onChange={(value)=>{
                                         this.setSetting('serial_opt', value, 'parity')
                                     }}
@@ -864,7 +911,7 @@ class ModbusPane extends Component {
                             <Form.Item label="IP地址:">
                                 <Input
                                     disabled={disabled}
-                                    defaultValue={socket_opt.host}
+                                    value={socket_opt.host}
                                     onChange={(e)=>{
                                         this.setSetting('socket_opt', e.target.value, 'host')
                                     }}
@@ -881,7 +928,7 @@ class ModbusPane extends Component {
                                     disabled={disabled}
                                     min={1}
                                     max={65535}
-                                    defaultValue={socket_opt.port}
+                                    value={socket_opt.port}
                                     onChange={(val)=>{
                                         this.setSetting('socket_opt', val, 'port')
                                     }}
@@ -977,6 +1024,7 @@ class ModbusPane extends Component {
                         key="1"
                         disable={disabled}
                         getdevs={this.getDevs}
+                        parentTitle={this.props.title}
                         templateList={this.state.templateList}
                         devs={this.props.pane.conf.devs}
                     />
@@ -996,6 +1044,7 @@ class ModbusPane extends Component {
                             style={{marginLeft: '10pxs', marginRight: '20px'}}
                             type="primary"
                             onClick={this.toggleDisable}
+                            disabled={this.state.checkIp}
                         >
                             {
                                 this.props.pane.status === 'Not installed'
@@ -1013,6 +1062,7 @@ class ModbusPane extends Component {
                             <Button
                                 style={{marginLeft: '10pxs'}}
                                 type="danger"
+                                disabled={this.state.checkIp}
                             >
                                 {
                                     this.props.pane.status === 'Not installed'
@@ -1030,7 +1080,8 @@ class ModbusPane extends Component {
                                 onClick={()=>{
                                     this.setState({disabled: true})
                                 }}
-                              >
+                                disabled={this.state.checkIp}
+                                >
                                     取消编辑
                                 </Button>
                             : ''
