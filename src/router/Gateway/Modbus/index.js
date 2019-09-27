@@ -263,6 +263,7 @@ class Modbus extends Component {
                                             {
                                                 pane.status !== 'add button'
                                                 ? <ModbusPane
+                                                    title={pane.inst_name.replace('_', '通道')}
                                                     removenotinstall={this.removeNotInstall}
                                                     key={key}
                                                     pane={pane}

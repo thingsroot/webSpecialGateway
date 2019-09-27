@@ -23,7 +23,11 @@ class Btn extends Component {
         loading: true
     }
     componentDidMount () {
-        this.getVersion()
+        this.setState({
+            sn: this.props.match.params.sn
+        }, ()=>{
+            this.getVersion()
+        })
         setInterval(() => {
             this.getVersion()
         }, 10000);
@@ -34,7 +38,9 @@ class Btn extends Component {
                 loading: true,
                 mqtt_version: null,
                 skynet_version: null,
-                modbus_version: null
+                modbus_version: null,
+                freeioe_version: null,
+                sn: nextProps.match.params.sn
             }, ()=>{
                 this.getVersion()
             })
@@ -153,77 +159,81 @@ class Btn extends Component {
     }
     getVersion () {
         const {gatewayInfo} = this.props.store;
-        const beta = this.props.store.gatewayInfo.enabled ? 1 : 0;
-        const app_list = gatewayInfo.apps;
-        const {freeioe_version, skynet_version, mqtt_version, modbus_version} = this.state;
-        if (!mqtt_version) {
-            http.get('/api/applications_versions_latest?app=APP00000259&beta=' + beta).then(res=>{
-                if (res.ok){
-                    this.setState({
-                        mqtt_version: res.data
+        const { sn } = this.state;
+        http.get('/api/gateways_read?name=' + sn).then(Response=>{
+            if (Response.ok) {
+                const beta = Response.data.data.enabled ? 1 : 0;
+                const app_list = gatewayInfo.apps;
+                const {freeioe_version, skynet_version, mqtt_version, modbus_version} = this.state;
+                if (!mqtt_version) {
+                    http.get('/api/applications_versions_latest?app=APP00000259&beta=' + beta).then(res=>{
+                        if (res.ok){
+                            this.setState({
+                                mqtt_version: res.data
+                            })
+                        }
                     })
                 }
-            })
-        }
-        if (!freeioe_version){
-            http.get('/api/applications_versions_latest?app=freeioe&beta=' + beta).then(res=>{
-                if (res.ok){
-                    this.setState({
-                        freeioe_version: res.data
+                if (!freeioe_version){
+                    http.get('/api/applications_versions_latest?app=freeioe&beta=' + beta).then(res=>{
+                        if (res.ok){
+                            this.setState({
+                                freeioe_version: res.data
+                            })
+                        }
                     })
                 }
-            })
-        }
-        if (!skynet_version) {
-            http.get('/api/applications_versions_latest?app=bin/openwrt/19.07/arm_cortex-a7_neon-vfpv4/skynet&beta=' + beta).then(res=>{
-                if (res.ok){
-                    this.setState({
-                        skynet_version: res.data
+                if (!skynet_version) {
+                    http.get('/api/applications_versions_latest?app=bin/openwrt/19.07/arm_cortex-a7_neon-vfpv4/skynet&beta=' + beta).then(res=>{
+                        if (res.ok){
+                            this.setState({
+                                skynet_version: res.data
+                            })
+                        }
                     })
                 }
-            })
-        }
-        if (!modbus_version) {
-            http.get('/api/applications_versions_latest?app=APP00000025&beta=' + beta).then(res=>{
-                if (res.ok){
-                    this.setState({
-                        modbus_version: res.data
+                if (!modbus_version) {
+                    http.get('/api/applications_versions_latest?app=APP00000025&beta=' + beta).then(res=>{
+                        if (res.ok){
+                            this.setState({
+                                modbus_version: res.data
+                            })
+                        }
                     })
                 }
-            })
-        }
-        if (mqtt_version) {
-            const mqttArr = [];
-            app_list && app_list.length > 0 && app_list.map((item) => {
-                if (item.name === 'APP00000259' && item.version < mqtt_version) {
-                        mqttArr.push(item.inst_name)
+                if (mqtt_version) {
+                    const mqttArr = [];
+                    app_list && app_list.length > 0 && app_list.map((item) => {
+                        if (item.name === 'APP00000259' && item.version < mqtt_version) {
+                                mqttArr.push(item.inst_name)
+                        }
+                    })
+                    const flag = mqttArr.length > 0 ? false : true
+                    this.setState({MqttBtnFlag: flag, mqttArr})
                 }
-            })
-            const flag = mqttArr.length > 0 ? false : true
-            this.setState({MqttBtnFlag: flag, mqttArr})
-        }
-        if (modbus_version) {
-            const modbusArr = [];
-            app_list && app_list.length > 0 && app_list.map((item) => {
-                if (item.name === 'APP00000025' && item.version < modbus_version) {
-                        modbusArr.push(item.inst_name)
+                if (modbus_version) {
+                    const modbusArr = [];
+                    app_list && app_list.length > 0 && app_list.map((item) => {
+                        if (item.name === 'APP00000025' && item.version < modbus_version) {
+                                modbusArr.push(item.inst_name)
+                        }
+                    })
+                    const Flag = modbusArr.length > 0 ? false : true
+                    this.setState({ModbusBtnFlag: Flag, modbusArr})
                 }
-            })
-            const Flag = modbusArr.length > 0 ? false : true
-            this.setState({ModbusBtnFlag: Flag, modbusArr})
-        }
-        if (freeioe_version > gatewayInfo.data.version || skynet_version > gatewayInfo.data.skynet_version) {
-            this.setState({firmwareBtnFlag: false})
-        }
-        if (freeioe_version === gatewayInfo.data.version && skynet_version === gatewayInfo.data.skynet_version){
-            this.setState({firmwareBtnFlag: true})
-        }
-        if (skynet_version && modbus_version && mqtt_version) {
-            this.setState({
-                loading: false
-            })
-        }
-
+                if (freeioe_version > Response.data.data.version || skynet_version > Response.data.data.skynet_version) {
+                    this.setState({firmwareBtnFlag: false})
+                }
+                if (freeioe_version <= Response.data.data.version && skynet_version <= Response.data.data.skynet_version){
+                    this.setState({firmwareBtnFlag: true})
+                }
+                if (skynet_version && modbus_version && mqtt_version) {
+                    this.setState({
+                        loading: false
+                    })
+                }
+            }
+        })
     }
     render () {
         const { firmwareBtnFlag, MqttBtnFlag, ModbusBtnFlag, loading} = this.state

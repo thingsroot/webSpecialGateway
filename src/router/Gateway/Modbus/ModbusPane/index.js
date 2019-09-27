@@ -481,6 +481,14 @@ class ModbusPane extends Component {
     }
     AppConf = (status) => {
             if (this.props.pane.status === 'Not installed'  && status === 'install') {
+                this.state.devs.map(item=>{
+                    console.log(item)
+                    console.log(this.state.devs.filter(items=>{
+                        if (items.unit === item.unit && items.key !== items.key) {
+                            return items
+                        }
+                    }))
+                })
                 this.startChannel()
                 this.setState({
                     pressVisible: true,
