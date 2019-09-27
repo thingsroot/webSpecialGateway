@@ -227,7 +227,9 @@ class Modbus extends Component {
                     app_list = app_list.concat(UnsavedChannel)
                 }
                 app_list.push(addButton)
-                this.setData(app_list)
+                if (JSON.stringify(this.state.panes) !== JSON.stringify(app_list)) {
+                    this.setData(app_list)
+                }
             } else {
                 message.error(res.error)
             }
@@ -265,6 +267,7 @@ class Modbus extends Component {
                                             {
                                                 pane.status !== 'add button'
                                                 ? <ModbusPane
+                                                    title={pane.inst_name.replace('_', '通道')}
                                                     removenotinstall={this.removeNotInstall}
                                                     key={key}
                                                     titles={titles}

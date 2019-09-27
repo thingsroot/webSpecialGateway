@@ -280,14 +280,11 @@ class ModbusPane extends Component {
         }
         // this.checkOption()
     }
-    // UNSAFE_componentWillReceiveProps (nextProps) {
-    //     console.log(this.refs.Carousel)
-    //     if (nextProps.modalKey !== this.props.modalKey) {
-    //         console.log(nextProps, this)
-    //         this.refs.Carousel.goTo(nextProps.modalKey)
-    //     }
-
-    // }
+    UNSAFE_componentWillReceiveProps () {
+        if (!this.state.disabled) {
+            return false;
+        }
+    }
     componentWillUnmount () {
         this.t1 && clearInterval(this.t1)
     }
@@ -481,6 +478,14 @@ class ModbusPane extends Component {
     }
     AppConf = (status) => {
             if (this.props.pane.status === 'Not installed'  && status === 'install') {
+                this.state.devs.map(item=>{
+                    console.log(item)
+                    console.log(this.state.devs.filter(items=>{
+                        if (items.unit === item.unit && items.key !== items.key) {
+                            return items
+                        }
+                    }))
+                })
                 this.startChannel()
                 this.setState({
                     pressVisible: true,

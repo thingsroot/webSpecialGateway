@@ -98,12 +98,16 @@ class MqttForm extends React.Component {
         };
     }
     componentDidMount () {
+        this.setPage()
+    }
+    setPage = () =>{
         if (this.props.pane.conf) {
             const { conf } = this.props.pane;
             this.setState({
                 options: conf.options,
                 mqtt: conf.mqtt,
-                has_options_ex: conf.has_options_ex === 'yes'
+                has_options_ex: conf.has_options_ex === 'yes',
+                devs: conf.devs ? conf.devs : []
             })
             console.log(this.props)
             if (this.props.pane.status === 'Not installed') {
@@ -162,8 +166,8 @@ class MqttForm extends React.Component {
         reader.readAsText(file);
         reader.onload = (result) => {
             let targetNum = result.target.result;
-            targetNum = targetNum.replace(/[\n\r]/g, '');
-            targetNum = targetNum.replace(/[ ]/g, '');
+            // targetNum = targetNum.replace(/[\n\r]/g, '');
+            // targetNum = targetNum.replace(/[ ]/g, '');
             this.setSetting('mqtt', targetNum, 'client_key')
 
         }
@@ -528,14 +532,15 @@ class MqttForm extends React.Component {
         })
     }
     funDownload = () => {
+        const sn = this.props.match.params.sn;
         const zip = new Zip();
         const {tls_cert, client_cert, client_key} = this.props.pane.conf.mqtt;
-        tls_cert && zip.file('CA证书.txt', tls_cert);
-        client_cert && zip.file('Client证书.txt', client_cert);
-        client_key && zip.file('Client秘钥.txt', client_key);
+        tls_cert && zip.file('CA.crt', tls_cert);
+        client_cert && zip.file('Client.crt', client_cert);
+        client_key && zip.file('Client.key', client_key);
         zip.generateAsync({type: 'blob'})
             .then(function (content) {
-                saveAs(content, '证书.zip');
+                saveAs(content, sn + '.zip');
 });
     }
     render () {
@@ -571,7 +576,11 @@ class MqttForm extends React.Component {
                                         type="danger"
                                         onClick={this.showConfirm}
                                     >
-                                        删除
+                                        {
+                                            this.props.pane.status === 'Not installed'
+                                                ? '取消添加'
+                                                : '删除'
+                                        }
                                     </Button>
                                 {/* </Popconfirm> */}
                             {
@@ -581,7 +590,9 @@ class MqttForm extends React.Component {
                                         marginLeft: '20px'
                                     }}
                                     onClick={()=>{
-                                        this.setState({disabled: true})
+                                        this.setState({disabled: true}, ()=>{
+                                            this.setPage()
+                                        })
                                     }}
                                   >
                                         取消编辑
@@ -878,7 +889,11 @@ class MqttForm extends React.Component {
                                     type="primary"
                                     onClick={this.toggleDisable}
                                 >
-                                    {!this.state.disabled ? '保存' : '编辑'}
+                                    {
+                                        this.props.pane.status !== 'Not installed'
+                                        ? !this.state.disabled ? '保存' : '编辑'
+                                        : '安装'
+                                    }
                                 </Button>
                                 <Popconfirm
                                     title="确定要删除应用吗?"
@@ -891,23 +906,30 @@ class MqttForm extends React.Component {
                                         style={{marginLeft: '10pxs'}}
                                         type="danger"
                                     >
-                                        删除
+                                        {
+                                            this.props.pane.status === 'Not installed'
+                                                ? '取消添加'
+                                                : '删除'
+                                        }
                                     </Button>
                                 </Popconfirm>
-                            {
-                                !disabled
-                                ? <Button
-                                    style={{
-                                        marginLeft: '20px'
-                                    }}
-                                    onClick={()=>{
-                                        this.setState({disabled: true})
-                                    }}
-                                  >
-                                        取消编辑
-                                    </Button>
-                                : ''
-                            }
+                                {
+                                    !disabled && this.props.pane.status !== 'Not installed'
+                                    ? <Button
+                                        style={{
+                                            marginLeft: '20px'
+                                        }}
+                                        onClick={()=>{
+                                            this.setState({disabled: true}, ()=>{
+                                                this.setPage()
+                                            })
+                                        }}
+                                        disabled={this.state.checkIp}
+                                      >
+                                            取消编辑
+                                        </Button>
+                                    : ''
+                                }
                             </div>
                     </Form>
                     <Modal

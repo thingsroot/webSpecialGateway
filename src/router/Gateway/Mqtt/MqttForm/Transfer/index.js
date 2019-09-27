@@ -12,6 +12,16 @@ class App extends React.Component {
     data: []
   };
   componentDidMount () {
+    console.log(this.props)
+    this.setPage()
+  }
+  UNSAFE_componentWillReceiveProps (nextProps){
+    if (nextProps.disabled !== this.props.disabled) {
+        this.MapSetDevList(this.state.data, nextProps.disabled)
+        this.setPage()
+    }
+  }
+  setPage = () => {
     const { devs } = this.props;
     http.get('/api/gateways_dev_list?gateway=' + this.props.match.params.sn).then(res=>{
       if (res.ok) {
@@ -29,11 +39,6 @@ class App extends React.Component {
       })
     })
   }
-  UNSAFE_componentWillReceiveProps (nextProps){
-    if (nextProps.disabled !== this.props.disabled) {
-        this.MapSetDevList(this.state.data, nextProps.disabled)
-    }
-  }
   MapSetDevList = (data, disabled) =>{
     const dev_list = [];
     if (data && data.length > 0) {
@@ -42,7 +47,7 @@ class App extends React.Component {
             if (item.meta.app_inst.toLowerCase().indexOf('modbus') !== -1) {
                 dev_list.push({
                   key: item.meta.sn,
-                  title: `设备名称:${item.meta.inst}        设备序列号:${item.meta.sn}`,
+                  title: `${item.meta.inst} [${item.meta.sn}]`,
                   description: item.meta.description,
                   disabled: disabled
                 })

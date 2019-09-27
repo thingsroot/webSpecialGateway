@@ -186,20 +186,7 @@ class NetworkConfig extends Component {
     }
     getIsNetInfo = ()=>{
         let isNetInfo = false;
-        const { apps } = this.props.store.gatewayInfo;
         return new Promise((resolve, reject) =>{
-            if (apps && apps.length > 0 && this.state.sn === this.props.store.gatewayInfo.sn) {
-                apps.map(item=>{
-                    if (item.name === 'APP00000115') {
-                        isNetInfo = true;
-                        this.getWanInfo(item.inst_name)
-                        if (item.status !== 'running') {
-                            this.startnetinfo(item.inst_name)
-                        }
-                    }
-                })
-                resolve(isNetInfo)
-            } else {
                 http.get('/api/gateways_app_list?gateway=' + this.state.sn).then(res=>{
                     if (res.ok && res.data.length > 0) {
                         if (res.data && res.data.length > 0){
@@ -214,7 +201,6 @@ class NetworkConfig extends Component {
                             })
                             resolve(isNetInfo)
                         } else {
-                            console.log('null')
                             resolve(isNetInfo)
                         }
                     } else {
@@ -223,7 +209,6 @@ class NetworkConfig extends Component {
                 }).catch(()=>{
                     reject(isNetInfo)
                 })
-            }
         })
     }
     showModal = (ip) => {
