@@ -8,27 +8,15 @@ class App extends React.Component {
     targetKeys: [],
     selectedKeys: [],
     disabled: false,
-    mockData: []
+    mockData: [],
+    data: []
   };
   componentDidMount () {
     const { devs } = this.props;
     http.get('/api/gateways_dev_list?gateway=' + this.props.match.params.sn).then(res=>{
       if (res.ok) {
-          const dev_list = [];
-          if (res.data && res.data.length > 0) {
-              res.data.map(item=>{
-                  if (item.meta.app_inst.toLowerCase().indexOf('modbus') !== -1) {
-                      dev_list.push({
-                        key: item.meta.sn,
-                        title: item.meta.sn,
-                        description: item.meta.description
-                      })
-                  }
-              })
-          }
-          this.setState({
-            mockData: dev_list
-          })
+          this.MapSetDevList(res.data, this.props.disabled)
+          this.setState({data: res.data})
       }
       const arr = [];
       devs && devs.length > 0 && devs.map(item=>{
@@ -39,6 +27,30 @@ class App extends React.Component {
           sign: false,
           targetKeys: arr
       })
+    })
+  }
+  UNSAFE_componentWillReceiveProps (nextProps){
+    if (nextProps.disabled !== this.props.disabled) {
+        this.MapSetDevList(this.state.data, nextProps.disabled)
+    }
+  }
+  MapSetDevList = (data, disabled) =>{
+    const dev_list = [];
+    if (data && data.length > 0) {
+        data.map(item=>{
+          console.log(item)
+            if (item.meta.app_inst.toLowerCase().indexOf('modbus') !== -1) {
+                dev_list.push({
+                  key: item.meta.sn,
+                  title: `设备名称:${item.meta.inst}        设备序列号:${item.meta.sn}`,
+                  description: item.meta.description,
+                  disabled: disabled
+                })
+            }
+        })
+    }
+    this.setState({
+      mockData: dev_list
     })
   }
   handleChange = (nextTargetKeys, direction, moveKeys) => {
@@ -77,7 +89,7 @@ class App extends React.Component {
             onSelectChange={this.handleSelectChange}
             // onScroll={this.handleScroll}
             render={item => item.title}
-            listStyle={{width: '300px'}}
+            listStyle={{width: '500px', height: '300px'}}
             disabled={this.props.disabled}
             locale={{ itemsUnit: '项'}}
         />

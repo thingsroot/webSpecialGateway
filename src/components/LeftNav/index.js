@@ -125,9 +125,12 @@ class LeftNav extends Component {
                                     {
                                         v.href.toLowerCase() === '/devices' ? <div className="gatecount count">{gatewayInfo.devices_count}</div> : ''
                                     }
-                                    {/* {
+                                    {
                                         v.href.toLowerCase() === '/modbus' ? <div className="appcount count">{gatewayInfo.apps_count}</div> : ''
-                                    } */}
+                                    }
+                                    {
+                                        v.href.toLowerCase() === '/mqtt' ? <div className="mqttcount count">{gatewayInfo.mqtt_count}</div> : ''
+                                    }
                                     <Icon type={v.icon}/>&nbsp;&nbsp;{v.text}</li></Link>
                                 )
                             })
