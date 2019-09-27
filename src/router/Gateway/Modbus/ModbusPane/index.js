@@ -280,14 +280,11 @@ class ModbusPane extends Component {
         }
         // this.checkOption()
     }
-    // UNSAFE_componentWillReceiveProps (nextProps) {
-    //     console.log(this.refs.Carousel)
-    //     if (nextProps.modalKey !== this.props.modalKey) {
-    //         console.log(nextProps, this)
-    //         this.refs.Carousel.goTo(nextProps.modalKey)
-    //     }
-
-    // }
+    UNSAFE_componentWillReceiveProps () {
+        if (!this.state.disabled) {
+            return false;
+        }
+    }
     componentWillUnmount () {
         this.t1 && clearInterval(this.t1)
     }
