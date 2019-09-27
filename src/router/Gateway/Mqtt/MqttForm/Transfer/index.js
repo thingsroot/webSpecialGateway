@@ -20,6 +20,10 @@ class App extends React.Component {
         this.MapSetDevList(this.state.data, nextProps.disabled)
         this.setPage()
     }
+    if (this.props.status !== nextProps.status) {
+      this.MapSetDevList(this.state.data, nextProps.disabled)
+      this.setPage()
+    }
   }
   setPage = () => {
     const { devs } = this.props;

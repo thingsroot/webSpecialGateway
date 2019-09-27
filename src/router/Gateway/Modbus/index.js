@@ -255,17 +255,32 @@ class Modbus extends Component {
                                   >
                             {
                                 this.state.panes.map((pane, key) => {
+                                    console.log(pane)
                                     const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
                                     return (
                                         <TabPane
-                                            tab={title}
+                                            tab={
+                                                pane.status === 'add button'
+                                                ? title
+                                                : pane.status === 'running'
+                                                    ? <span>
+                                                        <Icon
+                                                            type="play-circle"
+                                                            style={{color: '#269f42'}}
+                                                        />{title}</span>
+                                                    : <span>
+                                                        <Icon
+                                                            style={{color: '#d73a4a'}}
+                                                            type="pause-circle"
+                                                        />{title}</span>
+                                            }
                                             key={key}
                                             closable={false}
                                         >
                                             {
                                                 pane.status !== 'add button'
                                                 ? <ModbusPane
-                                                    title={pane.inst_name.replace('_', '通道')}
+                                                    title={pane.inst_name}
                                                     removenotinstall={this.removeNotInstall}
                                                     key={key}
                                                     pane={pane}

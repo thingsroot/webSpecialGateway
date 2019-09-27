@@ -32,6 +32,7 @@ class NetworkConfig extends Component {
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
             this.setState({
                 loading: true,
+                data: [],
                 sn: nextProps.match.params.sn
             }, ()=>{
                 this.getInfo()
@@ -188,7 +189,7 @@ class NetworkConfig extends Component {
         let isNetInfo = false;
         return new Promise((resolve, reject) =>{
                 http.get('/api/gateways_app_list?gateway=' + this.state.sn).then(res=>{
-                    if (res.ok && res.data.length > 0) {
+                    if (res.ok && res.data.length !== 0) {
                         if (res.data && res.data.length > 0){
                             res.data.map(item=>{
                                 if (item.name === 'APP00000115') {
@@ -256,7 +257,7 @@ class NetworkConfig extends Component {
         return (
             <div>
                 <Card
-                    loading={loading}
+                    loading={loading || loading.length === 0}
                 >
                     <h2>| 网络接口</h2>
                 {
@@ -350,7 +351,7 @@ class NetworkConfig extends Component {
                 }
                 </Card>
                 <div className="DNSinfo">
-                    <Card loading={loading}>
+                    <Card loading={loading || data.length === 0}>
                         <h2>| 默认网关&DNS</h2>
                         <div style={{lineHeight: '30px', marginTop: '20px', marginLeft: '30px'}}>
                             <p>默认网关： {this.state.default_gw}</p>

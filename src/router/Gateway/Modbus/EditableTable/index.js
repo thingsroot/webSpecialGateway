@@ -315,7 +315,7 @@ class EditableTable extends React.Component {
                 template: this.props.templateList[0].name,
                 number: `${title}_${incrementalAddress}`,
                 address: address ? incrementalAddress : dataSource.length + 1,
-                device: `${title}.device${incrementalAddress}`
+                device: `${title}_device${incrementalAddress}`
             };
             this.setState({
                 dataSource: [...dataSource, newData],
