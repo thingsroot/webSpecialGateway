@@ -124,9 +124,6 @@ class Modbus extends Component {
             return false;
         }
         this.setState({ activeKey });
-<<<<<<< HEAD
-        console.log(activeKey)
-=======
         if (this.state.panes[activeKey].conf.serial_opt) {
             console.log(this.state.panes[activeKey].conf.serial_opt.port === '/dev/ttyS1')
             if (this.state.panes[activeKey].conf.serial_opt.port === '/dev/ttyS1') {
@@ -136,21 +133,14 @@ class Modbus extends Component {
             }
             console.log(this.state.currentPagePort)
         }
->>>>>>> f8e943e3c9994415467e22f891403cd3c6133839
     };
     onEdit = (targetKey, action) => {
         this[action](targetKey);
     };
     add = () => {
         let inst = undefined;
-<<<<<<< HEAD
         let applist = this.state.panes;
         if (applist && applist.length > 0 && applist.length < 9) {
-=======
-        const applist = this.state.panes;
-        console.log(applist, applist.length)
-        if (applist && applist.length > 0 && applist.length < 8) {
->>>>>>> f8e943e3c9994415467e22f891403cd3c6133839
             applist.map((item, key) =>{
                 if (item.inst_name.indexOf(key + 1) === -1) {
                     if (!inst && applist.filter(item=>item.inst_name === 'modbus_' + (key + 1)).length === 0){
@@ -270,7 +260,6 @@ class Modbus extends Component {
                                             key={key}
                                             closable={false}
                                         >
-<<<<<<< HEAD
                                             {
                                                 pane.status !== 'add button'
                                                 ? <ModbusPane
@@ -283,18 +272,6 @@ class Modbus extends Component {
                                                   />
                                             : ''
                                             }
-=======
-                                            <ModbusPane
-                                                title={title}
-                                                removenotinstall={this.removeNotInstall}
-                                                key={key}
-                                                pane={pane}
-                                                panes={this.state.panes}
-                                                fetch={this.fetch}
-                                                setActiveKey={this.setActiveKey}
-                                                currentPagePort={this.state.currentPagePort}
-                                            />
->>>>>>> f8e943e3c9994415467e22f891403cd3c6133839
                                         </TabPane>
                                     )
                                 })
