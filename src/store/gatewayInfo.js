@@ -126,7 +126,8 @@ class GatewayInfo {
     }
     @action setApps (value) {
         this.apps = value
-        this.apps_count = Object.keys(value).length;
+        this.apps_count = value.length > 0 ? value.filter(item=>item.name === 'APP00000025' && item.inst_name.indexOf('modbus_') !== -1).length : 0;
+        this.mqtt_count = value.length > 0 ? value.filter(item=>item.name === 'APP00000259' && item.inst_name.indexOf('mqtt_') !== -1).length : 0;
         let vserial = false;
         let vnet = false;
         value && value.length > 0 && value.map(item=>{

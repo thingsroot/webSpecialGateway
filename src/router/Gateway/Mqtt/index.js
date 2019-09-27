@@ -208,8 +208,33 @@ class Mqtt extends Component {
     setActiveKey = (key)=>{
         this.setState({activeKey: key})
     }
-    fetch = (sn) => {
+    fetch = (sn, status) => {
         const vsn = sn ? sn : this.props.match.params.sn;
+        const addButton = {
+            inst_name: '+',
+            status: 'add button',
+            conf: {
+                has_options_ex: 'no',
+                mqtt: {
+                    enable_tls: false
+                },
+                options: {
+                    data_upload_dpp: 1024,
+                    period: 60
+                },
+                dev: [],
+                options_ex: {
+                    diable_command: false,
+                    diable_data: false,
+                    disable_compress: false,
+                    disable_data_em: false,
+                    disable_devices: false,
+                    disable_output: false,
+                    upload_event: 0
+
+                }
+            }
+        }
         http.get('/api/applications_read?app=APP00000259').then(res=>{
             if (res.ok) {
                 this.setState({app_info: res.data})
@@ -217,7 +242,7 @@ class Mqtt extends Component {
         })
         http.get('/api/gateways_app_list?gateway=' + vsn + '&beta=0').then(res=>{
             if (res.ok){
-                const app_list = [];
+                let app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
                         if (item.inst_name.toLowerCase().indexOf('mqtt_') !== -1) {
@@ -225,6 +250,14 @@ class Mqtt extends Component {
                         }
                     })
                 }
+                const UnsavedChannel = this.state.panes.filter(item=>item.status === 'Not installed')
+                app_list.sort((a, b)=>{
+                    return a.inst_name.slice(-1) - b.inst_name.slice(-1)
+                })
+                if (status !== 'success') {
+                    app_list = app_list.concat(UnsavedChannel)
+                }
+                app_list.push(addButton)
                 this.setState({app_list, loading: false})
             } else {
                 message.error(res.error)
@@ -471,6 +504,19 @@ class Mqtt extends Component {
         }
     }
     onChange = activeKey => {
+        const {app_list} = this.state;
+        console.log(activeKey)
+        if (app_list.length >= 3 && activeKey === '2') {
+            return false;
+        }
+        if (app_list.filter(item=> item.status === 'Not installed').length > 0 && activeKey === app_list.length - 1 + '') {
+            message.info('已有未安装通道，请在删除或安装通道后再执行操作！')
+            return false;
+        }
+        if (activeKey === app_list.length - 1 + '') {
+            this.add()
+            return false;
+        }
         this.setState({activeKey});
     };
     onEdit = (targetKey, action) => {
@@ -513,10 +559,11 @@ class Mqtt extends Component {
             }
         }
         const { app_list } = this.state;
-        app_list.push(data)
+        // app_list.push(data)
+        app_list.splice(app_list.length - 1, 0, data)
         this.setState({
             app_list,
-            activeKey: app_list.length - 1 + ''
+            activeKey: app_list.length - 2 + ''
         })
     };
 
@@ -623,9 +670,9 @@ class Mqtt extends Component {
                 </div>
                     {
                     !this.state.loading
-                    ? this.state.app_list && this.state.app_list.length > 0
+                    ? this.state.app_list && this.state.app_list.length > 0 && this.state.app_list.length !== 1 && this.state.app_list[0].status !== 'add button'
                     ? <Tabs
-                        hideAdd={this.state.app_list.length >= 2}
+                        hideAdd
                         onChange={this.onChange}
                         activeKey={this.state.activeKey}
                         type="editable-card"
@@ -638,13 +685,17 @@ class Mqtt extends Component {
                                 key={key}
                                 closable={false}
                             >
-                                <MqttPane
-                                    removenotinstall={this.removeNotInstall}
-                                    pane={pane}
-                                    fetch={this.fetch}
-                                    setActiveKey={this.setActiveKey}
-                                    app_info={this.state.app_info}
-                                />
+                                {
+                                    pane.status !== 'add button'
+                                    ? <MqttPane
+                                        removenotinstall={this.removeNotInstall}
+                                        pane={pane}
+                                        fetch={this.fetch}
+                                        setActiveKey={this.setActiveKey}
+                                        app_info={this.state.app_info}
+                                      />
+                                    : ''
+                                }
                             </TabPane>
                         ))
                     }

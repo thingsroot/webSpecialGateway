@@ -324,7 +324,7 @@ class EditableTable extends React.Component {
                 this.props.getdevs(this.state.dataSource)
             });
         } else {
-            message.info('请先选择模板，再添加设备列表')
+            message.info('请先选择模板，再添加设备！')
             return false
         }
     };
@@ -396,7 +396,7 @@ class EditableTable extends React.Component {
                     disabled={this.props.disable}
                     type="primary"
                 >
-                    添加设备列表
+                    添加设备
                 </Button>
             </div>
         );

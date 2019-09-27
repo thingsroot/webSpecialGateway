@@ -301,6 +301,15 @@ class DevicesList extends Component {
                         }
                         return className;
                     }}
+                    onRow={()=>{
+                        return {
+                            onClick: ()=>{
+                                if (!this.state.uploadOneShort && !gatewayInfo.data.data_upload) {
+                                    message.info('请开启临时数据上送！')
+                                }
+                            }
+                        }
+                    }}
                     expandedRowRender={this.state.uploadOneShort || gatewayInfo.data.data_upload ? Collapses : null}
                     expandRowByClick
                     pagination={false}

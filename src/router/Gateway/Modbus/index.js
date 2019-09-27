@@ -55,16 +55,28 @@ class Modbus extends Component {
             this.fetch()
             this.refreshTemplateList()
         })
+        this.t1 = setInterval(() => {
+            this.fetch()
+        }, 5000);
     }
     UNSAFE_componentWillReceiveProps (nextProps){
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
+            clearInterval(this.t1)
             this.setState({
                 sn: nextProps.match.params.sn,
-                loading: true
+                loading: true,
+                panes: [],
+                activeKey: '0'
             }, ()=>{
                 this.fetch()
+                this.t1 = setInterval(() => {
+                    this.fetch()
+                }, 5000);
             })
         }
+    }
+    componentWillUnmount () {
+        clearInterval(this.t1)
     }
     refreshTemplateList = () => {
         this.setState({appTemplateList: []})
@@ -97,19 +109,32 @@ class Modbus extends Component {
             });
     }
     onChange = activeKey => {
+        const {panes} = this.state;
         console.log(activeKey)
+        if (panes.length >= 9 && activeKey === '8') {
+            return false;
+        }
+        if (panes.filter(item=> item.status === 'Not installed').length > 0 && activeKey === panes.length - 1 + '') {
+            message.info('已有未安装通道，请在删除或安装通道后再执行操作！')
+            return false;
+        }
+        if (activeKey === panes.length - 1 + '') {
+            this.add()
+            return false;
+        }
         this.setState({ activeKey });
+        console.log(activeKey)
     };
     onEdit = (targetKey, action) => {
         this[action](targetKey);
     };
     add = () => {
         let inst = undefined;
-        const applist = this.state.panes;
-        if (applist && applist.length > 0 && applist.length < 8) {
+        let applist = this.state.panes;
+        if (applist && applist.length > 0 && applist.length < 9) {
             applist.map((item, key) =>{
                 if (item.inst_name.indexOf(key + 1) === -1) {
-                    if (!inst){
+                    if (!inst && applist.filter(item=>item.inst_name === 'modbus_' + (key + 1)).length === 0){
                         inst = 'modbus_' + (key + 1)
                     }
                 }
@@ -142,10 +167,10 @@ class Modbus extends Component {
             },
             version: this.state.app_info.versionLatest
         }
-        applist.push(data)
+        applist.splice(applist.length - 1, 0, data)
         this.setState({
             panes: applist,
-            activeKey: applist.length - 1 + ''
+            activeKey: applist.length - 2 + ''
         })
     }
     setActiveKey = (key)=>{
@@ -164,7 +189,12 @@ class Modbus extends Component {
             activeKey: '0'
         })
     }
-    fetch = () => {
+    fetch = (status) => {
+        const addButton = {
+            inst_name: '+',
+            status: 'add button',
+            conf: {}
+        }
         http.get('/api/applications_read?app=APP00000025').then(res=>{
             if (res.ok) {
                 this.setState({app_info: res.data})
@@ -172,7 +202,7 @@ class Modbus extends Component {
         })
         http.get('/api/gateways_app_list?gateway=' + this.state.sn + '&beta=0').then(res=>{
             if (res.ok){
-                const app_list = [];
+                let app_list = [];
                 if (res.data && res.data.length > 0) {
                     res.data.map(item=>{
                         if (item.inst_name.toLowerCase().indexOf('modbus_') !== -1) {
@@ -180,9 +210,14 @@ class Modbus extends Component {
                         }
                     })
                 }
+                const UnsavedChannel = this.state.panes.filter(item=>item.status === 'Not installed')
                 app_list.sort((a, b)=>{
                     return a.inst_name.slice(-1) - b.inst_name.slice(-1)
                 })
+                if (status !== 'success') {
+                    app_list = app_list.concat(UnsavedChannel)
+                }
+                app_list.push(addButton)
                 this.setData(app_list)
             } else {
                 message.error(res.error)
@@ -199,13 +234,13 @@ class Modbus extends Component {
             <div>
                     {
                     !this.state.loading
-                        ? this.state.panes && this.state.panes.length > 0
+                        ? this.state.panes && this.state.panes.length > 0 && this.state.panes.length !== 1 && this.state.panes[0].status !== 'add button'
                                 ? <Tabs
                                     onChange={this.onChange}
                                     activeKey={this.state.activeKey}
                                     type="editable-card"
                                     onEdit={this.onEdit}
-                                    hideAdd={this.state.panes.length >= 8}
+                                    hideAdd
                                   >
                             {
                                 this.state.panes.map((pane, key) => {
@@ -216,14 +251,18 @@ class Modbus extends Component {
                                             key={key}
                                             closable={false}
                                         >
-                                            <ModbusPane
-                                                removenotinstall={this.removeNotInstall}
-                                                key={key}
-                                                pane={pane}
-                                                panes={this.state.panes}
-                                                fetch={this.fetch}
-                                                setActiveKey={this.setActiveKey}
-                                            />
+                                            {
+                                                pane.status !== 'add button'
+                                                ? <ModbusPane
+                                                    removenotinstall={this.removeNotInstall}
+                                                    key={key}
+                                                    pane={pane}
+                                                    panes={this.state.panes}
+                                                    fetch={this.fetch}
+                                                    setActiveKey={this.setActiveKey}
+                                                  />
+                                            : ''
+                                            }
                                         </TabPane>
                                     )
                                 })

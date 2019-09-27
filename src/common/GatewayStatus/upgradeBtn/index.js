@@ -4,9 +4,9 @@ import http from '../../../utils/Server';
 import { inject, observer} from 'mobx-react';
 import { withRouter } from 'react-router-dom';
 const style = { backgroundColor: '#2db7f5', color: '#fff', border: '1px solid #2db7f5' }
-  @inject('store')
-  @observer
-  @withRouter
+    @withRouter
+    @inject('store')
+    @observer
 class Btn extends Component {
     state = {
         freeioe_version: null,
@@ -19,7 +19,8 @@ class Btn extends Component {
         ModbusBtnFlag: true,
         firmwareArr: [],
         mqttArr: [],
-        modbusArr: []
+        modbusArr: [],
+        loading: true
     }
     componentDidMount () {
         this.getVersion()
@@ -29,7 +30,14 @@ class Btn extends Component {
     }
     UNSAFE_componentWillReceiveProps (nextProps){
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
-            this.getVersion()
+            this.setState({
+                loading: true,
+                mqtt_version: null,
+                skynet_version: null,
+                modbus_version: null
+            }, ()=>{
+                this.getVersion()
+            })
         }
     }
     menu = () =>{
@@ -210,16 +218,31 @@ class Btn extends Component {
         if (freeioe_version === gatewayInfo.data.version && skynet_version === gatewayInfo.data.skynet_version){
             this.setState({firmwareBtnFlag: true})
         }
+        if (skynet_version && modbus_version && mqtt_version) {
+            this.setState({
+                loading: false
+            })
+        }
 
     }
     render () {
-        const { firmwareBtnFlag, MqttBtnFlag, ModbusBtnFlag} = this.state
+        const { firmwareBtnFlag, MqttBtnFlag, ModbusBtnFlag, loading} = this.state
         return (
             <div>
-                <Dropdown
-                    overlay={this.menu}
-                    disabled={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag}
-                >
+                {
+                    loading
+                    ? <Button
+                        style={{
+                            width: 200
+                        }}
+                        loading
+                      >
+                          版本信息获取中...
+                      </Button>
+                    : <Dropdown
+                        overlay={this.menu}
+                        disabled={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag}
+                      >
                         <Button
                             // type="primary"
                             className="ant-dropdown-link"
@@ -232,6 +255,7 @@ class Btn extends Component {
                             } <Icon type="down" />
                         </Button>
                     </Dropdown>
+                }
             </div>
         );
     }
