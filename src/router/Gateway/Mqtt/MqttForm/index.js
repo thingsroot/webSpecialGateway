@@ -24,6 +24,7 @@ import Zip from 'jszip';
 import * as saveAs from 'jszip/vendor/FileSaver';
 import './style.scss';
 const { Option } = Select;
+const { confirm } = Modal;
 @withRouter
 @inject('store')
 @observer
@@ -512,6 +513,20 @@ class MqttForm extends React.Component {
             }
         })
     }
+    showTitle = () => this.props.pane.status === 'Not installed' ? '确定要取消安装MQTT通道吗？' : '确定要删除应用MQTT吗?'
+    showConfirm =() => {
+        confirm({
+            title: this.props.pane.status === 'Not installed' ? '确定要取消安装MQTT通道吗？' : '确定要删除应用MQTT吗?',
+            content: '',
+            okText: '确定',
+            cancelText: '取消',
+            onOk: ()=> {
+                this.removeApp()
+            },
+            onCancel () {
+            }
+        })
+    }
     funDownload = () => {
         const zip = new Zip();
         const {tls_cert, client_cert, client_key} = this.props.pane.conf.mqtt;
@@ -544,20 +559,21 @@ class MqttForm extends React.Component {
                                         : '安装'
                                     }
                                 </Button>
-                                <Popconfirm
+                                {/* <Popconfirm
                                     title={this.props.pane.status === 'Not installed' ? '确定要取消安装MQTT通道吗？' : '确定要删除应用MQTT吗?'}
                                     onConfirm={this.removeApp}
                                     // onCancel={cancel}
                                     okText="删除"
                                     cancelText="取消"
-                                >
+                                > */}
                                     <Button
                                         style={{marginLeft: '10pxs'}}
                                         type="danger"
+                                        onClick={this.showConfirm}
                                     >
                                         删除
                                     </Button>
-                                </Popconfirm>
+                                {/* </Popconfirm> */}
                             {
                                 !disabled && this.props.pane.status !== 'Not installed'
                                 ? <Button
@@ -597,7 +613,6 @@ class MqttForm extends React.Component {
                                     min={1}
                                     max={65535}
                                     autoComplete="off"
-                                    defaultValue={1883}
                                     disabled={disabled}
                                     value={mqtt && mqtt.port ? mqtt.port : ''}
                                     onChange={(value) => {
@@ -923,7 +938,7 @@ class MqttForm extends React.Component {
                                     : <div>
                                         <Result
                                             status="warning"
-                                            title="新增MQTT通道失败！"
+                                            title={this.state.action === 'install' ? '新增MQTT通道失败' : '卸载MQTT通道失败'}
                                             extra={
                                             <Button
                                                 key="buy"

@@ -720,6 +720,8 @@ class ModbusPane extends Component {
         confirm({
             title: this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?',
             content: '',
+            okText: '确定',
+            cancelText: '取消',
             onOk: ()=> {
                 this.removeModbus()
             },
@@ -777,7 +779,7 @@ class ModbusPane extends Component {
                                     this.setState({disabled: true})
                                 }}
                                 disabled={this.state.checkIp}
-                                >
+                              >
                                     取消编辑
                                 </Button>
                             : ''
@@ -1081,7 +1083,7 @@ class ModbusPane extends Component {
                                     this.setState({disabled: true})
                                 }}
                                 disabled={this.state.checkIp}
-                                >
+                              >
                                     取消编辑
                                 </Button>
                             : ''
