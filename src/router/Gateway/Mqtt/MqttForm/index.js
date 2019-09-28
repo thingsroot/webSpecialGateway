@@ -552,6 +552,7 @@ class MqttForm extends React.Component {
                 this.props.store.action.pushAction(res.data, title, '', data, 10000,  (action)=> {
                     this.props.fetch()
                     this.props.setActiveKey('0')
+                    this.props.remove(this.props.pane.inst_name)
                     if (action) {
                         this.setState({
                             disabled: true,

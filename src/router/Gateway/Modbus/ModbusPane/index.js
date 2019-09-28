@@ -644,6 +644,7 @@ class ModbusPane extends Component {
                     })
                     this.props.fetch()
                     this.props.setActiveKey('0')
+                    this.props.remove(this.props.pane.inst_name)
                 })
             } else {
                 this.setState({

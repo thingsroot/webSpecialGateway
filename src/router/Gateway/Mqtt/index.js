@@ -156,6 +156,12 @@ class Mqtt extends Component {
             this.setState({upgrading: false})
         })
     }
+    removeList = (inst) =>{
+        const arr = this.state.panes.filter(item=> item.inst_name !== inst)
+        this.setState({
+            panes: arr
+        })
+    }
     showConfirm = () => {
         const $this = this;
         confirm({
@@ -254,9 +260,12 @@ class Mqtt extends Component {
                 app_list.sort((a, b)=>{
                     return a.inst_name.slice(-1) - b.inst_name.slice(-1)
                 })
-                if (status !== 'success') {
+                if (UnsavedChannel.length > 0 && app_list.filter(item => item.inst_name === UnsavedChannel[0].inst_name).length === 0 && status !== 'success') {
                     app_list = app_list.concat(UnsavedChannel)
                 }
+                // if (status !== 'success') {
+                //     app_list = app_list.concat(UnsavedChannel)
+                // }
                 app_list.push(addButton)
                 this.setState({app_list, loading: false})
             } else {
@@ -707,6 +716,7 @@ class Mqtt extends Component {
                                         ? <MqttPane
                                             removenotinstall={this.removeNotInstall}
                                             pane={pane}
+                                            remove={this.removeList}
                                             fetch={this.fetch}
                                             setActiveKey={this.setActiveKey}
                                             app_info={this.state.app_info}
