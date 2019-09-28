@@ -105,6 +105,7 @@ class ModbusPane extends Component {
             result: true,
             ShowResult: false,
             pressVisible: false,
+            switchLoading: false,
             tpls: [],
             devs: [],
             loop_gap: 1000,
@@ -553,6 +554,25 @@ class ModbusPane extends Component {
                 return false;
             }
         }
+        let regFlag = false;
+        const reg = /^[0-9a-zA-Z_]{1,}$/;
+        if (!this.state.disabled) {
+            this.state.devs.map(item=>{
+                if (!reg.test(item.sn)) {
+                    message.info('设备名称与设备序列号只能输入字母、数字、下划线，请修改后重试！')
+                    regFlag = true;
+                    return false;
+                }
+                if (!reg.test(item.name)) {
+                    message.info('设备名称与设备序列号只能输入字母、数字、下划线，请修改后重试！')
+                    regFlag = true;
+                    return false;
+                }
+            })
+        }
+        if (regFlag === true){
+                return false;
+            }
         // this.state.tpls.map(data=>{
         //     if (this.state.tpls.filter())
         // })
@@ -732,6 +752,51 @@ class ModbusPane extends Component {
             }
         })
     }
+    switch = () =>{
+        this.setState({
+            switchLoading: true
+        })
+        const { status } = this.props.pane;
+        let action = '';
+        const type = status === 'running' ? 'stop' : 'start'
+        if (status === 'running') {
+            action = '关闭'
+        } else {
+            action = '启动'
+        }
+        const data = status !== 'running'
+        ? {
+            gateway: this.props.match.params.sn,
+            inst: this.props.pane.inst_name,
+            id: `gateways/${status}/${this.props.match.params.sn}/${new Date() * 1}`
+        } : {
+            gateway: this.props.match.params.sn,
+            inst: this.props.pane.inst_name,
+            reason: 'reason',
+            id: `gateways/${status}/${this.props.match.params.sn}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_applications_' + type, data).then(res=>{
+            if (res.ok) {
+                message.success(action + data.inst + '请求发送成功')
+                this.props.store.action.pushAction(res.data, action + '应用', '', data, 10000,  ()=> {
+                    this.setState({
+                        switchLoading: false
+                    })
+                })
+            } else {
+                message.error(action +  data.inst + '请求发送失败。 错误:' + res.error)
+                this.setState({
+                    switchLoading: false
+                })
+            }
+        }).catch(req=>{
+            req;
+            message.error('发送请求失败！')
+            this.setState({
+                switchLoading: true
+            })
+        })
+    }
     render (){
         const conf = this.props.pane.conf
         const  { loop_gap, apdu_type, channel_type, serial_opt, disabled, socket_opt, tpls, devs, dev_sn_prefix, mqtt, isShow, loading} = this.state;
@@ -751,14 +816,6 @@ class ModbusPane extends Component {
                                 : !this.state.disabled ? '保存' : '编辑'
                             }
                         </Button>
-                        {/*<Popconfirm*/}
-                        {/* title={this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?'}
-*/}
-                        {/*    onConfirm={this.removeModbus}*/}
-                        {/*    onCancel={cancel}*/}
-                        {/*    okText="删除"*/}
-                        {/*    cancelText="取消"*/}
-                        {/*>*/}
                             <Button
                                 style={{marginLeft: '10pxs'}}
                                 type="danger"
@@ -771,7 +828,6 @@ class ModbusPane extends Component {
                                     : '删除'
                                 }
                             </Button>
-                        {/*</Popconfirm>*/}
                         {
                             !disabled && this.props.pane.status !== 'Not installed'
                             ? <Button
@@ -785,6 +841,27 @@ class ModbusPane extends Component {
                               >
                                     取消编辑
                                 </Button>
+                            : ''
+                        }
+                        {
+                            this.props.pane.status !== 'Not installed' && this.props.pane.status !== 'add button'
+                            ? <div className="SwitchButton">
+                                <Button
+                                    onClick={this.switch}
+                                    loading={this.state.switchLoading}
+                                    type={
+                                        this.props.pane.status !== 'running'
+                                        ? 'primary'
+                                        : 'danger'
+                                    }
+                                >
+                                    {
+                                        this.props.pane.status === 'running'
+                                        ? '停止应用'
+                                        : '启动应用'
+                                    }
+                              </Button>
+                              </div>
                             : ''
                         }
                         </div>
@@ -1165,13 +1242,14 @@ class ModbusPane extends Component {
                                             status="warning"
                                             title="新增Modbus通道失败！"
                                             extra={
-                                            <Button
-                                                type="primary"
-                                                key="console"
-                                                onClick={()=>{
-                                                    this.setState({isShow: !this.state.isShow})
-                                                }}
-                                            >
+                                            [
+                                                <Button
+                                                    type="primary"
+                                                    key="console"
+                                                    onClick={()=>{
+                                                        this.setState({isShow: !this.state.isShow})
+                                                    }}
+                                                >
                                                 {
                                                     isShow
                                                     ? '关闭日志'
@@ -1184,6 +1262,7 @@ class ModbusPane extends Component {
                                                     this.setState({pressVisible: false})
                                                 }}
                                             >关闭窗口</Button>
+                                            ]
                                             }
                                         />
                                         {
@@ -1219,25 +1298,27 @@ class ModbusPane extends Component {
                                             status="warning"
                                             title="新增Modbus通道失败！"
                                             extra={
-                                            <Button
-                                                type="primary"
-                                                key="console"
-                                                onClick={()=>{
-                                                    this.setState({isShow: !this.state.isShow})
-                                                }}
-                                            >
-                                                {
-                                                    isShow
-                                                    ? '关闭日志'
-                                                    : '查看日志'
-                                                }
-                                            </Button>,
-                                            <Button
-                                                key="buy"
-                                                onClick={()=>{
-                                                    this.setState({pressVisible: false})
-                                                }}
-                                            >关闭窗口</Button>
+                                            [
+                                                <Button
+                                                    type="primary"
+                                                    key="console"
+                                                    onClick={()=>{
+                                                        this.setState({isShow: !this.state.isShow})
+                                                    }}
+                                                >
+                                                    {
+                                                        isShow
+                                                        ? '关闭日志'
+                                                        : '查看日志'
+                                                    }
+                                                </Button>,
+                                                <Button
+                                                    key="buy"
+                                                    onClick={()=>{
+                                                        this.setState({pressVisible: false})
+                                                    }}
+                                                >关闭窗口</Button>
+                                                ]
                                             }
                                         />
                                         {

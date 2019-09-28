@@ -877,6 +877,7 @@ class MqttForm extends React.Component {
                         <Divider orientation="left">需要上传的设备列表</Divider>
                         <Col span={24}>
                             <AddDevList
+                                status={this.props.pane.status}
                                 devs={this.props.pane.conf.devs}
                                 setdevs={this.setDevs}
                                 disabled={this.state.disabled}
