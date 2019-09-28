@@ -109,7 +109,7 @@ class ModbusPane extends Component {
             devs: [],
             loop_gap: 1000,
             apdu_type: 'TCP',
-            channel_type: 'TCP',
+            channel_type: 'socket',
             serial_opt: {
                 port: this.currentPort || 'COM1',
                 baudrate: 9600,
@@ -439,7 +439,7 @@ class ModbusPane extends Component {
                     devs: this.state.devs,
                     loop_gap: this.state.loop_gap,
                     serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                    socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
+                    socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
                     tpls: this.state.tpls
                 },
                 gateway: this.props.match.params.sn,
@@ -522,7 +522,7 @@ class ModbusPane extends Component {
                     devs: this.state.devs,
                     loop_gap: this.state.loop_gap,
                     serial_opt: this.state.channel_type === 'serial' ? this.state.serial_opt : undefined,
-                    socket_opt: this.state.channel_type === 'TCP' ? this.state.socket_opt : undefined,
+                    socket_opt: this.state.channel_type === 'socket' ? this.state.socket_opt : undefined,
                     tpls: this.state.templateList
                 },
                 gateway: this.props.match.params.sn,
@@ -827,7 +827,7 @@ class ModbusPane extends Component {
                                 value="serial"
                                 disabled={this.state.communication}
                             >串口</Option>
-                            <Option value="TCP">以太网</Option>
+                            <Option value="socket">以太网</Option>
                         </Select>
                     </Form.Item>
                 </Form>
