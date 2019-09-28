@@ -36,6 +36,7 @@ class EditableCell extends React.Component {
                 return;
             }
             this.toggleEdit();
+            console.log(values)
             handleSave({ ...record, ...values });
         });
         // const value = e.target.value;
@@ -96,8 +97,12 @@ class EditableCell extends React.Component {
         this.recordNumber = record.number;
         // const pattern = /^[0-9a-zA-Z_]$/;
         const pattern = /^[\da-zA-Z_]+$/;
+        const regName = /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/;
         return (rule, value, callback)=> {
             rule, value;
+            if (rule.field === 'address') {
+                callback()
+            }
             if (rule.field === 'address') {
                 callback()
             }
@@ -108,7 +113,7 @@ class EditableCell extends React.Component {
                     if (this.device(value)) {
                         callback('名称重复')
                     }
-                    if (!pattern.test(value)) {
+                    if (!regName.test(value)) {
                         console.log(pattern.test(value))
                         callback('仅支持字母、数字、下划线')
                     }

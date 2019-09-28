@@ -24,7 +24,8 @@ class NetworkConfig extends Component {
         running_action: false,
         uploadOneShort: false,
         dataSanpshotEnable: true,
-        dataFlushEnable: true
+        dataFlushEnable: true,
+        interface: ''
     }
     componentDidMount () {
        this.getInfo()
@@ -268,11 +269,12 @@ class NetworkConfig extends Component {
                 })
         })
     }
-    showModal = (ip) => {
-
+    showModal = (ip, item) => {
+        console.log(item)
         this.setState({
-          visible: true,
-          brlan_ip: ip
+            interface: item.interface,
+            visible: true,
+            brlan_ip: ip
         });
       };
       handleOk = () => {
@@ -285,7 +287,7 @@ class NetworkConfig extends Component {
             command: 'mod_interface',
             name: `${this.state.sn}.${this.state.inst_name}`,
             param: {
-                interface: 'lan',
+                interface: this.state.interface,
                 proto: 'static',
                 ipaddr: this.state.brlan_ip.address,
                 netmask: this.state.netmask
@@ -402,7 +404,7 @@ class NetworkConfig extends Component {
                                                         message.info('请先开启临时数据上传后重试！')
                                                         return false;
                                                     }
-                                                    this.showModal(item['ipv4-address'][0])
+                                                    this.showModal(item['ipv4-address'][0], item)
                                                 }}
                                               >
                                                 编辑
@@ -412,7 +414,7 @@ class NetworkConfig extends Component {
                                         <div className="modal_">
                                         <Modal
                                             maskClosable={false}
-                                            title="修改br-lan IP地址与子网掩码"
+                                            title="修改lan IP地址与子网掩码"
                                             visible={this.state.visible}
                                             onOk={this.handleOk}
                                             onCancel={this.handleCancel}

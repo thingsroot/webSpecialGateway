@@ -583,15 +583,16 @@ class ModbusPane extends Component {
         }
         let regFlag = false;
         const reg = /^[0-9a-zA-Z_]{1,}$/;
+        const regName = /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/;
         if (!this.state.disabled) {
             this.state.devs.map(item=>{
                 if (!reg.test(item.sn)) {
-                    message.info('设备名称与设备序列号只能输入字母、数字、下划线，请修改后重试！')
+                    message.info('设备序列号只能输入字母、数字、下划线，请修改后重试！')
                     regFlag = true;
                     return false;
                 }
-                if (!reg.test(item.name)) {
-                    message.info('设备名称与设备序列号只能输入字母、数字、下划线，请修改后重试！')
+                if (!regName.test(item.name)) {
+                    message.info('设备名称只能输入中文、字母、数字、下划线，请修改后重试！')
                     regFlag = true;
                     return false;
                 }
@@ -884,8 +885,8 @@ class ModbusPane extends Component {
                                 >
                                     {
                                         this.props.pane.status === 'running'
-                                        ? '停止应用'
-                                        : '启动应用'
+                                        ? '停止'
+                                        : '启动'
                                     }
                               </Button>
                               </div>

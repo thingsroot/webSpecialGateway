@@ -87,8 +87,8 @@ class MqttForm extends React.Component {
             },
             has_options_ex: false,
             options_ex: {
-                diable_command: false,
-                diable_data: false,
+                disable_command: false,
+                disable_data: false,
                 disable_compress: false,
                 disable_data_em: false,
                 disable_devices: false,
@@ -411,13 +411,14 @@ class MqttForm extends React.Component {
                 inst: this.props.pane.inst_name,
                 conf: {
                     devs: this.state.devs,
-                    has_options_ex: this.state.has_options_ex ? 'yes' : 'no',
+                    has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
                     mqtt: this.state.mqtt,
                     options: this.state.options,
                     options_ex: this.state.options_ex
                 },
                 id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`
             }
+            console.log(data.conf)
             http.post('/api/gateways_applications_conf', data).then(res=>{
                 if (res.ok) {
                     let title = '配置应用' + data.inst + '请求'
@@ -431,15 +432,7 @@ class MqttForm extends React.Component {
         this.setState({disabled: !this.state.disabled})
     };
     installMqtt = () => {
-        const { serial_opt } = this.state;
-        const devs = serial_opt.dataSource;
-        const arr = [];
-        devs && devs.length > 0 && devs.map((item) =>{
-            arr.push({
-                key: item.key,
-                sn: item.name
-            })
-        })
+        const { devs } = this.state;
         const data = {
                 gateway: this.props.match.params.sn,
                 inst: this.props.pane.inst_name,
@@ -448,7 +441,7 @@ class MqttForm extends React.Component {
                 conf: {
                     mqtt: this.state.mqtt,
                     options: this.state.options,
-                    devs: arr,
+                    devs,
                     has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
                     options_ex: this.state.options_ex
                 },
@@ -533,6 +526,7 @@ class MqttForm extends React.Component {
     }
     funDownload = () => {
         const sn = this.props.match.params.sn;
+        const { inst_name } = this.props.pane
         const zip = new Zip();
         const {tls_cert, client_cert, client_key} = this.props.pane.conf.mqtt;
         tls_cert && zip.file('CA.crt', tls_cert);
@@ -540,7 +534,7 @@ class MqttForm extends React.Component {
         client_key && zip.file('Client.key', client_key);
         zip.generateAsync({type: 'blob'})
             .then(function (content) {
-                saveAs(content, sn + '.zip');
+                saveAs(content, sn + '-' + inst_name + '证书.zip');
 });
     }
     render () {
@@ -627,7 +621,12 @@ class MqttForm extends React.Component {
                                     disabled={disabled}
                                     value={mqtt && mqtt.port ? mqtt.port : ''}
                                     onChange={(value) => {
-                                        this.setSetting('mqtt', value, 'port')
+                                        console.log(value)
+                                        if (value > 65535 || value < 1) {
+                                            return false;
+                                        } else {
+                                            this.setSetting('mqtt', value, 'port')
+                                        }
                                     }}
                                 />
                             </div>
