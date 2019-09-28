@@ -800,7 +800,7 @@ class MqttForm extends React.Component {
                                         />
                                         {
                                             !this.state.mqtt.client_id
-                                            ? <span style={{color: 'red', marginLeft: '10px'}}>留空时客户端ID为网关序列号</span>
+                                            ? <span style={{color: '#ccc', marginLeft: '10px'}}>留空时客户端ID为网关序列号</span>
                                             : ''
                                         }
                                     </div>

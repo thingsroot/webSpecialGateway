@@ -326,7 +326,7 @@ class NetworkConfig extends Component {
         return (
             <div className="networkwrapper">
                 <Card
-                    loading={loading || loading.length === 0}
+                    loading={loading || data.length === 0}
                 >
                     <div className="title">
                         <h2>| 网络接口</h2>
@@ -430,7 +430,6 @@ class NetworkConfig extends Component {
                                                         <Option value="255.255.0.0">255.255.0.0</Option>
                                                     </Select>
                                                 </Form.Item>
-
                                             </div>
                                         </Modal>
                                         </div>
