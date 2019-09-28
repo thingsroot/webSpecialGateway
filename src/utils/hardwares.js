@@ -14,6 +14,55 @@ export function GetSerialListBySN (sn) {
     return tty_list
 }
 
+
+export function GetSerialListBySNs (sn) {
+    let tty_list = [];
+    if (/2-30002.+/.test(sn)) {
+        // Q102
+        tty_list = [
+            {
+                dev: '/dev/ttymxc0',
+                com: 'COM1'
+            },
+            {
+                dev: '/dev/ttymxc1',
+                com: 'COM2'
+            }
+        ]
+    } else if (/2-30102.+/.test(sn)) {
+        // Q204
+        tty_list = [
+            {
+                dev: '/dev/ttymxc0',
+                com: 'COM1'
+            },
+            {
+                dev: '/dev/ttymxc1',
+                com: 'COM2'
+            },
+            {
+                dev: '/dev/ttymxc2',
+                com: 'COM3'
+            },
+            {
+                dev: '/dev/ttymxc3',
+                com: 'COM4'
+            }]
+    } else if (/TRTX01.+/.test(sn)) {
+        // TLink X1
+        tty_list = [
+            {
+                dev: '/dev/ttyS1',
+                com: 'COM1'
+            },
+            {
+                dev: '/dev/ttyS2',
+                com: 'COM2'
+            }]
+    }
+    return tty_list
+}
+
 export function GetInfoBySN (sn) {
     if (/2-30002.+/.test(sn)) {
         // Q102
