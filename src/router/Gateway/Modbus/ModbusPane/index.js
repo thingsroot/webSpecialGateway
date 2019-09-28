@@ -255,6 +255,7 @@ class ModbusPane extends Component {
     }
     componentDidMount () {
         const { conf } = this.props.pane;
+        console.log(this.props.pane.auto, 'panes')
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
@@ -542,6 +543,32 @@ class ModbusPane extends Component {
                     message.error(res.error)
                 }
             })
+            if (this.props.pane.auto === 0) {
+                const options = {
+                    gateway: this.props.match.params.sn,
+                    inst: this.props.pane.inst_name,
+                    option: 'auto',
+                    value: 1,
+                    id: `option/${this.props.match.params.sn}/${this.props.pane.inst_name}/${new Date() * 1}`
+                }
+                http.post('/api/gateways_applications_option', options).then(res=>{
+                    if (res.ok){
+                        let title = '开启应用开机自启请求成功!';
+                        message.info(title + '等待网关响应!')
+                        let info = {
+                            gateway: this.props.match.params.sn,
+                            inst: this.props.pane.inst_name,
+                            value: 1
+                        }
+                        this.props.store.action.pushAction(res.data, title, '', info, 10000,  ()=> {
+                            this.props.update_app_list();
+                        })
+                    } else {
+                        let title = '开启应用开机自启请求失败!';
+                        message.error(title)
+                    }
+                })
+            }
         } else {
             message.error('设备列表不能为空');
             return false

@@ -18,12 +18,13 @@ class App extends React.Component {
   UNSAFE_componentWillReceiveProps (nextProps){
     if (nextProps.disabled !== this.props.disabled) {
         this.MapSetDevList(this.state.data, nextProps.disabled)
-        this.setPage()
     }
-    if (this.props.status !== nextProps.status) {
-      this.MapSetDevList(this.state.data, nextProps.disabled)
+    if (nextProps.status !== this.props.status) {
       this.setPage()
     }
+    // if (JSON.stringify(this.props.devs) !== JSON.stringify(nextProps.devs)) {
+    //   this.setPage()
+    // }
   }
   setPage = () => {
     const { devs } = this.props;
@@ -40,7 +41,9 @@ class App extends React.Component {
           loading: false,
           sign: false,
           targetKeys: arr
-      })
+      }), ()=>{
+        this.handleChange(this.props.devs)
+      }
     })
   }
   MapSetDevList = (data, disabled) =>{
@@ -66,8 +69,8 @@ class App extends React.Component {
     direction, moveKeys;
     this.setState({ targetKeys: nextTargetKeys });
     const arr = [];
-    if (nextTargetKeys.length > 0) {
-      nextTargetKeys.map((item, key)=>{
+    if (direction === 'right' && moveKeys.length > 0) {
+      moveKeys.map((item, key)=>{
         const obj = {
           key: key + 1,
           sn: item

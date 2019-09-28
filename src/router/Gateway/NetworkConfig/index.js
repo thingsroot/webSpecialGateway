@@ -2,12 +2,13 @@ import React, { Component } from 'react';
 import http from '../../../utils/Server';
 import { inject, observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { message, Modal, Input, Select, Card, Form } from 'antd';
+import { message, Modal, Input, Select, Card, Form, Tooltip, Button, Icon } from 'antd';
+import { IconIOT } from '../../../utils/iconfont';
 import './style.scss';
 const Option = Select.Option;
+@withRouter
 @inject('store')
 @observer
-@withRouter
 class NetworkConfig extends Component {
     state = {
         data: [],
@@ -20,7 +21,10 @@ class NetworkConfig extends Component {
         gw_interface: undefined,
         dns_servers: undefined,
         sn: this.props.match.params.sn,
-        running_action: false
+        running_action: false,
+        uploadOneShort: false,
+        dataSanpshotEnable: true,
+        dataFlushEnable: true
     }
     componentDidMount () {
        this.getInfo()
@@ -38,9 +42,61 @@ class NetworkConfig extends Component {
                 this.getInfo()
             })
         }
+        // if (nextProps.sn !== this.state.sn){
+        //     this.setState({
+        //         sn: nextProps.sn,
+        //         loading: true
+        //     }, ()=>{
+        //         const { gatewayInfo } = this.props.store;
+        //         if (!gatewayInfo.data.data_upload && this.state.uploadOneShort) {
+        //             message.info('网关未开启数据上送，临时开启中!')
+        //             this.enableDataUploadOneShort(60)
+        //         }
+        //     });
+        // }
     }
     componentWillUnmount (){
         clearInterval(this.t1)
+    }
+    enableDataUploadOneShort (duration) {
+        const { gatewayInfo } = this.props.store;
+        const { sn } = this.state;
+        if (!gatewayInfo.data.data_upload) {
+            let params = {
+                name: this.state.sn,
+                duration: duration,
+                id: `enable_data_one_short/${sn}/${new Date() * 1}`
+            }
+            http.post('/api/gateways_enable_data_one_short', params).then(res => {
+                if (!res.ok) {
+                    message.error('临时数据上送指令失败:' + res.error)
+                }
+            }).catch( err => {
+                message.error('临时数据上送指令失败:' + err)
+            })
+        }
+    }
+    dataSnapshot () {
+        http.post('/api/gateways_data_snapshot', {name: this.state.sn}).then(res => {
+            if (res.ok) {
+                message.success('请求网关数据数据快照成功')
+            } else {
+                message.error('请求网关数据数据快照失败:' + res.error)
+            }
+        }).catch( err => {
+            message.error('请求网关数据数据快照失败:' + err)
+        })
+    }
+    dataFlush () {
+        http.post('/api/gateways_data_flush', {name: this.state.sn}).then(res => {
+            if (res.ok) {
+                message.success('请求网关上送周期内数据成功')
+            } else {
+                message.error('请求网关上送周期内数据失败:' + res.error)
+            }
+        }).catch( err => {
+            message.error('请求网关上送周期内数据失败:' + err)
+        })
     }
     showConfirm = (res) => {
         const $this = this;
@@ -254,12 +310,64 @@ class NetworkConfig extends Component {
       };
     render (){
         const {data, loading, dns_servers} = this.state;
+        const { gatewayInfo } = this.props.store;
         return (
-            <div>
+            <div className="networkwrapper">
                 <Card
                     loading={loading || loading.length === 0}
                 >
-                    <h2>| 网络接口</h2>
+                    <div className="title">
+                        <h2>| 网络接口</h2>
+                        <div className="btn_to_set">
+                        {
+                            gatewayInfo.data.data_upload
+                            ? null
+                            : <Button
+                                type={this.state.uploadOneShort ? 'default' : 'primary'}
+                                style={{
+                                    marginRight: '10px'
+                                }}
+                                onClick={
+                                    ()=>{
+                                        this.setState({uploadOneShort: !this.state.uploadOneShort}, ()=>{
+                                            if (!this.state.uploadOneShort){
+                                                clearInterval(this.one_short_timer);
+                                                this.enableDataUploadOneShort(0)
+                                            } else {
+                                                this.enableDataUploadOneShort(60)
+                                                this.one_short_timer = setInterval(()=>{
+                                                    this.enableDataUploadOneShort(60)
+                                                }, 55000)
+                                            }
+                                        })
+                                    }
+                                }
+                              >
+                                    <Icon
+                                        type={this.state.uploadOneShort ? 'close-circle' : 'play-circle'}
+                                        theme="filled"
+                                    />{this.state.uploadOneShort ? '停止临时数据上传' : '开启临时数据上传'}
+                                </Button>
+                        }
+                        <Tooltip
+                            placement="bottom"
+                            title="强制网关上送最新数据"
+                        >
+                                <Button
+                                    disabled={!this.state.dataFlushEnable}
+                                    onClick={()=>{
+                                        this.setState({dataFlushEnable: false})
+                                        this.dataFlush()
+                                        setTimeout(()=>{
+                                            this.setState({dataFlushEnable: true})
+                                        }, 1000)
+                                    }}
+                                >
+                                    <IconIOT type="icon-APIshuchu"/>强制刷新
+                                </Button>
+                            </Tooltip>
+                        </div>
+                    </div>
                 {
                     data && data.length > 0 && data.map((item, key)=>{
                         return (
@@ -290,6 +398,10 @@ class NetworkConfig extends Component {
                                             ? <div
                                                 className="networksetinfo"
                                                 onClick={()=>{
+                                                    if (!gatewayInfo.data.data_upload && !this.state.uploadOneShort){
+                                                        message.info('请先开启临时数据上传后重试！')
+                                                        return false;
+                                                    }
                                                     this.showModal(item['ipv4-address'][0])
                                                 }}
                                               >
