@@ -257,8 +257,7 @@ class ModbusPane extends Component {
     componentDidMount () {
         this.tty_list = GetSerialListBySNs(this.props.match.params.sn)
         const { conf } = this.props.pane;
-        console.log(conf)
-        console.log(this.props.pane)
+
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
@@ -287,7 +286,17 @@ class ModbusPane extends Component {
         serial_opt.port = conf.serial_opt ? conf.serial_opt.port : this.tty_list[0].dev
         this.setState({serial_opt})
         if (this.props.pane.conf.serial_opt === undefined) {
-            console.log(1)
+            this.props.panes.forEach(item=>{
+                if (item.conf.serial_opt) {
+                    this.tty_list.forEach(j=> {
+                        if (item.conf.serial_opt.port === j.dev) {
+                            this.setState({communication: true})
+                        } else {
+                            this.setState({communication: false})
+                        }
+                    })
+                }
+            })
         }
     }
     UNSAFE_componentWillReceiveProps (nextProps) {
@@ -303,74 +312,7 @@ class ModbusPane extends Component {
     componentWillUnmount () {
         this.t1 && clearInterval(this.t1)
     }
-    checkOption () {
-        if (this.props.panes.length) {
-                    let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
-                    let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
-                    let option = '';
-                    switch (true) {
-                        case s1 && s2 :
-                            option = this.optionDisabled();
-                            break;
-                        case !s1 && !s2:
-                            option = this.optionTotal();
-                            break;
-                        case s1:
-                             console.log('s1 show');
-                             // if (this.props.currentPagePort === 'ttyS1' && !s2) {
-                             //    option = this.optionTotal();
-                             //     break;
-                             // } else {
-                             //   option = this.optionS2();
-                             //     break;
-                             // }
-                            option = this.optionS2();
-                            break;
-                        case s2:
-                            console.log('s2 show');
-                            // if (this.props.currentPagePort === 'ttyS2' && !s1) {
-                            //     option = this.optionTotal();
-                            //     break;
-                            // } else {
-                            //     option = this.optionS1();
-                            //     break;
-                            // }
-                            option = this.optionS1();
-                            break;
-                        default:
-                            console.log(5);
-                    }
-                    return option
-        }
-    }
-    optionS1 = () => (
-        <Option
-            value="/dev/ttyS1"
-            key="/dev/ttyS1"
-        >COM1</Option>);
-    optionS2 = () => (
-        <Option
-            value="/dev/ttyS2"
-            key="/dev/ttyS2"
-        >COM2</Option>);
-    optionDisabled = () => (
-        <Option
-            value="disabled"
-            key="disabled"
-            disabled
-        >不可选</Option>);
-    optionTotal =() => {
-        return [
-            <Option
-                value="/dev/ttyS1"
-                key="/dev/ttyS1"
-            >COM1</Option>,
-            <Option
-                value="/dev/ttyS2"
-                key="/dev/ttyS2"
-            >COM2</Option>
-        ]
-    };
+
     setSetting = (type, val, name) =>{
         if (type === 'serial_opt') {
             console.log(type, val, name, 'setting')
