@@ -57,7 +57,7 @@ class Modbus extends Component {
             this.refreshTemplateList()
         })
         this.t1 = setInterval(() => {
-            // this.fetch()
+            this.fetch()
         }, 5000);
     }
     UNSAFE_componentWillReceiveProps (nextProps){

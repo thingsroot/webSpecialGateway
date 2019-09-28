@@ -203,6 +203,17 @@ class DevicesList extends Component {
                         {/* {'数据上送周期: ' + gatewayInfo.data.data_upload_period + ' 毫秒'}
                         <span style={{padding: '0 5px'}}></span>
                         {'全量数据上送周期: ' + gatewayInfo.data.data_upload_cov_ttl + ' 秒'} */}
+                        {
+                            !gatewayInfo.data.data_upload
+                            ? <span style={!gatewayInfo.data.data_upload && this.state.uploadOneShort ? {} : {color: 'red'}}>
+                            {
+                                this.state.uploadOneShort
+                                ? '临时数据上传已开启'
+                                : '如要查看设备实时数据，请点击右侧“开启临时数据上传”按钮'
+                            }
+                            </span>
+                            : ''
+                        }
                     </p>
                     <p>
                         {

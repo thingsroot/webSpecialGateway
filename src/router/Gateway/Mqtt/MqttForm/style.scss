@@ -30,3 +30,13 @@
     color: rgba(0, 0, 0, 0.85);
     font-size: 14px;
 }
+.MQTTPaneAffix{
+    position: relative;
+    width: 100%;
+    display: flex;
+    .SwitchButton{
+        position: absolute;
+        right: 20px;
+        top: 5px;
+    }
+}

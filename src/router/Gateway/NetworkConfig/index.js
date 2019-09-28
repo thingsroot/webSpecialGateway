@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import http from '../../../utils/Server';
 import { inject, observer } from 'mobx-react';
 import { withRouter } from 'react-router-dom';
-import { message, Modal, Input, Select, Card, Form, Tooltip, Button, Icon } from 'antd';
+import { message, Modal, Input, Select, Card, Form, Tooltip, Button } from 'antd';
 import { IconIOT } from '../../../utils/iconfont';
 import './style.scss';
 const Option = Select.Option;
@@ -29,9 +29,14 @@ class NetworkConfig extends Component {
     }
     componentDidMount () {
        this.getInfo()
+       this.getGateywayInfo()
        this.t1 = setInterval(() => {
         this.getInfo()
        }, 10000);
+       this.setintervalGayewayInfo = setInterval(() => {
+           this.getGateywayInfo()
+       }, 5000);
+       console.log(this.props.store.gatewayInfo)
     }
     UNSAFE_componentWillReceiveProps (nextProps){
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
@@ -41,23 +46,36 @@ class NetworkConfig extends Component {
                 sn: nextProps.match.params.sn
             }, ()=>{
                 this.getInfo()
+                clearInterval(this.setintervalGayewayInfo)
+                if (this.one_short_timer) {
+                    clearInterval(this.one_short_timer)
+                }
+                this.getGateywayInfo()
+                this.setintervalGayewayInfo = setInterval(() => {
+                    this.getGateywayInfo()
+                }, 5000);
             })
         }
-        // if (nextProps.sn !== this.state.sn){
-        //     this.setState({
-        //         sn: nextProps.sn,
-        //         loading: true
-        //     }, ()=>{
-        //         const { gatewayInfo } = this.props.store;
-        //         if (!gatewayInfo.data.data_upload && this.state.uploadOneShort) {
-        //             message.info('网关未开启数据上送，临时开启中!')
-        //             this.enableDataUploadOneShort(60)
-        //         }
-        //     });
-        // }
     }
     componentWillUnmount (){
         clearInterval(this.t1)
+        clearInterval(this.one_short_timer)
+        clearInterval(this.setintervalGayewayInfo)
+    }
+    getGateywayInfo = () => {
+        http.get('/api/gateways_read?name=' + this.state.sn).then(res=>{
+            console.log(res)
+            if (res.ok) {
+                if (!res.data.data.data_upload) {
+                    if (!this.one_short_timer) {
+                        this.enableDataUploadOneShort(60)
+                        this.one_short_timer = setInterval(()=>{
+                            this.enableDataUploadOneShort(60)
+                        }, 55000)
+                    }
+                }
+            }
+        })
     }
     enableDataUploadOneShort (duration) {
         const { gatewayInfo } = this.props.store;
@@ -321,36 +339,6 @@ class NetworkConfig extends Component {
                     <div className="title">
                         <h2>| 网络接口</h2>
                         <div className="btn_to_set">
-                        {
-                            gatewayInfo.data.data_upload
-                            ? null
-                            : <Button
-                                type={this.state.uploadOneShort ? 'default' : 'primary'}
-                                style={{
-                                    marginRight: '10px'
-                                }}
-                                onClick={
-                                    ()=>{
-                                        this.setState({uploadOneShort: !this.state.uploadOneShort}, ()=>{
-                                            if (!this.state.uploadOneShort){
-                                                clearInterval(this.one_short_timer);
-                                                this.enableDataUploadOneShort(0)
-                                            } else {
-                                                this.enableDataUploadOneShort(60)
-                                                this.one_short_timer = setInterval(()=>{
-                                                    this.enableDataUploadOneShort(60)
-                                                }, 55000)
-                                            }
-                                        })
-                                    }
-                                }
-                              >
-                                    <Icon
-                                        type={this.state.uploadOneShort ? 'close-circle' : 'play-circle'}
-                                        theme="filled"
-                                    />{this.state.uploadOneShort ? '停止临时数据上传' : '开启临时数据上传'}
-                                </Button>
-                        }
                         <Tooltip
                             placement="bottom"
                             title="强制网关上送最新数据"
@@ -384,7 +372,7 @@ class NetworkConfig extends Component {
                                                 {item.interface}
                                             </div>
                                             <div className="networkinfo_bottom">
-                                                {item.device}
+                                                {item.l3_device ? item.l3_device : item.device}
                                             </div>
                                         </div>
                                         <div className="networkpagelist_right">
@@ -396,7 +384,7 @@ class NetworkConfig extends Component {
                                             </div>
                                         </div>
                                         {
-                                            item.device === 'br-lan'
+                                            item.interface === 'lan'
                                             ? <div
                                                 className="networksetinfo"
                                                 onClick={()=>{

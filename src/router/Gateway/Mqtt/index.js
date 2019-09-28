@@ -97,9 +97,9 @@ class Mqtt extends Component {
     componentDidMount () {
         this.fetch()
         this.upgradeFreeioe()
-        // this.t1 = setInterval(() => {
-        //     this.fetch()
-        // }, 10000);
+        this.t1 = setInterval(() => {
+            this.fetch()
+        }, 5000);
         this.t1 = setInterval(() => {
             this.upgradeFreeioe()
         }, 3000);
@@ -680,25 +680,42 @@ class Mqtt extends Component {
                         onEdit={this.onEdit}
                       >
                     {
-                        this.state.app_list.map((pane, key) => (
-                            <TabPane
-                                tab={pane.inst_name.indexOf('mqtt_') !== -1 ? pane.inst_name.replace('_', '通道') : pane.inst_name}
-                                key={key}
-                                closable={false}
-                            >
-                                {
-                                    pane.status !== 'add button'
-                                    ? <MqttPane
-                                        removenotinstall={this.removeNotInstall}
-                                        pane={pane}
-                                        fetch={this.fetch}
-                                        setActiveKey={this.setActiveKey}
-                                        app_info={this.state.app_info}
-                                      />
-                                    : ''
-                                }
-                            </TabPane>
-                        ))
+                        this.state.app_list.map((pane, key) => {
+                            const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
+                            return (
+                                <TabPane
+                                    tab={
+                                        pane.status === 'add button'
+                                                ? title
+                                                : pane.status === 'running'
+                                                    ? <span>
+                                                        <Icon
+                                                            type="play-circle"
+                                                            style={{color: '#269f42'}}
+                                                        />{title}</span>
+                                                    : <span>
+                                                        <Icon
+                                                            style={{color: '#d73a4a'}}
+                                                            type="pause-circle"
+                                                        />{title}</span>
+                                    }
+                                    key={key}
+                                    closable={false}
+                                >
+                                    {
+                                        pane.status !== 'add button'
+                                        ? <MqttPane
+                                            removenotinstall={this.removeNotInstall}
+                                            pane={pane}
+                                            fetch={this.fetch}
+                                            setActiveKey={this.setActiveKey}
+                                            app_info={this.state.app_info}
+                                          />
+                                        : ''
+                                    }
+                                </TabPane>
+                            )
+                        })
                     }
                       </Tabs>
                     : <Result

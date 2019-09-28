@@ -282,9 +282,14 @@ class ModbusPane extends Component {
         }
         // this.checkOption()
     }
-    UNSAFE_componentWillReceiveProps () {
+    UNSAFE_componentWillReceiveProps (nextProps) {
         if (!this.state.disabled) {
             return false;
+        }
+        if (this.props.pane.status !== nextProps.pane.status) {
+            this.setState({
+                switchLoading: false
+            })
         }
     }
     componentWillUnmount () {
@@ -806,10 +811,12 @@ class ModbusPane extends Component {
         http.post('/api/gateways_applications_' + type, data).then(res=>{
             if (res.ok) {
                 message.success(action + data.inst + '请求发送成功')
-                this.props.store.action.pushAction(res.data, action + '应用', '', data, 10000,  ()=> {
-                    this.setState({
-                        switchLoading: false
-                    })
+                this.props.store.action.pushAction(res.data, action + '应用', '', data, 10000,  (action)=> {
+                    if (!action) {
+                        this.setState({
+                            switchLoading: false
+                        })
+                    }
                 })
             } else {
                 message.error(action +  data.inst + '请求发送失败。 错误:' + res.error)
@@ -1234,6 +1241,7 @@ class ModbusPane extends Component {
                                                     key="buy"
                                                     onClick={()=>{
                                                         this.setState({pressVisible: false, number: 0})
+                                                        this.props.fetch()
                                                     }}
                                                 >关闭窗口</Button>
                                                 ]}
@@ -1288,6 +1296,7 @@ class ModbusPane extends Component {
                                                 key="buy"
                                                 onClick={()=>{
                                                     this.setState({pressVisible: false})
+                                                    this.props.fetch()
                                                 }}
                                             >关闭窗口</Button>
                                             ]
@@ -1344,6 +1353,7 @@ class ModbusPane extends Component {
                                                     key="buy"
                                                     onClick={()=>{
                                                         this.setState({pressVisible: false})
+                                                        this.props.fetch()
                                                     }}
                                                 >关闭窗口</Button>
                                                 ]
