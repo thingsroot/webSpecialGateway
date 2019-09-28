@@ -119,7 +119,6 @@ class MqttForm extends React.Component {
                 has_options_ex: conf.has_options_ex === 'yes',
                 devs: conf.devs ? conf.devs : []
             })
-            console.log(this.props)
             if (this.props.pane.status === 'Not installed') {
                 this.setState({
                     disabled: false
@@ -393,7 +392,6 @@ class MqttForm extends React.Component {
         }
     }
     setDevs = (value) =>{
-        console.log(value)
         this.setState({
             devs: value
         })
@@ -452,7 +450,6 @@ class MqttForm extends React.Component {
             message.info('请选择上传设备后重试！')
             return false;
         }
-        console.log(this.state)
         if (this.state.mqtt.enable_tls && !this.state.mqtt.tls_cert && !this.state.disabled) {
             message.info('请先上传CA证书！')
             return false;
@@ -474,7 +471,6 @@ class MqttForm extends React.Component {
                 },
                 id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`
             }
-            console.log(data.conf)
             http.post('/api/gateways_applications_conf', data).then(res=>{
                 if (res.ok) {
                     let title = '配置应用' + data.inst + '请求'
@@ -721,7 +717,6 @@ class MqttForm extends React.Component {
                                     disabled={disabled}
                                     value={mqtt && mqtt.port ? mqtt.port : ''}
                                     onChange={(value) => {
-                                        console.log(value)
                                         if (value > 65535 || value < 1) {
                                             if (!this.state.mqttReg) {
                                                 this.setState({

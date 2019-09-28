@@ -36,7 +36,6 @@ class NetworkConfig extends Component {
        this.setintervalGayewayInfo = setInterval(() => {
            this.getGateywayInfo()
        }, 5000);
-       console.log(this.props.store.gatewayInfo)
     }
     UNSAFE_componentWillReceiveProps (nextProps){
         if (nextProps.match.params.sn !== this.props.match.params.sn) {
@@ -64,7 +63,6 @@ class NetworkConfig extends Component {
     }
     getGateywayInfo = () => {
         http.get('/api/gateways_read?name=' + this.state.sn).then(res=>{
-            console.log(res)
             if (res.ok) {
                 if (!res.data.data.data_upload) {
                     if (!this.one_short_timer) {
@@ -126,14 +124,10 @@ class NetworkConfig extends Component {
           cancelText: '取消',
           onOk () {
               $this.installNet_info(res)
-              return false
-            // return new Promise((resolve, reject) => {
-            //   setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-            // }).catch(() => console.log('Oops errors!'));
+              return false;
           },
           onCancel () {
               message.info('取消安装net_info')
-              console.log($this.props)
               $this.props.history.push(`/gateway/${$this.props.match.params.sn}/devices`)
               return false
           }
@@ -288,7 +282,6 @@ class NetworkConfig extends Component {
         })
     }
     showModal = (ip, item) => {
-        console.log(item)
         this.setState({
             interface: item.interface,
             visible: true,
@@ -330,7 +323,6 @@ class NetworkConfig extends Component {
       };
     render (){
         const {data, loading, dns_servers} = this.state;
-        const { gatewayInfo } = this.props.store;
         return (
             <div className="networkwrapper">
                 <Card
@@ -388,10 +380,6 @@ class NetworkConfig extends Component {
                                             ? <div
                                                 className="networksetinfo"
                                                 onClick={()=>{
-                                                    if (!gatewayInfo.data.data_upload && !this.state.uploadOneShort){
-                                                        message.info('请先开启临时数据上传后重试！')
-                                                        return false;
-                                                    }
                                                     this.showModal(item['ipv4-address'][0], item)
                                                 }}
                                               >

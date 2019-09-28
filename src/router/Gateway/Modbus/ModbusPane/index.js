@@ -226,7 +226,6 @@ class ModbusPane extends Component {
     }
     UNSAFE_componentWillMount () {
         if (this.props.panes.length) {
-            console.log(this.props.panes, 'panes')
             let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
             let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
             let serial_opt = this.state.serial_opt
@@ -255,7 +254,6 @@ class ModbusPane extends Component {
     }
     componentDidMount () {
         const { conf } = this.props.pane;
-        console.log(this.props.pane.auto, 'panes')
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
@@ -296,7 +294,6 @@ class ModbusPane extends Component {
         this.t1 && clearInterval(this.t1)
     }
     checkOption () {
-        console.log(this.state.serial_opt)
         if (this.props.panes.length) {
                     let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
                     let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
@@ -369,13 +366,11 @@ class ModbusPane extends Component {
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
             })
-            console.log(this.state.serial_opt, 'serial')
         }
         if (type === 'socket_opt') {
             this.setState({
                 socket_opt: Object.assign({}, this.state.socket_opt, {[name]: val})
             })
-            console.log(this.state.socket_opt, 'socket')
         }
         if (!name){
             this.setState({
@@ -426,7 +421,6 @@ class ModbusPane extends Component {
         http.post('/api/gateways_enable_log', data)
     }
     installapp = () => {
-        console.log(this.state.serial_opt.port)
         if (this.state.serial_opt.port === 'COM1') {
             let serial_opt = this.state.serial_opt;
             serial_opt.port = '/dev/ttyS1'
@@ -459,7 +453,6 @@ class ModbusPane extends Component {
                     // let title = '安装应用' + data.inst + '请求'
                     // message.info(title + '等待网关响应!')
                     this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
-                        console.log(action)
                         this.props.fetch('success')
                         if (action) {
                             this.setState({
@@ -486,7 +479,6 @@ class ModbusPane extends Component {
     AppConf = (status) => {
             if (this.props.pane.status === 'Not installed'  && status === 'install') {
                 this.state.devs.map(item=>{
-                    console.log(item)
                     console.log(this.state.devs.filter(items=>{
                         if (items.unit === item.unit && items.key !== items.key) {
                             return items
@@ -697,10 +689,8 @@ class ModbusPane extends Component {
         window.open('/appdetails/APP00000025/new_template', '_blank')
     };
     search = (value) => {
-        console.log(value)
         if (value) {
             const newList = this.state.TheBackupappTemplateList.filter(item=>item.name.toLocaleLowerCase().indexOf(value) !== -1 || item.description.indexOf(value) !== -1 || item.conf_name.toLocaleLowerCase().indexOf(value) !== -1)
-            console.log(newList)
             this.setState({
                 appTemplateList: newList
             })

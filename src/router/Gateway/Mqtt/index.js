@@ -204,7 +204,6 @@ class Mqtt extends Component {
         const { version } = this.props.store.gatewayInfo.data;
         if (version !== 0 && version < 1273) {
             clearInterval(this.t1)
-            console.log('需要升级Freeioe')
             this.showConfirm()
         }
         if (version !== 0 && version >= 1273) {
@@ -263,9 +262,6 @@ class Mqtt extends Component {
                 if (UnsavedChannel.length > 0 && app_list.filter(item => item.inst_name === UnsavedChannel[0].inst_name).length === 0 && status !== 'success') {
                     app_list = app_list.concat(UnsavedChannel)
                 }
-                // if (status !== 'success') {
-                //     app_list = app_list.concat(UnsavedChannel)
-                // }
                 app_list.push(addButton)
                 this.setState({app_list, loading: false})
             } else {
@@ -514,7 +510,6 @@ class Mqtt extends Component {
     }
     onChange = activeKey => {
         const {app_list} = this.state;
-        console.log(activeKey)
         if (app_list.length >= 3 && activeKey === '2') {
             return false;
         }
