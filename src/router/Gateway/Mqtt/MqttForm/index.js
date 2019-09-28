@@ -58,6 +58,8 @@ class MqttForm extends React.Component {
             CustomAuthentication: false, //自定义认证
             visible: false,
             switchLoading: false,
+            mqttReg: false,
+            mqttNameReg: false,
             WhetherTheCA: 'true',
             dataSource: [],
             devs: [],
@@ -440,7 +442,7 @@ class MqttForm extends React.Component {
         }
     }
     toggleDisable = () => {
-        const regIp =  /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]))$/;
+        const regIp =  /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/;
         const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
         if (regIp.test(this.state.mqtt.server) === false && reg.test(this.state.mqtt.server) === false && !this.state.disabled) {
             message.info('MQTT地址不合法，请重新输入！')
@@ -681,9 +683,31 @@ class MqttForm extends React.Component {
                                     disabled={disabled}
                                     value={mqtt && mqtt.server ? mqtt.server : ''}
                                     onChange={(e) => {
-                                    this.setSetting('mqtt', e.target.value, 'server')
-                                }}
+                                        const regIp = /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/;
+                                        const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
+                                        const value = e.target.value;
+                                        if (!regIp.test(value) && !reg.test(value)) {
+                                            if (!this.state.mqttNameReg) {
+                                                this.setState({
+                                                    mqttNameReg: true
+                                                })
+                                            }
+                                        } else {
+                                            if (this.state.mqttNameReg){
+                                                this.setState({
+                                                    mqttNameReg: false
+                                                })
+                                            }
+                                        }
+                                        this.setSetting('mqtt', value, 'server')
+                                        }
+                                    }
                                 />
+                                {
+                                    this.state.mqttNameReg
+                                    ? <span style={{color: 'red', marginLeft: '10px'}}>请输入合法的IP地址或域名</span>
+                                    : ''
+                                }
                             </div>
                             <div className="flex">
                                 <span>MQTT端口：</span>
@@ -698,12 +722,26 @@ class MqttForm extends React.Component {
                                     onChange={(value) => {
                                         console.log(value)
                                         if (value > 65535 || value < 1) {
-                                            return false;
+                                            if (!this.state.mqttReg) {
+                                                this.setState({
+                                                    mqttReg: true
+                                                })
+                                            }
                                         } else {
+                                            if (this.state.mqttReg){
+                                                this.setState({
+                                                    mqttReg: false
+                                                })
+                                            }
                                             this.setSetting('mqtt', value, 'port')
                                         }
                                     }}
                                 />
+                                {
+                                    this.state.mqttReg
+                                    ? <span style={{color: 'red', marginLeft: '10px'}}>端口数值输入错误， 请输入正确数值！（正确数值为1-65535）</span>
+                                    : ''
+                                }
                             </div>
                             <div style={{padding: '8px 3px'}}>
                                 <span>
@@ -764,6 +802,11 @@ class MqttForm extends React.Component {
                                                 this.setSetting('mqtt', e.target.value, 'client_id')
                                             }}
                                         />
+                                        {
+                                            !this.state.mqtt.client_id
+                                            ? <span style={{color: 'red', marginLeft: '10px'}}>留空时客户端ID为网关序列号</span>
+                                            : ''
+                                        }
                                     </div>
                                 </div>
                                 : ''
