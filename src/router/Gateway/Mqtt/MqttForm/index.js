@@ -57,6 +57,9 @@ class MqttForm extends React.Component {
             seniorIndeterminate: false, //高级选项
             CustomAuthentication: false, //自定义认证
             visible: false,
+            switchLoading: false,
+            mqttReg: false,
+            mqttNameReg: false,
             WhetherTheCA: 'true',
             dataSource: [],
             devs: [],
@@ -87,8 +90,8 @@ class MqttForm extends React.Component {
             },
             has_options_ex: false,
             options_ex: {
-                diable_command: false,
-                diable_data: false,
+                disable_command: false,
+                disable_data: false,
                 disable_compress: false,
                 disable_data_em: false,
                 disable_devices: false,
@@ -100,6 +103,13 @@ class MqttForm extends React.Component {
     componentDidMount () {
         this.setPage()
     }
+    UNSAFE_componentWillReceiveProps (nextProps) {
+        if (this.props.pane.status !== nextProps.pane.status) {
+            this.setState({
+                switchLoading: false
+            })
+        }
+    }
     setPage = () =>{
         if (this.props.pane.conf) {
             const { conf } = this.props.pane;
@@ -109,7 +119,6 @@ class MqttForm extends React.Component {
                 has_options_ex: conf.has_options_ex === 'yes',
                 devs: conf.devs ? conf.devs : []
             })
-            console.log(this.props)
             if (this.props.pane.status === 'Not installed') {
                 this.setState({
                     disabled: false
@@ -250,7 +259,53 @@ class MqttForm extends React.Component {
     seniorChange = () => {
         this.setState({seniorIndeterminate: !this.state.seniorIndeterminate})
     };
-
+    switch = () =>{
+        this.setState({
+            switchLoading: true
+        })
+        const { status } = this.props.pane;
+        let action = '';
+        const type = status === 'running' ? 'stop' : 'start'
+        if (status === 'running') {
+            action = '关闭'
+        } else {
+            action = '启动'
+        }
+        const data = status !== 'running'
+        ? {
+            gateway: this.props.match.params.sn,
+            inst: this.props.pane.inst_name,
+            id: `gateways/${status}/${this.props.match.params.sn}/${new Date() * 1}`
+        } : {
+            gateway: this.props.match.params.sn,
+            inst: this.props.pane.inst_name,
+            reason: 'reason',
+            id: `gateways/${status}/${this.props.match.params.sn}/${new Date() * 1}`
+        }
+        http.post('/api/gateways_applications_' + type, data).then(res=>{
+            if (res.ok) {
+                message.success(action + data.inst + '请求发送成功')
+                this.props.store.action.pushAction(res.data, action + '应用', '', data, 10000,  (action)=> {
+                    if (!action) {
+                        this.setState({
+                            switchLoading: false
+                        })
+                    }
+                })
+            } else {
+                message.error(action +  data.inst + '请求发送失败。 错误:' + res.error)
+                this.setState({
+                    switchLoading: false
+                })
+            }
+        }).catch(req=>{
+            req;
+            message.error('发送请求失败！')
+            this.setState({
+                switchLoading: true
+            })
+        })
+    }
     moreChange () {
         if (this.state.seniorIndeterminate) {
             return (
@@ -260,9 +315,9 @@ class MqttForm extends React.Component {
                                         <Checkbox
                                             disabled={this.state.disabled}
                                             value="禁止数据上送"
-                                            checked={this.state.options_ex.diable_data}
+                                            checked={this.state.options_ex.disable_data}
                                             onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'diable_data')
+                                                this.setSetting('options_ex', e.target.checked, 'disable_data')
                                             }}
                                         >禁止数据上送：</Checkbox>
                                     </Col>
@@ -294,10 +349,10 @@ class MqttForm extends React.Component {
                                     <Col span={24}>
                                         <Checkbox
                                             value="禁止设备指令"
-                                            checked={this.state.options_ex.diable_command}
+                                            checked={this.state.options_ex.disable_command}
                                             disabled={this.state.disabled}
                                             onChange={(e)=>{
-                                                this.setSetting('options_ex', e.target.checked, 'diable_command')
+                                                this.setSetting('options_ex', e.target.checked, 'disable_command')
                                             }}
                                         >禁止设备指令：</Checkbox>
                                     </Col>
@@ -337,7 +392,6 @@ class MqttForm extends React.Component {
         }
     }
     setDevs = (value) =>{
-        console.log(value)
         this.setState({
             devs: value
         })
@@ -386,7 +440,7 @@ class MqttForm extends React.Component {
         }
     }
     toggleDisable = () => {
-        const regIp =  /^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5]))$/;
+        const regIp =  /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/;
         const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
         if (regIp.test(this.state.mqtt.server) === false && reg.test(this.state.mqtt.server) === false && !this.state.disabled) {
             message.info('MQTT地址不合法，请重新输入！')
@@ -396,7 +450,6 @@ class MqttForm extends React.Component {
             message.info('请选择上传设备后重试！')
             return false;
         }
-        console.log(this.state)
         if (this.state.mqtt.enable_tls && !this.state.mqtt.tls_cert && !this.state.disabled) {
             message.info('请先上传CA证书！')
             return false;
@@ -411,7 +464,7 @@ class MqttForm extends React.Component {
                 inst: this.props.pane.inst_name,
                 conf: {
                     devs: this.state.devs,
-                    has_options_ex: this.state.has_options_ex ? 'yes' : 'no',
+                    has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
                     mqtt: this.state.mqtt,
                     options: this.state.options,
                     options_ex: this.state.options_ex
@@ -431,15 +484,7 @@ class MqttForm extends React.Component {
         this.setState({disabled: !this.state.disabled})
     };
     installMqtt = () => {
-        const { serial_opt } = this.state;
-        const devs = serial_opt.dataSource;
-        const arr = [];
-        devs && devs.length > 0 && devs.map((item) =>{
-            arr.push({
-                key: item.key,
-                sn: item.name
-            })
-        })
+        const { devs } = this.state;
         const data = {
                 gateway: this.props.match.params.sn,
                 inst: this.props.pane.inst_name,
@@ -448,7 +493,7 @@ class MqttForm extends React.Component {
                 conf: {
                     mqtt: this.state.mqtt,
                     options: this.state.options,
-                    devs: arr,
+                    devs,
                     has_options_ex: this.state.seniorIndeterminate ? 'yes' : 'no',
                     options_ex: this.state.options_ex
                 },
@@ -503,6 +548,7 @@ class MqttForm extends React.Component {
                 this.props.store.action.pushAction(res.data, title, '', data, 10000,  (action)=> {
                     this.props.fetch()
                     this.props.setActiveKey('0')
+                    this.props.remove(this.props.pane.inst_name)
                     if (action) {
                         this.setState({
                             disabled: true,
@@ -533,6 +579,7 @@ class MqttForm extends React.Component {
     }
     funDownload = () => {
         const sn = this.props.match.params.sn;
+        const { inst_name } = this.props.pane
         const zip = new Zip();
         const {tls_cert, client_cert, client_key} = this.props.pane.conf.mqtt;
         tls_cert && zip.file('CA.crt', tls_cert);
@@ -540,7 +587,7 @@ class MqttForm extends React.Component {
         client_key && zip.file('Client.key', client_key);
         zip.generateAsync({type: 'blob'})
             .then(function (content) {
-                saveAs(content, sn + '.zip');
+                saveAs(content, sn + '-' + inst_name + '证书.zip');
 });
     }
     render () {
@@ -552,7 +599,7 @@ class MqttForm extends React.Component {
                 >
                     <Row gutter={24}>
                         <Col span={24}>
-                            <div style={{display: 'flex'}}>
+                            <div className="MQTTPaneAffix">
                                 <Button
                                     style={{marginLeft: '10pxs', marginRight: '20px'}}
                                     type="primary"
@@ -599,6 +646,27 @@ class MqttForm extends React.Component {
                                     </Button>
                                 : ''
                             }
+                                {
+                                    this.props.pane.status !== 'Not installed' && this.props.pane.status !== 'add button'
+                                    ? <div className="SwitchButton">
+                                        <Button
+                                            onClick={this.switch}
+                                            loading={this.state.switchLoading}
+                                            type={
+                                                this.props.pane.status !== 'running'
+                                                ? 'primary'
+                                                : 'danger'
+                                            }
+                                        >
+                                            {
+                                                this.props.pane.status === 'running'
+                                                ? '停止'
+                                                : '启动'
+                                            }
+                                    </Button>
+                                    </div>
+                                    : ''
+                                }
                             </div>
                             <Divider orientation="left">服务器信息</Divider>
                         </Col>
@@ -612,9 +680,31 @@ class MqttForm extends React.Component {
                                     disabled={disabled}
                                     value={mqtt && mqtt.server ? mqtt.server : ''}
                                     onChange={(e) => {
-                                    this.setSetting('mqtt', e.target.value, 'server')
-                                }}
+                                        const regIp = /^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$/;
+                                        const reg = /(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})/;
+                                        const value = e.target.value;
+                                        if (!regIp.test(value) && !reg.test(value)) {
+                                            if (!this.state.mqttNameReg) {
+                                                this.setState({
+                                                    mqttNameReg: true
+                                                })
+                                            }
+                                        } else {
+                                            if (this.state.mqttNameReg){
+                                                this.setState({
+                                                    mqttNameReg: false
+                                                })
+                                            }
+                                        }
+                                        this.setSetting('mqtt', value, 'server')
+                                        }
+                                    }
                                 />
+                                {
+                                    this.state.mqttNameReg
+                                    ? <span style={{color: 'red', marginLeft: '10px'}}>请输入合法的IP地址或域名</span>
+                                    : ''
+                                }
                             </div>
                             <div className="flex">
                                 <span>MQTT端口：</span>
@@ -627,9 +717,27 @@ class MqttForm extends React.Component {
                                     disabled={disabled}
                                     value={mqtt && mqtt.port ? mqtt.port : ''}
                                     onChange={(value) => {
-                                        this.setSetting('mqtt', value, 'port')
+                                        if (value > 65535 || value < 1) {
+                                            if (!this.state.mqttReg) {
+                                                this.setState({
+                                                    mqttReg: true
+                                                })
+                                            }
+                                        } else {
+                                            if (this.state.mqttReg){
+                                                this.setState({
+                                                    mqttReg: false
+                                                })
+                                            }
+                                            this.setSetting('mqtt', value, 'port')
+                                        }
                                     }}
                                 />
+                                {
+                                    this.state.mqttReg
+                                    ? <span style={{color: 'red', marginLeft: '10px'}}>端口数值输入错误， 请输入正确数值！（正确数值为1-65535）</span>
+                                    : ''
+                                }
                             </div>
                             <div style={{padding: '8px 3px'}}>
                                 <span>
@@ -690,6 +798,11 @@ class MqttForm extends React.Component {
                                                 this.setSetting('mqtt', e.target.value, 'client_id')
                                             }}
                                         />
+                                        {
+                                            !this.state.mqtt.client_id
+                                            ? <span style={{color: 'red', marginLeft: '10px'}}>留空时客户端ID为网关序列号</span>
+                                            : ''
+                                        }
                                     </div>
                                 </div>
                                 : ''
@@ -884,7 +997,10 @@ class MqttForm extends React.Component {
                             />
                         </Col>
                     </Row>
-                    <div style={{display: 'flex', marginTop: '20px'}}>
+                    <div
+                        className="MQTTPaneAffix"
+                        style={{marginTop: '20px'}}
+                    >
                                 <Button
                                     style={{marginLeft: '10pxs', marginRight: '20px'}}
                                     type="primary"

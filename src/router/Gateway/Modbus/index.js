@@ -57,7 +57,7 @@ class Modbus extends Component {
             this.refreshTemplateList()
         })
         this.t1 = setInterval(() => {
-            // this.fetch()
+            this.fetch()
         }, 5000);
     }
     UNSAFE_componentWillReceiveProps (nextProps){
@@ -185,6 +185,12 @@ class Modbus extends Component {
     setActiveKey = (key)=>{
         this.setState({activeKey: key})
     }
+    removeList = (inst) =>{
+        const arr = this.state.panes.filter(item=> item.inst_name !== inst)
+        this.setState({
+            panes: arr
+        })
+    }
     removeNotInstall = (record) =>{
         const app_list = this.state.panes;
         app_list.map((item, key) => {
@@ -223,9 +229,12 @@ class Modbus extends Component {
                 app_list.sort((a, b)=>{
                     return a.inst_name.slice(-1) - b.inst_name.slice(-1)
                 })
-                if (status !== 'success') {
+                if (UnsavedChannel.length > 0 && app_list.filter(item => item.inst_name === UnsavedChannel[0].inst_name).length === 0 && status !== 'success') {
                     app_list = app_list.concat(UnsavedChannel)
                 }
+                // if (status !== 'success') {
+                //     app_list = app_list.concat(UnsavedChannel)
+                // }
                 app_list.push(addButton)
                 if (JSON.stringify(this.state.panes) !== JSON.stringify(app_list)) {
                     this.setData(app_list)
@@ -286,6 +295,7 @@ class Modbus extends Component {
                                                     removenotinstall={this.removeNotInstall}
                                                     key={key}
                                                     titles={titles}
+                                                    remove={this.removeList}
                                                     pane={pane}
                                                     panes={this.state.panes}
                                                     fetch={this.fetch}

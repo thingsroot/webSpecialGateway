@@ -38,27 +38,6 @@ class EditableCell extends React.Component {
             this.toggleEdit();
             handleSave({ ...record, ...values });
         });
-        // const value = e.target.value;
-        // const {record, handleSave, datasource, dataIndex} = this.props;
-        // let detection = false;
-        // datasource.map(item=>{
-        //     console.log(item[dataIndex], value, record)
-        //     if (item[dataIndex] === value && item.key !== record.key) {
-        //         detection = true;
-        //     }
-        // })
-        // console.log(detection)
-        // if (!detection) {
-        //     this.form.validateFields((error, values) => {
-        //         if (error && error[e.currentTarget.id]) {
-        //             return;
-        //         }
-        //         this.toggleEdit();
-        //         handleSave({...record, ...values});
-        //     });
-        // } else {
-        //     message.info('设备值不能重复，请重新输入')
-        // }
     };
 
     renderCell = form => {
@@ -96,8 +75,12 @@ class EditableCell extends React.Component {
         this.recordNumber = record.number;
         // const pattern = /^[0-9a-zA-Z_]$/;
         const pattern = /^[\da-zA-Z_]+$/;
+        const regName = /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/;
         return (rule, value, callback)=> {
             rule, value;
+            if (rule.field === 'address') {
+                callback()
+            }
             if (rule.field === 'address') {
                 callback()
             }
@@ -108,8 +91,7 @@ class EditableCell extends React.Component {
                     if (this.device(value)) {
                         callback('名称重复')
                     }
-                    if (!pattern.test(value)) {
-                        console.log(pattern.test(value))
+                    if (!regName.test(value)) {
                         callback('仅支持字母、数字、下划线')
                     }
                     callback()
@@ -124,7 +106,6 @@ class EditableCell extends React.Component {
                         callback('序列号重复')
                     }
                     if (!pattern.test(value)) {
-                        console.log(pattern.test(value))
                         callback('仅支持字母、数字、下划线')
                     }
                     callback()
@@ -295,28 +276,12 @@ class EditableTable extends React.Component {
             this.props.getdevs(this.state.dataSource)
         });
     };
-    // ForeachName = (names, arr) => {
-    //     let name = names
-    //     console.log(name, arr)
-    //     let list = [];
-    //     list = arr.filter(item=> item.device === name);
-    //     let num = Number(name.split('device')[1]) + 1 + Math.floor(Math.random() * 100);
-    //     if (list.length > 0) {
-    //         name = 'device' + num;
-    //             return name;
-    //     } else {
-    //         return name;
-    //     }
-    // }
     handleAdd = () => {
         const {count, dataSource} = this.state;
         let address = dataSource.length && Math.max.apply(Math, dataSource.map(o=> o.address));
         let incrementalAddress = address >= 247 ? address : address + 1;
         let title = this.props.parentTitle
-        console.log(this.props.paremtTitle)
-        // var limitTitle = title.split('(')
         if (this.props.templateList.length) {
-            // const device = this.ForeachName(`device${count + 1}`, dataSource);
             const newData = {
                 key: dataSource.length + 1,
                 template: this.props.templateList[0].name,

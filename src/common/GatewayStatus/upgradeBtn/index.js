@@ -162,7 +162,7 @@ class Btn extends Component {
         const { sn } = this.state;
         http.get('/api/gateways_read?name=' + sn).then(Response=>{
             if (Response.ok) {
-                const beta = Response.data.data.enabled ? 1 : 0;
+                const beta = Response.data.data.enable_beta ? 1 : 0;
                 const app_list = gatewayInfo.apps;
                 const {freeioe_version, skynet_version, mqtt_version, modbus_version} = this.state;
                 if (!mqtt_version) {

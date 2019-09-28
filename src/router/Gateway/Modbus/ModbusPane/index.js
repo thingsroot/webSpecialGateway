@@ -212,7 +212,6 @@ class ModbusPane extends Component {
                 }
             ],
             disabled: true,
-            disabledPort: true,
             templateList: [],
             addTempLists,
             TheBackupappTemplateList: [],
@@ -222,11 +221,38 @@ class ModbusPane extends Component {
             filter_text: '',
             origTemplate: [],
             loading: false,
-            checkOption: false,
+            checkOption: false
         }
 
     }
     UNSAFE_componentWillMount () {
+        if (this.props.panes.length) {
+            console.log(this.props.panes, 'panes')
+            let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
+            let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
+            let serial_opt = this.state.serial_opt
+            if (s1) {
+                console.log('s1')
+                serial_opt.port = 'COM2'
+                this.setState({serial_opt})
+            }
+            if (s1 && !s2) {
+                console.log('!s2')
+            }
+            if (s2) {
+                serial_opt.port = 'COM1'
+                this.setState({serial_opt})
+            }
+            if (s1 && s2) {
+                this.setState({
+                    communication: true
+                })
+            } else {
+                this.setState({
+                    communicationFt: false
+                })
+            }
+        }
     }
     componentDidMount () {
         this.tty_list = GetSerialListBySNs(this.props.match.params.sn)
@@ -264,27 +290,98 @@ class ModbusPane extends Component {
             console.log(1)
         }
     }
-    UNSAFE_componentWillReceiveProps () {
+    UNSAFE_componentWillReceiveProps (nextProps) {
         if (!this.state.disabled) {
             return false;
+        }
+        if (this.props.pane.status !== nextProps.pane.status) {
+            this.setState({
+                switchLoading: false
+            })
         }
     }
     componentWillUnmount () {
         this.t1 && clearInterval(this.t1)
     }
+    checkOption () {
+        if (this.props.panes.length) {
+                    let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
+                    let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
+                    let option = '';
+                    switch (true) {
+                        case s1 && s2 :
+                            option = this.optionDisabled();
+                            break;
+                        case !s1 && !s2:
+                            option = this.optionTotal();
+                            break;
+                        case s1:
+                             console.log('s1 show');
+                             // if (this.props.currentPagePort === 'ttyS1' && !s2) {
+                             //    option = this.optionTotal();
+                             //     break;
+                             // } else {
+                             //   option = this.optionS2();
+                             //     break;
+                             // }
+                            option = this.optionS2();
+                            break;
+                        case s2:
+                            console.log('s2 show');
+                            // if (this.props.currentPagePort === 'ttyS2' && !s1) {
+                            //     option = this.optionTotal();
+                            //     break;
+                            // } else {
+                            //     option = this.optionS1();
+                            //     break;
+                            // }
+                            option = this.optionS1();
+                            break;
+                        default:
+                            console.log(5);
+                    }
+                    return option
+        }
+    }
+    optionS1 = () => (
+        <Option
+            value="/dev/ttyS1"
+            key="/dev/ttyS1"
+        >COM1</Option>);
+    optionS2 = () => (
+        <Option
+            value="/dev/ttyS2"
+            key="/dev/ttyS2"
+        >COM2</Option>);
+    optionDisabled = () => (
+        <Option
+            value="disabled"
+            key="disabled"
+            disabled
+        >不可选</Option>);
+    optionTotal =() => {
+        return [
+            <Option
+                value="/dev/ttyS1"
+                key="/dev/ttyS1"
+            >COM1</Option>,
+            <Option
+                value="/dev/ttyS2"
+                key="/dev/ttyS2"
+            >COM2</Option>
+        ]
+    };
     setSetting = (type, val, name) =>{
         if (type === 'serial_opt') {
             console.log(type, val, name, 'setting')
             this.setState({
                 serial_opt: Object.assign({}, this.state.serial_opt, {[name]: val})
             })
-            console.log(this.state.serial_opt, 'serial')
         }
         if (type === 'socket_opt') {
             this.setState({
                 socket_opt: Object.assign({}, this.state.socket_opt, {[name]: val})
             })
-            console.log(this.state.socket_opt, 'socket')
         }
         if (!name){
             this.setState({
@@ -357,7 +454,6 @@ class ModbusPane extends Component {
                     // let title = '安装应用' + data.inst + '请求'
                     // message.info(title + '等待网关响应!')
                     this.props.store.action.pushAction(res.data, '安装', '', data, 10000,  (action)=> {
-                        console.log(action)
                         this.props.fetch('success')
                         if (action) {
                             this.setState({
@@ -384,7 +480,6 @@ class ModbusPane extends Component {
     AppConf = (status) => {
             if (this.props.pane.status === 'Not installed'  && status === 'install') {
                 this.state.devs.map(item=>{
-                    console.log(item)
                     console.log(this.state.devs.filter(items=>{
                         if (items.unit === item.unit && items.key !== items.key) {
                             return items
@@ -434,7 +529,6 @@ class ModbusPane extends Component {
                 id: `/gateways/${this.props.match.params.sn}/config/${this.props.pane.inst_name}/${new Date() * 1}`,
                 inst: this.props.pane.inst_name
             };
-
         if (data.conf.devs.length) {
             http.post('/api/gateways_applications_conf', data).then(res=>{
                 if (res.ok) {
@@ -447,6 +541,32 @@ class ModbusPane extends Component {
                     message.error(res.error)
                 }
             })
+            if (this.props.pane.auto === 0) {
+                const options = {
+                    gateway: this.props.match.params.sn,
+                    inst: this.props.pane.inst_name,
+                    option: 'auto',
+                    value: 1,
+                    id: `option/${this.props.match.params.sn}/${this.props.pane.inst_name}/${new Date() * 1}`
+                }
+                http.post('/api/gateways_applications_option', options).then(res=>{
+                    if (res.ok){
+                        let title = '开启应用开机自启请求成功!';
+                        message.info(title + '等待网关响应!')
+                        let info = {
+                            gateway: this.props.match.params.sn,
+                            inst: this.props.pane.inst_name,
+                            value: 1
+                        }
+                        this.props.store.action.pushAction(res.data, title, '', info, 10000,  ()=> {
+                            this.props.update_app_list();
+                        })
+                    } else {
+                        let title = '开启应用开机自启请求失败!';
+                        message.error(title)
+                    }
+                })
+            }
         } else {
             message.error('设备列表不能为空');
             return false
@@ -461,15 +581,16 @@ class ModbusPane extends Component {
         }
         let regFlag = false;
         const reg = /^[0-9a-zA-Z_]{1,}$/;
+        const regName = /^[a-zA-Z0-9_\u4e00-\u9fa5]+$/;
         if (!this.state.disabled) {
             this.state.devs.map(item=>{
                 if (!reg.test(item.sn)) {
-                    message.info('设备名称与设备序列号只能输入字母、数字、下划线，请修改后重试！')
+                    message.info('设备序列号只能输入字母、数字、下划线，请修改后重试！')
                     regFlag = true;
                     return false;
                 }
-                if (!reg.test(item.name)) {
-                    message.info('设备名称与设备序列号只能输入字母、数字、下划线，请修改后重试！')
+                if (!regName.test(item.name)) {
+                    message.info('设备名称只能输入中文、字母、数字、下划线，请修改后重试！')
                     regFlag = true;
                     return false;
                 }
@@ -538,6 +659,7 @@ class ModbusPane extends Component {
                     })
                     this.props.fetch()
                     this.props.setActiveKey('0')
+                    this.props.remove(this.props.pane.inst_name)
                 })
             } else {
                 this.setState({
@@ -590,10 +712,8 @@ class ModbusPane extends Component {
         window.open('/appdetails/APP00000025/new_template', '_blank')
     };
     search = (value) => {
-        console.log(value)
         if (value) {
             const newList = this.state.TheBackupappTemplateList.filter(item=>item.name.toLocaleLowerCase().indexOf(value) !== -1 || item.description.indexOf(value) !== -1 || item.conf_name.toLocaleLowerCase().indexOf(value) !== -1)
-            console.log(newList)
             this.setState({
                 appTemplateList: newList
             })
@@ -705,10 +825,12 @@ class ModbusPane extends Component {
         http.post('/api/gateways_applications_' + type, data).then(res=>{
             if (res.ok) {
                 message.success(action + data.inst + '请求发送成功')
-                this.props.store.action.pushAction(res.data, action + '应用', '', data, 10000,  ()=> {
-                    this.setState({
-                        switchLoading: false
-                    })
+                this.props.store.action.pushAction(res.data, action + '应用', '', data, 10000,  (action)=> {
+                    if (!action) {
+                        this.setState({
+                            switchLoading: false
+                        })
+                    }
                 })
             } else {
                 message.error(action +  data.inst + '请求发送失败。 错误:' + res.error)
@@ -784,8 +906,8 @@ class ModbusPane extends Component {
                                 >
                                     {
                                         this.props.pane.status === 'running'
-                                        ? '停止应用'
-                                        : '启动应用'
+                                        ? '停止'
+                                        : '启动'
                                     }
                               </Button>
                               </div>
