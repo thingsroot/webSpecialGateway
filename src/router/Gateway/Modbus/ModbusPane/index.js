@@ -804,7 +804,7 @@ class ModbusPane extends Component {
                             {
                                 this.props.pane.status === 'Not installed'
                                 ? '安装'
-                                : !this.state.disabled || !this.state.disabledPort ? '保存' : '编辑'
+                                : !this.state.disabled ? '保存' : '编辑'
                             }
                         </Button>
                             <Button
