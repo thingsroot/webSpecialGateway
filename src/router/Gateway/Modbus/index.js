@@ -156,7 +156,7 @@ class Modbus extends Component {
             status: 'Not installed',
             conf: {
                 apdu_type: 'TCP',
-                channel_type: 'TCP',
+                channel_type: 'socket',
                 devs: [],
                 loop_gap: '1000',
                 // serial_opt: {
