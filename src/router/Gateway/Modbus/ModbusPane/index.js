@@ -807,18 +807,6 @@ class ModbusPane extends Component {
                                 : !this.state.disabled ? '保存' : '编辑'
                             }
                         </Button>
-                            <Button
-                                style={{marginLeft: '10pxs'}}
-                                type="danger"
-                                disabled={this.state.checkIp}
-                                onClick={this.showConfirm}
-                            >
-                                {
-                                    this.props.pane.status === 'Not installed'
-                                    ? '取消添加'
-                                    : '删除'
-                                }
-                            </Button>
                         {
                             !disabled && this.props.pane.status !== 'Not installed'
                             ? <Button
@@ -838,6 +826,7 @@ class ModbusPane extends Component {
                             this.props.pane.status !== 'Not installed' && this.props.pane.status !== 'add button'
                             ? <div className="SwitchButton">
                                 <Button
+                                    style={{marginRight: '20px'}}
                                     onClick={this.switch}
                                     loading={this.state.switchLoading}
                                     type={
@@ -851,7 +840,19 @@ class ModbusPane extends Component {
                                         ? '停止'
                                         : '启动'
                                     }
-                              </Button>
+                                </Button>
+                                <Button
+                                    style={{marginLeft: '10pxs', background: '#CC3300'}}
+                                    type="danger"
+                                    disabled={this.state.checkIp}
+                                    onClick={this.showConfirm}
+                                >
+                                {
+                                    this.props.pane.status === 'Not installed'
+                                    ? '取消添加'
+                                    : '删除'
+                                }
+                                </Button>
                               </div>
                             : ''
                         }
@@ -1069,19 +1070,12 @@ class ModbusPane extends Component {
                             style={{ width: 200 }}
                         />
                         <span style={{padding: '0 2px'}}> </span>
-                        {/* <Button
-                            type="primary"
-                            onClick={this.onCreateNewTemplate}
-                        >
-                            创建新模板
-                        </Button> */}
                         <Button
                             style={{
                                 marginLeft: '538px'
                             }}
                             type="primary"
                             onClick={()=>{
-                                // this.props.refreshTemplateList()
                                 this.refreshTemplateList()
                             }}
                         >
@@ -1131,27 +1125,6 @@ class ModbusPane extends Component {
                                 : !this.state.disabled ? '保存' : '编辑'
                             }
                         </Button>
-                    {/*<Popconfirm*/}
-                    {/* title={this.props.pane.status === 'Not installed' ? '确定要取消安装Modbus通道吗？' : '确定要删除应用Modbus吗?'}
-*/}
-                    {/*    onConfirm={this.removeModbus}*/}
-                    {/*    onCancel={cancel}*/}
-                    {/*    okText="删除"*/}
-                    {/*    cancelText="取消"*/}
-                    {/*>*/}
-                    <Button
-                        style={{marginLeft: '10pxs'}}
-                        type="danger"
-                        disabled={this.state.checkIp}
-                        onClick={this.showConfirm}
-                    >
-                        {
-                            this.props.pane.status === 'Not installed'
-                                ? '取消添加'
-                                : '删除'
-                        }
-                    </Button>
-                    {/*</Popconfirm>*/}
                         {
                             !disabled && this.props.pane.status !== 'Not installed'
                             ? <Button
@@ -1221,9 +1194,6 @@ class ModbusPane extends Component {
                                                                 return (<div key={key}>
                                                                     <div className="tableHeaders">
                                                                         <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
-                                                                        {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
-                                                                        {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
-                                                                        {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
                                                                         <div>{mqtt.log_channel.Data[key].content}</div>
                                                                     </div>
                                                                 </div>)
@@ -1332,9 +1302,6 @@ class ModbusPane extends Component {
                                                             return (<div key={key}>
                                                                 <div className="tableHeaders">
                                                                     <div>{mqtt.log_channel.Data[key].time.substring(10, 19)}</div>
-                                                                    {/* <div>{mqtt.log_channel.Data[key].level}</div> */}
-                                                                    {/* <div>{mqtt.log_channel.Data[key].id}</div> */}
-                                                                    {/* <div>{mqtt.log_channel.Data[key].inst}</div> */}
                                                                     <div>{mqtt.log_channel.Data[key].content}</div>
                                                                 </div>
                                                             </div>)

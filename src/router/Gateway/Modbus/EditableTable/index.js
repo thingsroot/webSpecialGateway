@@ -242,15 +242,7 @@ class EditableTable extends React.Component {
             }
         ];
         this.state = {
-            dataSource: [
-                // {
-                //     key: '0',
-                //     number: '0',
-                //     template: '选择模板',
-                //     address: '0',
-                //     device: '设备名称'
-                // }
-            ],
+            dataSource: [],
             count: 0
         };
     }

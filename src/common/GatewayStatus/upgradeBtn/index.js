@@ -48,12 +48,12 @@ class Btn extends Component {
     }
     menu = () =>{
         return (
-            <Menu>
+            <Menu style={{width: 140}}>
                 <Menu.Item>
                     <div className="upgradeBtn">
-                        <span>固件升级</span>
+                        <span>固件</span>
                         <Button
-                            // type="primary"
+                            size="small"
                             disabled={this.state.firmwareBtnFlag}
                             style={this.state.firmwareBtnFlag ? {} : style}
                             onClick={()=>{
@@ -64,8 +64,9 @@ class Btn extends Component {
                 </Menu.Item>
                 <Menu.Item>
                     <div className="upgradeBtn">
-                        <span>Modbus升级</span>
+                        <span>Modbus</span>
                         <Button
+                            size="small"
                             type="primary"
                             disabled={this.state.ModbusBtnFlag}
                             style={this.state.ModbusBtnFlag ? {} : style}
@@ -77,8 +78,9 @@ class Btn extends Component {
                 </Menu.Item>
                 <Menu.Item>
                     <div className="upgradeBtn">
-                        <span>MQTT升级</span>
+                        <span>MQTT</span>
                         <Button
+                            size="small"
                             type="primary"
                             disabled={this.state.MqttBtnFlag}
                             style={this.state.MqttBtnFlag ? {} : style}
@@ -243,11 +245,11 @@ class Btn extends Component {
                     loading
                     ? <Button
                         style={{
-                            width: 200
+                            width: 140
                         }}
                         loading
                       >
-                          版本信息获取中...
+                          版本获取中...
                       </Button>
                     : <Dropdown
                         overlay={this.menu}
@@ -256,7 +258,7 @@ class Btn extends Component {
                         <Button
                             // type="primary"
                             className="ant-dropdown-link"
-                            style={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag ? {width: 200} : {...style, width: 200}}
+                            style={firmwareBtnFlag && MqttBtnFlag && ModbusBtnFlag ? {width: 140} : {...style, width: 140}}
                         >
                             {
                                 !firmwareBtnFlag || !MqttBtnFlag || !ModbusBtnFlag

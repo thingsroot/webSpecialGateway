@@ -232,9 +232,6 @@ class Modbus extends Component {
                 if (UnsavedChannel.length > 0 && app_list.filter(item => item.inst_name === UnsavedChannel[0].inst_name).length === 0 && status !== 'success') {
                     app_list = app_list.concat(UnsavedChannel)
                 }
-                // if (status !== 'success') {
-                //     app_list = app_list.concat(UnsavedChannel)
-                // }
                 app_list.push(addButton)
                 if (JSON.stringify(this.state.panes) !== JSON.stringify(app_list)) {
                     this.setData(app_list)

@@ -155,8 +155,6 @@ class MqttForm extends React.Component {
         reader.readAsText(file);
         reader.onload = (result) => {
             let targetNum = result.target.result;
-            // targetNum = targetNum.replace(/[\n\r]/g, '');
-            // targetNum = targetNum.replace(/[ ]/g, '');
            this.setSetting('mqtt', targetNum, 'tls_cert')
         }
         return false;
@@ -175,8 +173,6 @@ class MqttForm extends React.Component {
         reader.readAsText(file);
         reader.onload = (result) => {
             let targetNum = result.target.result;
-            // targetNum = targetNum.replace(/[\n\r]/g, '');
-            // targetNum = targetNum.replace(/[ ]/g, '');
             this.setSetting('mqtt', targetNum, 'client_key')
 
         }
@@ -611,25 +607,6 @@ class MqttForm extends React.Component {
                                         : '安装'
                                     }
                                 </Button>
-                                {/* <Popconfirm
-                                    title={this.props.pane.status === 'Not installed' ? '确定要取消安装MQTT通道吗？' : '确定要删除应用MQTT吗?'}
-                                    onConfirm={this.removeApp}
-                                    // onCancel={cancel}
-                                    okText="删除"
-                                    cancelText="取消"
-                                > */}
-                                    <Button
-                                        style={{marginLeft: '10pxs'}}
-                                        type="danger"
-                                        onClick={this.showConfirm}
-                                    >
-                                        {
-                                            this.props.pane.status === 'Not installed'
-                                                ? '取消添加'
-                                                : '删除'
-                                        }
-                                    </Button>
-                                {/* </Popconfirm> */}
                             {
                                 !disabled && this.props.pane.status !== 'Not installed'
                                 ? <Button
@@ -650,6 +627,7 @@ class MqttForm extends React.Component {
                                     this.props.pane.status !== 'Not installed' && this.props.pane.status !== 'add button'
                                     ? <div className="SwitchButton">
                                         <Button
+                                            style={{marginRight: '20px'}}
                                             onClick={this.switch}
                                             loading={this.state.switchLoading}
                                             type={
@@ -663,6 +641,17 @@ class MqttForm extends React.Component {
                                                 ? '停止'
                                                 : '启动'
                                             }
+                                    </Button>
+                                    <Button
+                                        style={{marginLeft: '10pxs', background: '#CC3300'}}
+                                        type="danger"
+                                        onClick={this.showConfirm}
+                                    >
+                                        {
+                                            this.props.pane.status === 'Not installed'
+                                                ? '取消添加'
+                                                : '删除'
+                                        }
                                     </Button>
                                     </div>
                                     : ''
@@ -1012,24 +1001,6 @@ class MqttForm extends React.Component {
                                         : '安装'
                                     }
                                 </Button>
-                                <Popconfirm
-                                    title="确定要删除应用吗?"
-                                    onConfirm={this.removeApp}
-                                    // onCancel={cancel}
-                                    okText="删除"
-                                    cancelText="取消"
-                                >
-                                    <Button
-                                        style={{marginLeft: '10pxs'}}
-                                        type="danger"
-                                    >
-                                        {
-                                            this.props.pane.status === 'Not installed'
-                                                ? '取消添加'
-                                                : '删除'
-                                        }
-                                    </Button>
-                                </Popconfirm>
                                 {
                                     !disabled && this.props.pane.status !== 'Not installed'
                                     ? <Button
