@@ -255,7 +255,7 @@ class Mqtt extends Component {
                         }
                     })
                 }
-                const UnsavedChannel = this.state.panes.filter(item=>item.status === 'Not installed')
+                const UnsavedChannel = this.state.app_list.filter(item=>item.status === 'Not installed')
                 app_list.sort((a, b)=>{
                     return a.inst_name.slice(-1) - b.inst_name.slice(-1)
                 })
