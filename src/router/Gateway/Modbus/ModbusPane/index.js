@@ -257,7 +257,6 @@ class ModbusPane extends Component {
     componentDidMount () {
         this.tty_list = GetSerialListBySNs(this.props.match.params.sn)
         const { conf } = this.props.pane;
-
         this.setState({
             apdu_type: conf.apdu_type,
             channel_type: conf.channel_type,
@@ -285,7 +284,7 @@ class ModbusPane extends Component {
         let serial_opt = this.state.serial_opt;
         serial_opt.port = conf.serial_opt ? conf.serial_opt.port : this.tty_list[0].dev
         this.setState({serial_opt})
-        if (this.props.pane.conf.serial_opt === undefined) {
+        if (this.props.pane.conf.serial_opt === undefined) { //没有选择串口，或新建
             this.props.panes.forEach(item=>{
                 if (item.conf.serial_opt) {
                     this.tty_list.forEach(j=> {
@@ -1100,6 +1099,7 @@ class ModbusPane extends Component {
                         parentTitle={this.props.titles}
                         templateList={this.state.templateList}
                         devs={this.props.pane.conf.devs}
+                        panes={this.props.panes}
                     />
                 <div style={{display: 'none'}}>
                     使用网关sn作为设备sn的前缀:

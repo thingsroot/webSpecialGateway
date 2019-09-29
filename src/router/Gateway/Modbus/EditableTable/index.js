@@ -81,9 +81,6 @@ class EditableCell extends React.Component {
             if (rule.field === 'address') {
                 callback()
             }
-            if (rule.field === 'address') {
-                callback()
-            }
             if (rule.field === 'device') {
                 if (this.recordDevice === value) {
                     callback()
@@ -102,12 +99,21 @@ class EditableCell extends React.Component {
                 if (this.recordNumber === value) {
                     callback()
                 } else {
+                    this.props.panes.map(item=> {
+                        if (item.conf && item.conf.devs) {
+                            let sn = item.conf.devs.some(item=>item.sn === value)
+                            if (sn) {
+                                callback('序列号重复')
+                            }
+                        }
+                        })
                     if (this.number(value)) {
                         callback('序列号重复')
                     }
                     if (!pattern.test(value)) {
                         callback('仅支持字母、数字、下划线')
                     }
+
                     callback()
                 }
             }
@@ -310,6 +316,7 @@ class EditableTable extends React.Component {
         const disabled = this.props.disable;
         const parentTitle = this.props.title
         const {dataSource} = this.state;
+        const panes = this.props.panes;
         const components = {
             body: {
                 row: EditableFormRow,
@@ -322,6 +329,7 @@ class EditableTable extends React.Component {
                             disabled={disabled}
                             {...restProps}
                             parentTitle={parentTitle}
+                            panes={panes}
                         />
                     )
                 }
@@ -353,6 +361,7 @@ class EditableTable extends React.Component {
                     bordered
                     dataSource={dataSource}
                     columns={columns}
+                    panes={panes}
                     pagination={false}
                 />
                 <Button
