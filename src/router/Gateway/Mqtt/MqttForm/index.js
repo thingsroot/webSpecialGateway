@@ -321,7 +321,7 @@ class MqttForm extends React.Component {
                                         span={24}
                                         style={{display: 'flex'}}
                                     >
-                                        <span style={{lineHeight: '30px', marginLeft: '6px'}}>事件上送（最小等级）：</span>
+                                        <span style={this.state.disabled ? {lineHeight: '30px', marginLeft: '6px', color: 'rgba(0, 0, 0, 0.25)'} : {lineHeight: '30px', marginLeft: '6px'}}>事件上送（最小等级）：</span>
                                         <InputNumber
                                             disabled={this.state.disabled}
                                             min={1}
