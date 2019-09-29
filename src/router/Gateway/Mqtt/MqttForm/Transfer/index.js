@@ -12,19 +12,12 @@ class App extends React.Component {
     data: []
   };
   componentDidMount () {
-    console.log(this.props)
     this.setPage()
   }
   UNSAFE_componentWillReceiveProps (nextProps){
     if (nextProps.disabled !== this.props.disabled) {
         this.MapSetDevList(this.state.data, nextProps.disabled)
     }
-    // if (nextProps.status !== this.props.status) {
-    //   this.setPage()
-    // }
-    // if (JSON.stringify(this.props.devs) !== JSON.stringify(nextProps.devs)) {
-    //   this.setPage()
-    // }
   }
   setPage = () => {
     const { devs } = this.props;
@@ -99,7 +92,6 @@ class App extends React.Component {
             selectedKeys={selectedKeys}
             onChange={this.handleChange}
             onSelectChange={this.handleSelectChange}
-            // onScroll={this.handleScroll}
             render={item => item.title}
             listStyle={{width: '48%', height: '300px'}}
             disabled={this.props.disabled}

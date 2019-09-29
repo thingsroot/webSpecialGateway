@@ -13,17 +13,9 @@ import GatewayMQTT from '../../utils/GatewayMQTT';
 const DeviceList = LoadableComponent(()=>import('./DeviceList'));
 const Modbus = LoadableComponent(()=>import('./Modbus'));
 const Mqtt = LoadableComponent(()=>import('./Mqtt'));
-// const AppsList = LoadableComponent(()=>import('./AppsList'));
-// const Settings = LoadableComponent(()=>import('./Settings'));
-// const Vnet  = LoadableComponent(()=>import('./Vnet'));
-// const Vserial = LoadableComponent(()=>import('./Vserial'));
-// const OnlineRecords = LoadableComponent(()=>import('./OnlineRecords'));
 const Logviewer = LoadableComponent(()=>import('./Logviewer'));
 const Comm = LoadableComponent(()=>import('./CommViewer'));
 const NetworkConfig = LoadableComponent(()=>import('./NetworkConfig'));
-// const Appconfig = LoadableComponent(()=>import('../AppsInstall/AppConfig'));
-// const PlatformEvents = LoadableComponent(()=>import('./PlatformEvents'));
-// const DeviceEvents = LoadableComponent(()=>import('./DeviceEvents'));
 const GatewaysDrawer = LoadableComponent(()=>import('../../common/GatewaysDrawer'));
 @withRouter
 @inject('store')
@@ -65,7 +57,6 @@ class MyGatesDevices extends Component {
         clearInterval(this.timer)
     }
     fetch = () => {
-        //console.log(new Date())
         const {gateway} = this.state;
         if (gateway === undefined || gateway === '') {
             return;
@@ -100,18 +91,9 @@ class MyGatesDevices extends Component {
             visible: false
         })
     }
-    onChangeGateway = () => {
-        //this.componentDidMount()
-    }
-    // setUrl = (sn) => {
-    //   let arr = location.pathname.split('/');
-    //   arr[2] = sn;
-    //   return arr.join('/')
-    // }
     render () {
       const { path } = this.props.match;
       const { pathname } = this.props.location;
-    //   const {gatewayInfo} = this.props.store;
         return (
             <div>
                 <GatewayStatus gateway={this.state.gateway}/>
@@ -159,29 +141,6 @@ class MyGatesDevices extends Component {
                             title="我的网关·网络配置"
                             gateway={this.state.gateway}
                         />
-                        {/* <GatewayRoute path={`${path}/settings`}
-                            component={Settings}
-                            title="我的网关·网关设置"
-                            gateway={this.state.gateway}
-                        /> */}
-                        {/* <GatewayRoute path={`${path}/vnet`}
-                            component={Vnet}
-                            title="我的网关·远程编程-网络"
-                            gateway={this.state.gateway}
-                            mqtt={this.state.mqtt}
-                            gatewayInfo={gatewayInfo}
-                        />
-                        <GatewayRoute path={`${path}/vserial`}
-                            component={Vserial}
-                            title="我的网关·虚拟串口"
-                            gateway={this.state.gateway}
-                            mqtt={this.state.mqtt}
-                            gatewayInfo={gatewayInfo}
-                        /> */}
-                        {/* <GatewayRoute path={`${path}/onlinerecords`}
-                            component={OnlineRecords}
-                            title="我的网关·在线记录"
-                            gateway={this.state.gateway}
                         /> */}
                         <GatewayRoute path={`${path}/logs`}
                             component={Logviewer}
@@ -195,21 +154,6 @@ class MyGatesDevices extends Component {
                             mqtt={this.state.mqtt}
                             gateway={this.state.gateway}
                         />
-                        {/* <GatewayRoute path={`${path}/platformevents`}
-                            component={PlatformEvents}
-                            title="我的网关·平台事件"
-                            gateway={this.state.gateway}
-                        />
-                        <GatewayRoute path={`${path}/events`}
-                            component={DeviceEvents}
-                            title="我的网关·设备事件"
-                            gateway={this.state.gateway}
-                        /> */}
-                        {/* <GatewayRoute path="/gateways/appconfig"
-                            component={Appconfig}
-                            title="我的网关·应用配置"
-                            gateway={this.state.gateway}
-                        /> */}
                         <Redirect from={path}
                             to={`${path}/devices`}
                         />

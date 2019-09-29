@@ -15,46 +15,28 @@ const columns = [{
         dataIndex: 'meta.inst',
         key: 'meta.inst',
         className: 'cursor'
-        // sorter: true
     }, {
         title: '描述',
         dataIndex: 'meta.description',
         key: 'meta.description',
         className: 'cursor'
-        // sorter: true
     }, {
         title: '输入/输出',
         dataIndex: 'meta.ioc',
         key: 'meta.ioc',
         className: 'cursor'
-        // sorter: true
     }, {
         title: '设备序列号',
         key: 'meta.sn',
         dataIndex: 'meta.sn',
         width: '30%',
         className: 'cursor'
-        // sorter: true
     }, {
         title: '所属通道',
         key: 'meta.app_inst',
         dataIndex: 'meta.app_inst',
         className: 'cursor'
-        // sorter: true
     }
-    //   , {
-    //   title: 'Action',
-    //   key: 'action',
-    //   render: (record) => {
-    //     return (<span>
-    //       <Link
-    //           disabled={record.set_data ? false : true}
-    //           to={`/MyGatesDevicesOutputs/${record.gateway}/${record.sn}`}
-    //           key="1"
-    //       >数据下置</Link>
-    //     </span>)
-    //   }
-    // }
 ];
 
 @withRouter
@@ -243,23 +225,6 @@ class DevicesList extends Component {
                                     />{this.state.uploadOneShort ? '停止临时数据上传' : '开启临时数据上传'}
                                 </Button>
                         }
-                        {/* <Tooltip
-                            placement="topLeft"
-                            title="请求网关数据快照"
-                        >
-                            <Button
-                                disabled={!this.state.dataSanpshotEnable}
-                                onClick={()=>{
-                                    this.setState({dataSanpshotEnable: false})
-                                    this.dataSnapshot()
-                                    setTimeout(()=>{
-                                        this.setState({dataSanpshotEnable: true})
-                                    }, 1000)
-                                }}
-                            >
-                                <IconIOT type="icon-APIshuchu"/>获取数据快照
-                            </Button>
-                        </Tooltip> */}
                         <Tooltip
                             placement="bottom"
                             title="强制网关上送最新数据"
@@ -277,22 +242,6 @@ class DevicesList extends Component {
                                 <IconIOT type="icon-APIshuchu"/>强制刷新
                             </Button>
                         </Tooltip>
-                        {/* <Tooltip
-                            placement="topLeft"
-                            title="刷新设备列表"
-                        >
-                            <Icon
-                                style={{fontSize: 18, margin: '0 0 0 15px'}}
-                                type="reload"
-                                onClick={()=>{
-                                    this.setState({
-                                        loading: true,
-                                        sign: true
-                                    });
-                                    this.getData()
-                                }}
-                            />
-                        </Tooltip> */}
                     </p>
                 </div>
                 <Table
