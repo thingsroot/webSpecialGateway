@@ -183,7 +183,9 @@ class Modbus extends Component {
         })
     }
     setActiveKey = (key)=>{
+        console.log(key, 'key')
         this.setState({activeKey: key})
+        // this.fetch()
     }
     removeList = (inst) =>{
         const arr = this.state.panes.filter(item=> item.inst_name !== inst)
@@ -264,10 +266,8 @@ class Modbus extends Component {
                                   >
                             {
                                 this.state.panes.map((pane, key) => {
-                                    console.log(pane)
                                     const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
                                     const titles = pane.inst_name.indexOf('_') !== -1 ?  pane.inst_name : pane.inst_name;
-                                    console.log(titles, 'titles')
                                     return (
                                         <TabPane
                                             tab={
