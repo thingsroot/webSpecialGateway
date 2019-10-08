@@ -42,6 +42,8 @@ class GatewaysDrawer extends Component {
     };
     onClose = () => {
         this.updateGatewayList()
+        this.setState({visible: false})
+        console.log(this.props.visible)
         this.props.store.timer.setGateStatusLast(0) // Force to update gateway status
         setTimeout( ()=> {
             this.props.onChange()
@@ -62,6 +64,7 @@ class GatewaysDrawer extends Component {
                 closable={false}
                 onClose={this.onClose}
                 visible={visible}
+                maskClosable
                 width="400"
             >
                 <ul>

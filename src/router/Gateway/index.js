@@ -91,6 +91,9 @@ class MyGatesDevices extends Component {
             visible: false
         })
     }
+    onChangeGateway = () => {
+        //this.componentDidMount()
+    }
     render () {
       const { path } = this.props.match;
       const { pathname } = this.props.location;
