@@ -33,3 +33,7 @@
 .templateList{
   width: 1030px!important;
 }
+.ant-table-tbody > tr > td {
+  word-wrap: break-word;
+  word-break: break-all;
+  }
