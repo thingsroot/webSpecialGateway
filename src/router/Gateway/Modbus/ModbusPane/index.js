@@ -227,12 +227,10 @@ class ModbusPane extends Component {
     }
     UNSAFE_componentWillMount () {
         if (this.props.panes.length) {
-            console.log(this.props.panes, 'panes')
             let s1 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS1' : '');
             let s2 = this.props.panes.some(item => item.conf.serial_opt ? item.conf.serial_opt.port === '/dev/ttyS2' : '');
             let serial_opt = this.state.serial_opt
             if (s1) {
-                console.log('s1')
                 serial_opt.port = 'COM2'
                 this.setState({serial_opt})
             }

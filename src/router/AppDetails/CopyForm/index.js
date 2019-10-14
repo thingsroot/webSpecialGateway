@@ -50,17 +50,18 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                 }
                 if (this.props.type === '复制') {
                     http.post('/api/configurations_create', params).then(res=>{
-                        let conf_info = res.data;
-                        conf_name = res.data.name;
                         if (res.ok === false) {
                             message.error('复制模板信息失败！');
                         } else {
+                            let conf_info = res.data;
+                            conf_name = res.data.name;
                             if (this.props.copyData.version !== 0) {
+                                const data = this.props.csvData ? this.props.csvData.join('\n') : this.props.copyData
                                 let params = {
                                     conf: conf_name,
                                     version: 1,
                                     comment: 'V1',
-                                    data: this.props.copyData.data
+                                    data
                                 };
                                 http.post('/api/configurations_versions_create', params)
                                     .then(res=>{
@@ -77,7 +78,7 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                         }
                     });
                 } else if (this.props.type === '编辑') {
-                    params['name'] = this.props.conf;
+                    params.name = this.props.conf;
                     http.post('/api/configurations_update', params)
                         .then(res=>{
                             if (res.ok) {
@@ -108,14 +109,14 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                 >
                     <Form layout="vertical">
                         <Form.Item label="模板名称">
-                            {getFieldDecorator('conf_name', { initialValue: copyData.conf_name }, {
+                            {getFieldDecorator('conf_name', { initialValue: copyData.conf_name + '_copy' }, {
                                 rules: [{ required: true, message: '请填写模板名称!' }]
                             })(
                                 <Input type="text"/>
                             )}
                         </Form.Item>
                         <Form.Item label="描述">
-                            {getFieldDecorator('description', { initialValue: copyData.description }, {
+                            {getFieldDecorator('description', { initialValue: copyData.description + '_copy' }, {
                                 rules: [{ required: true, message: '请填写描述信息!' }]
                             })(
                                 <Input type="textarea" />
@@ -125,7 +126,7 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                             className="collection-create-form_last-form-item"
                             label="权限"
                         >
-                            {getFieldDecorator('owner_type', { initialValue: copyData.owner_type }
+                            {getFieldDecorator('owner_type', { initialValue: 'User' }
                             )(
                                 <Radio.Group>
                                     {this.state.userGroups.length > 0 ? <Radio value="Cloud Company Group">公司</Radio> : ''}
@@ -137,7 +138,7 @@ const CopyForm = Form.create({ name: 'copy_form' })(
                             className="collection-create-form_last-form-item"
                             label="是否公开"
                         >
-                            {getFieldDecorator('public', { initialValue: copyData.public === 0 ? '0' : '1' })(
+                            {getFieldDecorator('public', { initialValue: '0' })(
                                 <Radio.Group>
                                     <Radio value="0">不公开</Radio>
                                     <Radio value="1">公开</Radio>

@@ -260,25 +260,26 @@ class MyTemplateDetails extends Component  {
                         border="1"
                     >
                         <tbody>
-                        {csvData && csvData.length > 0 && csvData.map((v, key)=>{
-                                if (v.length > 1) {
-                                    return <tr key={key}>
-                                        {
-                                            v && v.length > 0 && v.map((w, key)=>{
-                                                return (
-                                                    <td
-                                                        key={key}
-                                                        style={{width: '100px', padding: '10px', whiteSpace: 'nowrap'}}
-                                                    >
-                                                        {w}
-                                                    </td>
-                                                )
-                                            })
-                                        }
-                                    </tr>
-                                }
-                            })
-                        }</tbody>
+                            {csvData && csvData.length > 0 && csvData.map((v, key)=>{
+                                    if (v.join('').length > 1) {
+                                        return <tr key={key}>
+                                            {
+                                                v && v.length > 0 && v.map((w, key)=>{
+                                                    return (
+                                                        <td
+                                                            key={key}
+                                                            style={{width: '100px', padding: '10px', whiteSpace: 'nowrap'}}
+                                                        >
+                                                            {w ? w : 'null'}
+                                                        </td>
+                                                    )
+                                                })
+                                            }
+                                        </tr>
+                                    }
+                                })
+                            }
+                        </tbody>
                     </table>
                 </div>
                 <div
@@ -366,6 +367,7 @@ class MyTemplateDetails extends Component  {
                     onSuccess={this.handleCloneSuccess}
                     app={this.state.app}
                     copyData={conf_info}
+                    csvData={csvData}
                 />
             </div>
         );

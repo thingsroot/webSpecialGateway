@@ -43,7 +43,6 @@ class App extends React.Component {
     const dev_list = [];
     if (data && data.length > 0) {
         data.map(item=>{
-          console.log(item)
             if (item.meta.app_inst.toLowerCase().indexOf('modbus') !== -1) {
                 dev_list.push({
                   key: item.meta.sn,
