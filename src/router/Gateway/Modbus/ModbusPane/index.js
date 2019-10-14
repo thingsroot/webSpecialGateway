@@ -234,9 +234,9 @@ class ModbusPane extends Component {
                 serial_opt.port = 'COM2'
                 this.setState({serial_opt})
             }
-            if (s1 && !s2) {
-                console.log('!s2')
-            }
+            // if (s1 && !s2) {
+            //     console.log('!s2')
+            // }
             if (s2) {
                 serial_opt.port = 'COM1'
                 this.setState({serial_opt})

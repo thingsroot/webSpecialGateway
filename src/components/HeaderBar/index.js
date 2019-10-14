@@ -29,7 +29,7 @@ class HeaderBar extends PureComponent {
                     </span>
                 </Menu.Item>
                 <Menu.Item
-                    key="16"
+                    key="17"
                     style={{lineHeight: '30px'}}
                     onClick={
                         ()=>{

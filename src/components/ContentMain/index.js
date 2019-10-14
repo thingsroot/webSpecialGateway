@@ -7,7 +7,6 @@ import PrivateRoute from '../PrivateRoute';
 import { doUpdate } from '../../utils/Action';
 import { isDeveloper } from '../../utils/Session'
 const AppDetails = LoadableComponent(()=>import('../../router/AppDetails'));
-const Configuration = LoadableComponent(()=>import('../../router/TheConfiguration'))
 // const AppEdit = LoadableComponent(()=>import('../../router/AppEdit'));
 // const Dashboard = LoadableComponent(()=>import('../../router/Dashboard'));
 const GatewayList = LoadableComponent(()=>import('../../router/GatewayList'));
@@ -132,11 +131,6 @@ class ContentMain extends Component {
                     path="/account"
                     component={UserSettings}
                     title={'用户信息'}
-                />
-                <PrivateRoute
-                    path="/Configuration"
-                    component={Configuration}
-                    title={'组态'}
                 />
                 {/*
                 <PrivateRoute
