@@ -634,16 +634,31 @@ class ModbusPane extends Component {
                         }
                     }
                 });
-                list.sort(function (b, a) {
-                    const id = _getCookie('user_id')
-                    const order = [owner, id];
-                    return order.indexOf(a.owner_id) - order.indexOf(b.owner_id)
-                });
-                this.setState({
-                    appTemplateList: list,
-                    TheBackupappTemplateList: list,
-                    loading: false
-                });
+                http.get('/api/user_configurations_list?conf_type=Template&app=APP00000025')
+                    .then(res=>{
+                        if (res.ok) {
+                            let list = this.state.appTemplateList;
+                            res.data && res.data.length > 0 && res.data.map((tp)=>{
+                                if (undefined === list.find(item => item.name === tp.name) ) {
+                                    list.push(tp)
+                                }
+                            });
+                            this.setState({
+                                appTemplateList: list
+                            }, ()=> {
+                                list.sort(function (b, a) {
+                                    const id = _getCookie('user_id')
+                                    const order = [owner, id];
+                                    return order.indexOf(a.owner_id) - order.indexOf(b.owner_id)
+                                });
+                                this.setState({
+                                    appTemplateList: list,
+                                    TheBackupappTemplateList: list,
+                                    loading: false
+                                });
+                            });
+                        }
+                    });
             });
         })
     };

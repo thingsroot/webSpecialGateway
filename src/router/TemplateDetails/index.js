@@ -42,23 +42,7 @@ class MyTemplateDetails extends Component  {
         }
     }
     componentDidMount () {
-        let app = this.props.match.params.app;
-        let conf = this.props.match.params.name;
-        let version = this.props.match.params.version
-        let action = this.props.match.params.action;
-        if (version === undefined) {
-            version = 0
-        } else {
-            version = Number(version) ? Number(version) : 0
-        }
-        this.setState({
-            app: app,
-            conf: conf,
-            show_version: version,
-            action: action
-        }, ()=>{
-            this.fetchInfo();
-        });
+        this.UpdateFetchData()
     }
 
     fetchInfo (){
@@ -187,8 +171,28 @@ class MyTemplateDetails extends Component  {
             visible: false
         });
     };
+    UpdateFetchData = () => {
+        let app = this.props.match.params.app;
+        let conf = this.props.match.params.name;
+        let version = this.props.match.params.version
+        let action = this.props.match.params.action;
+        if (version === undefined) {
+            version = 0
+        } else {
+            version = Number(version) ? Number(version) : 0
+        }
+        this.setState({
+            app: app,
+            conf: conf,
+            show_version: version,
+            action: action
+        }, ()=>{
+            this.fetchInfo();
+        });
+    }
     handleCloneSuccess = (conf_info) => {
-        this.props.history.push('/template/' + conf_info.name)
+        this.props.history.push('/template/APP00000025/' + conf_info.name + '/1')
+        this.UpdateFetchData()
     }
 
     render () {
@@ -270,7 +274,7 @@ class MyTemplateDetails extends Component  {
                                                             key={key}
                                                             style={{width: '100px', padding: '10px', whiteSpace: 'nowrap'}}
                                                         >
-                                                            {w ? w : 'null'}
+                                                            {w}
                                                         </td>
                                                     )
                                                 })

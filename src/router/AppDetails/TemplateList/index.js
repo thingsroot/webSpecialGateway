@@ -214,6 +214,7 @@ class TemplateList extends Component {
     };
 
     handleCreateSuccess = (newData) => {
+        console.log(newData)
         let newList = [...this.state.myList, newData]
         this.setState({
             myList: newList
