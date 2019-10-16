@@ -38,6 +38,12 @@ class Login extends PureComponent {
                         />
                         <span>冬笋云</span>
                     </p>
+                    <div className="Product_introduction">
+                        <a
+                            target="_blank"
+                            href="http://help.cloud.thingsroot.com/modbus_gate_manual/"
+                        >产品介绍</a>
+                    </div>
                 </div>
                 <div className="main">
                     <div className="tabs">
