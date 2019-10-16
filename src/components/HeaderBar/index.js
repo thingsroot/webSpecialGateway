@@ -19,29 +19,16 @@ class HeaderBar extends PureComponent {
                     style={{lineHeight: '30px'}}
                     onClick={
                         ()=>{
-                            window.open('http://help.cloud.thingsroot.com/quick_start/', '_blank')
-                        }
-                    }
-                >
-                    <Icon type="monitor" />
-                    <span>
-                        快速指南
-                    </span>
-                </Menu.Item>
-                <Menu.Item
-                    key="17"
-                    style={{lineHeight: '30px'}}
-                    onClick={
-                        ()=>{
-                            window.open('http://help.cloud.thingsroot.com/app_api_book/', '_blank')
+                            window.open('http://help.cloud.thingsroot.com/modbus_gate_manual/', '_blank')
                         }
                     }
                 >
                     <Icon type="read" />
                     <span>
-                        应用开发手册
+                        快速指南
                     </span>
                 </Menu.Item>
+
 
             </Menu>
         )
