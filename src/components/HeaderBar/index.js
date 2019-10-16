@@ -87,7 +87,7 @@ class HeaderBar extends PureComponent {
                 </Dropdown>
                 <span style={{padding: '0 5px'}}> </span>
                 <a onClick={()=>{
-                    window.open('https://freeioe.org/', '_blank')
+                    window.open('https://freeioe.org/t/modbusgate', '_blank')
                 }}
                 >
                     <Icon
