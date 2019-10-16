@@ -19,29 +19,16 @@ class HeaderBar extends PureComponent {
                     style={{lineHeight: '30px'}}
                     onClick={
                         ()=>{
-                            window.open('http://help.cloud.thingsroot.com/quick_start/', '_blank')
-                        }
-                    }
-                >
-                    <Icon type="monitor" />
-                    <span>
-                        快速指南
-                    </span>
-                </Menu.Item>
-                <Menu.Item
-                    key="17"
-                    style={{lineHeight: '30px'}}
-                    onClick={
-                        ()=>{
-                            window.open('http://help.cloud.thingsroot.com/app_api_book/', '_blank')
+                            window.open('http://help.cloud.thingsroot.com/modbus_gate_manual/', '_blank')
                         }
                     }
                 >
                     <Icon type="read" />
                     <span>
-                        应用开发手册
+                        快速指南
                     </span>
                 </Menu.Item>
+
 
             </Menu>
         )
@@ -95,12 +82,15 @@ class HeaderBar extends PureComponent {
                         className="ant-dropdown-link"
                         style={{padding: '10px', cursor: 'pointer'}}
                     >
-                        <Icon type="question-circle" />
+                        <Icon
+                            style={{padding: '0 4px', fontWeight: 800}}
+                            type="question-circle"
+                        />帮助
                     </span>
                 </Dropdown>
                 <span style={{padding: '0 5px'}}> </span>
                 <a onClick={()=>{
-                    window.open('https://freeioe.org/', '_blank')
+                    window.open('https://freeioe.org/t/modbusgate', '_blank')
                 }}
                 >
                     <Icon
