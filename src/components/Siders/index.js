@@ -48,7 +48,7 @@ class Siders extends PureComponent {
                             style={{width: '200px',
                                 transition: 'background 0.3s, width 0.2s'}}
                           >
-                              <b>冬笋云</b>
+                              <b>Modbus云网关</b>
                           </div>
                         : <div className="logo"
                             style={{width: '80px',
