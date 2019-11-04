@@ -23,7 +23,6 @@ const Gateway = LoadableComponent(()=>import('../../router/Gateway'));
 const AppsInstall = LoadableComponent(()=>import('../../router/AppsInstall'));
 // const AppEditorCode = LoadableComponent(()=>import('../../router/AppEditorCode'));
 const TemplateDetails = LoadableComponent(()=>import('../../router/TemplateDetails'));
-const TheConfiguration = LoadableComponent(()=>import('../../router/TheConfiguration'))
 
 let timer;
 const openNotification = (title, message) => {
@@ -131,11 +130,6 @@ class ContentMain extends Component {
                 <PrivateRoute
                     path="/account"
                     component={UserSettings}
-                    title={'用户信息'}
-                />
-                <PrivateRoute
-                    path="/TheConfiguration"
-                    component={TheConfiguration}
                     title={'用户信息'}
                 />
                 {/*
