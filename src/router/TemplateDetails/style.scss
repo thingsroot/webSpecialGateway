@@ -1,0 +1,36 @@
+.MyTemplateDetails{
+  .title{
+    line-height: 50px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: -20px;
+  }
+}
+.empty{
+  width: 100%;
+  line-height: 400px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+}
+.web{
+  .ant-modal-content {
+    width: 70vw!important;
+    //height: 72vh!important;
+    margin-left: -35vw!important;
+    position: absolute;
+    left: 50%;
+  }
+  .ant-modal-body {
+    width: 70vw!important;
+    height: 57vh!important;
+    .resetCsv{
+      position: absolute;
+      bottom: 10px;
+      left: 20px;
+    }
+  }
+  .ant-upload-list-item, .ant-upload-list-item-error{
+    display: none!important;
+  }
+}

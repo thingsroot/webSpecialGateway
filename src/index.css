@@ -1,0 +1,59 @@
+html, body, div, ul, li, h1, h2, h3, h4, h5, h6, p, dl, dt, dd, ol, form, input, textarea, th, td, select {
+    margin: 0;
+    padding: 0;
+}
+*{box-sizing: border-box;
+    scrollbar-3dlight-color:#D4D0C8; /*- 最外左 -*/
+
+    scrollbar-highlight-color:#fff; /*- 左二 -*/
+    
+    scrollbar-face-color:#E4E4E4; /*- 面子 -*/
+    
+    scrollbar-arrow-color:#666; /*- 箭头 -*/
+    
+    scrollbar-shadow-color:#808080; /*- 右二 -*/
+    
+    scrollbar-darkshadow-color:#D7DCE0; /*- 右一 -*/
+    
+    scrollbar-base-color:#D7DCE0; /*- 基色 -*/
+    
+    /* scrollbar-track-color:#;- 滑道 - */
+}
+html, body {
+    min-height: 100%;
+}
+
+body {
+    font-family:  Helvetica,Arial,'Microsoft YaHei','Source Sans Pro','Helvetica Neue',sans-serif;
+    font-size:14px;
+    color:#333;
+}
+h1, h2, h3, h4, h5, h6{font-weight:normal;}
+ul,ol {
+    list-style: none;
+}
+
+img {
+    border: none;
+    vertical-align: middle;
+}
+
+a {
+    text-decoration: none;
+    color: #232323;
+}
+
+table {
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+input, textarea {
+    outline: none;
+    border: none;
+}
+
+textarea {
+    resize: none;
+    overflow: auto;
+}
