@@ -261,49 +261,49 @@ class Modbus extends Component {
                                     onEdit={this.onEdit}
                                     hideAdd
                                   >
-                            {
-                                this.state.panes.map((pane, key) => {
-                                    const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
-                                    const titles = pane.inst_name.indexOf('_') !== -1 ?  pane.inst_name : pane.inst_name;
-                                    return (
-                                        <TabPane
-                                            tab={
-                                                pane.status === 'add button'
-                                                ? title
-                                                : pane.status === 'running'
-                                                    ? <span>
-                                                        <Icon
-                                                            type="play-circle"
-                                                            style={{color: '#269f42'}}
-                                                        />{title}</span>
-                                                    : <span>
-                                                        <Icon
-                                                            style={{color: '#d73a4a'}}
-                                                            type="pause-circle"
-                                                        />{title}</span>
-                                            }
-                                            key={key}
-                                            closable={false}
-                                        >
-                                            {
-                                                pane.status !== 'add button'
-                                                ? <ModbusPane
-                                                    title={pane.inst_name}
-                                                    removenotinstall={this.removeNotInstall}
+                                    {
+                                        this.state.panes.map((pane, key) => {
+                                            const title = pane.inst_name.indexOf('_') !== -1 ?  pane.status === 'Not installed' ? pane.inst_name.replace('_', '通道') + '(未安装)' : pane.inst_name.replace('_', '通道') : pane.inst_name;
+                                            const titles = pane.inst_name.indexOf('_') !== -1 ?  pane.inst_name : pane.inst_name;
+                                            return (
+                                                <TabPane
+                                                    tab={
+                                                        pane.status === 'add button'
+                                                        ? title
+                                                        : pane.status === 'running'
+                                                            ? <span>
+                                                                <Icon
+                                                                    type="play-circle"
+                                                                    style={{color: '#269f42'}}
+                                                                />{title}</span>
+                                                            : <span>
+                                                                <Icon
+                                                                    style={{color: '#d73a4a'}}
+                                                                    type="pause-circle"
+                                                                />{title}</span>
+                                                    }
                                                     key={key}
-                                                    titles={titles}
-                                                    remove={this.removeList}
-                                                    pane={pane}
-                                                    panes={this.state.panes}
-                                                    fetch={this.fetch}
-                                                    setActiveKey={this.setActiveKey}
-                                                  />
-                                            : ''
-                                            }
-                                        </TabPane>
-                                    )
-                                })
-                            }
+                                                    closable={false}
+                                                >
+                                                    {
+                                                        pane.status !== 'add button'
+                                                        ? <ModbusPane
+                                                            title={pane.inst_name}
+                                                            removenotinstall={this.removeNotInstall}
+                                                            key={key}
+                                                            titles={titles}
+                                                            remove={this.removeList}
+                                                            pane={pane}
+                                                            panes={this.state.panes}
+                                                            fetch={this.fetch}
+                                                            setActiveKey={this.setActiveKey}
+                                                          />
+                                                        : ''
+                                                    }
+                                                </TabPane>
+                                            )
+                                        })
+                                    }
                             </Tabs>
                             : <Result
                                 icon={
